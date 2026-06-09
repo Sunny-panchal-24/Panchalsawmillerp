@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          created_by: string
+          gstin: string | null
+          id: string
+          name: string
+          opening_balance: number
+          type: Database["public"]["Enums"]["customer_type"]
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          created_by?: string
+          gstin?: string | null
+          id?: string
+          name: string
+          opening_balance?: number
+          type?: Database["public"]["Enums"]["customer_type"]
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          created_by?: string
+          gstin?: string | null
+          id?: string
+          name?: string
+          opening_balance?: number
+          type?: Database["public"]["Enums"]["customer_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -34,6 +70,138 @@ export type Database = {
           full_name?: string | null
           id?: string
           preferred_language?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          actual_man: number
+          chai_pani_expense: number
+          cost_per_man: number
+          created_at: string
+          created_by: string
+          diesel_expense: number
+          empty_weight: number
+          entry_date: string
+          entry_no: string
+          forest_expense: number
+          id: string
+          material_cost: number
+          net_man: number
+          net_weight: number
+          other_expense: number
+          paid_amount: number
+          paid_mode: Database["public"]["Enums"]["payment_mode"] | null
+          ptype: Database["public"]["Enums"]["purchase_type"]
+          rate_per_man: number
+          remarks: string | null
+          total_cost: number
+          tractor_id: string | null
+          tractor_labour: number
+          updated_at: string
+          vendor_id: string
+          weight_with_material: number
+        }
+        Insert: {
+          actual_man?: number
+          chai_pani_expense?: number
+          cost_per_man?: number
+          created_at?: string
+          created_by?: string
+          diesel_expense?: number
+          empty_weight?: number
+          entry_date?: string
+          entry_no: string
+          forest_expense?: number
+          id?: string
+          material_cost?: number
+          net_man?: number
+          net_weight?: number
+          other_expense?: number
+          paid_amount?: number
+          paid_mode?: Database["public"]["Enums"]["payment_mode"] | null
+          ptype?: Database["public"]["Enums"]["purchase_type"]
+          rate_per_man?: number
+          remarks?: string | null
+          total_cost?: number
+          tractor_id?: string | null
+          tractor_labour?: number
+          updated_at?: string
+          vendor_id: string
+          weight_with_material?: number
+        }
+        Update: {
+          actual_man?: number
+          chai_pani_expense?: number
+          cost_per_man?: number
+          created_at?: string
+          created_by?: string
+          diesel_expense?: number
+          empty_weight?: number
+          entry_date?: string
+          entry_no?: string
+          forest_expense?: number
+          id?: string
+          material_cost?: number
+          net_man?: number
+          net_weight?: number
+          other_expense?: number
+          paid_amount?: number
+          paid_mode?: Database["public"]["Enums"]["payment_mode"] | null
+          ptype?: Database["public"]["Enums"]["purchase_type"]
+          rate_per_man?: number
+          remarks?: string | null
+          total_cost?: number
+          tractor_id?: string | null
+          tractor_labour?: number
+          updated_at?: string
+          vendor_id?: string
+          weight_with_material?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_tractor_id_fkey"
+            columns: ["tractor_id"]
+            isOneToOne: false
+            referencedRelation: "tractors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tractors: {
+        Row: {
+          created_at: string
+          created_by: string
+          default_empty_weight: number
+          driver_name: string | null
+          id: string
+          number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          default_empty_weight?: number
+          driver_name?: string | null
+          id?: string
+          number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          default_empty_weight?: number
+          driver_name?: string | null
+          id?: string
+          number?: string
           updated_at?: string
         }
         Relationships: []
@@ -59,6 +227,120 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string
+          id: string
+          mode: Database["public"]["Enums"]["payment_mode"]
+          payment_date: string
+          purchase_id: string | null
+          remarks: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          mode?: Database["public"]["Enums"]["payment_mode"]
+          payment_date?: string
+          purchase_id?: string | null
+          remarks?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          mode?: Database["public"]["Enums"]["payment_mode"]
+          payment_date?: string
+          purchase_id?: string | null
+          remarks?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_payments_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_payments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          opening_balance: number
+          updated_at: string
+          village: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name: string
+          opening_balance?: number
+          updated_at?: string
+          village?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          opening_balance?: number
+          updated_at?: string
+          village?: string | null
+        }
+        Relationships: []
+      }
+      workers: {
+        Row: {
+          created_at: string
+          created_by: string
+          daily_wage: number
+          id: string
+          name: string
+          salary_type: Database["public"]["Enums"]["salary_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          daily_wage?: number
+          id?: string
+          name: string
+          salary_type?: Database["public"]["Enums"]["salary_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          daily_wage?: number
+          id?: string
+          name?: string
+          salary_type?: Database["public"]["Enums"]["salary_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -74,6 +356,10 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "accountant" | "worker"
+      customer_type: "waste" | "finished" | "both"
+      payment_mode: "cash" | "dad_saving" | "dad_current" | "sunny_saving"
+      purchase_type: "A" | "B"
+      salary_type: "weekly" | "monthly"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -202,6 +488,10 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "accountant", "worker"],
+      customer_type: ["waste", "finished", "both"],
+      payment_mode: ["cash", "dad_saving", "dad_current", "sunny_saving"],
+      purchase_type: ["A", "B"],
+      salary_type: ["weekly", "monthly"],
     },
   },
 } as const
