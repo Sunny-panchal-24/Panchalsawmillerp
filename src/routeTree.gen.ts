@@ -15,6 +15,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticated/masters'
 import { Route as AuthenticatedPurchasesIndexRouteImport } from './routes/_authenticated/purchases.index'
 import { Route as AuthenticatedPurchasesNewRouteImport } from './routes/_authenticated/purchases.new'
+import { Route as AuthenticatedVendorsVendorIdLedgerRouteImport } from './routes/_authenticated/vendors.$vendorId.ledger'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -47,6 +48,12 @@ const AuthenticatedPurchasesNewRoute =
     path: '/purchases/new',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedVendorsVendorIdLedgerRoute =
+  AuthenticatedVendorsVendorIdLedgerRouteImport.update({
+    id: '/vendors/$vendorId/ledger',
+    path: '/vendors/$vendorId/ledger',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByFullPath {
   '/masters': typeof AuthenticatedMastersRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/purchases/': typeof AuthenticatedPurchasesIndexRoute
+  '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -61,6 +69,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/purchases': typeof AuthenticatedPurchasesIndexRoute
+  '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,12 +79,25 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/_authenticated/purchases/': typeof AuthenticatedPurchasesIndexRoute
+  '/_authenticated/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/masters' | '/purchases/new' | '/purchases/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/masters'
+    | '/purchases/new'
+    | '/purchases/'
+    | '/vendors/$vendorId/ledger'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/masters' | '/' | '/purchases/new' | '/purchases'
+  to:
+    | '/auth'
+    | '/masters'
+    | '/'
+    | '/purchases/new'
+    | '/purchases'
+    | '/vendors/$vendorId/ledger'
   id:
     | '__root__'
     | '/_authenticated'
@@ -84,6 +106,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/purchases/new'
     | '/_authenticated/purchases/'
+    | '/_authenticated/vendors/$vendorId/ledger'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -135,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchasesNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/vendors/$vendorId/ledger': {
+      id: '/_authenticated/vendors/$vendorId/ledger'
+      path: '/vendors/$vendorId/ledger'
+      fullPath: '/vendors/$vendorId/ledger'
+      preLoaderRoute: typeof AuthenticatedVendorsVendorIdLedgerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -143,6 +173,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedPurchasesNewRoute: typeof AuthenticatedPurchasesNewRoute
   AuthenticatedPurchasesIndexRoute: typeof AuthenticatedPurchasesIndexRoute
+  AuthenticatedVendorsVendorIdLedgerRoute: typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -150,6 +181,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedPurchasesNewRoute: AuthenticatedPurchasesNewRoute,
   AuthenticatedPurchasesIndexRoute: AuthenticatedPurchasesIndexRoute,
+  AuthenticatedVendorsVendorIdLedgerRoute:
+    AuthenticatedVendorsVendorIdLedgerRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
