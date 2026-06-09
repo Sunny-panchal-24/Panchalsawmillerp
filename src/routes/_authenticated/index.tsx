@@ -22,18 +22,18 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
 });
 
-const TILES = [
-  { key: "purchases", Icon: ShoppingCart, color: "bg-blue-600" },
-  { key: "waste_wood_sales", Icon: Package, color: "bg-emerald-600" },
-  { key: "finished_wood_sales", Icon: Hammer, color: "bg-amber-600" },
-  { key: "vendor_payments", Icon: Wallet, color: "bg-rose-600" },
-  { key: "customer_receipts", Icon: Receipt, color: "bg-violet-600" },
-  { key: "workers", Icon: Users, color: "bg-cyan-600" },
-  { key: "cash_book", Icon: BookOpen, color: "bg-orange-600" },
-  { key: "bank_book", Icon: Landmark, color: "bg-teal-600" },
-  { key: "reports", Icon: BarChart3, color: "bg-indigo-600" },
-  { key: "settings", Icon: SettingsIcon, color: "bg-slate-600" },
-] as const;
+const TILES: { key: string; Icon: typeof ShoppingCart; color: string; to: string | null }[] = [
+  { key: "purchases", Icon: ShoppingCart, color: "bg-blue-600", to: "/purchases" },
+  { key: "waste_wood_sales", Icon: Package, color: "bg-emerald-600", to: null },
+  { key: "finished_wood_sales", Icon: Hammer, color: "bg-amber-600", to: null },
+  { key: "vendor_payments", Icon: Wallet, color: "bg-rose-600", to: null },
+  { key: "customer_receipts", Icon: Receipt, color: "bg-violet-600", to: null },
+  { key: "workers", Icon: Users, color: "bg-cyan-600", to: null },
+  { key: "cash_book", Icon: BookOpen, color: "bg-orange-600", to: null },
+  { key: "bank_book", Icon: Landmark, color: "bg-teal-600", to: null },
+  { key: "reports", Icon: BarChart3, color: "bg-indigo-600", to: null },
+  { key: "masters", Icon: SettingsIcon, color: "bg-slate-600", to: "/masters" },
+];
 
 function Dashboard() {
   const { t } = useI18n();
@@ -71,11 +71,14 @@ function Dashboard() {
 
       <main className="mx-auto max-w-3xl px-4 py-6">
         <div className="grid grid-cols-2 gap-4">
-          {TILES.map(({ key, Icon, color }) => (
+          {TILES.map(({ key, Icon, color, to }) => (
             <button
               key={key}
               type="button"
-              onClick={() => toast.info(t("coming_soon"))}
+              onClick={() => {
+                if (to) navigate({ to });
+                else toast.info(t("coming_soon"));
+              }}
               className="group flex aspect-square flex-col items-center justify-center gap-3 rounded-2xl border-2 border-border bg-card p-4 text-card-foreground shadow-sm transition-all active:scale-95 active:shadow-inner"
             >
               <div className={`flex h-16 w-16 items-center justify-center rounded-2xl text-white ${color}`}>
