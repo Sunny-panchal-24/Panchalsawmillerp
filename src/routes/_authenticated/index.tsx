@@ -22,18 +22,18 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
 });
 
-const TILES = [
-  { key: "purchases", Icon: ShoppingCart, color: "bg-blue-600" },
-  { key: "waste_wood_sales", Icon: Package, color: "bg-emerald-600" },
-  { key: "finished_wood_sales", Icon: Hammer, color: "bg-amber-600" },
-  { key: "vendor_payments", Icon: Wallet, color: "bg-rose-600" },
-  { key: "customer_receipts", Icon: Receipt, color: "bg-violet-600" },
-  { key: "workers", Icon: Users, color: "bg-cyan-600" },
-  { key: "cash_book", Icon: BookOpen, color: "bg-orange-600" },
-  { key: "bank_book", Icon: Landmark, color: "bg-teal-600" },
-  { key: "reports", Icon: BarChart3, color: "bg-indigo-600" },
-  { key: "settings", Icon: SettingsIcon, color: "bg-slate-600" },
-] as const;
+const TILES: { key: string; Icon: typeof ShoppingCart; color: string; to: string | null }[] = [
+  { key: "purchases", Icon: ShoppingCart, color: "bg-blue-600", to: "/purchases" },
+  { key: "waste_wood_sales", Icon: Package, color: "bg-emerald-600", to: null },
+  { key: "finished_wood_sales", Icon: Hammer, color: "bg-amber-600", to: null },
+  { key: "vendor_payments", Icon: Wallet, color: "bg-rose-600", to: null },
+  { key: "customer_receipts", Icon: Receipt, color: "bg-violet-600", to: null },
+  { key: "workers", Icon: Users, color: "bg-cyan-600", to: null },
+  { key: "cash_book", Icon: BookOpen, color: "bg-orange-600", to: null },
+  { key: "bank_book", Icon: Landmark, color: "bg-teal-600", to: null },
+  { key: "reports", Icon: BarChart3, color: "bg-indigo-600", to: null },
+  { key: "masters", Icon: SettingsIcon, color: "bg-slate-600", to: "/masters" },
+];
 
 function Dashboard() {
   const { t } = useI18n();
