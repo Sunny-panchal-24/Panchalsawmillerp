@@ -71,11 +71,14 @@ function Dashboard() {
 
       <main className="mx-auto max-w-3xl px-4 py-6">
         <div className="grid grid-cols-2 gap-4">
-          {TILES.map(({ key, Icon, color }) => (
+          {TILES.map(({ key, Icon, color, to }) => (
             <button
               key={key}
               type="button"
-              onClick={() => toast.info(t("coming_soon"))}
+              onClick={() => {
+                if (to) navigate({ to });
+                else toast.info(t("coming_soon"));
+              }}
               className="group flex aspect-square flex-col items-center justify-center gap-3 rounded-2xl border-2 border-border bg-card p-4 text-card-foreground shadow-sm transition-all active:scale-95 active:shadow-inner"
             >
               <div className={`flex h-16 w-16 items-center justify-center rounded-2xl text-white ${color}`}>
