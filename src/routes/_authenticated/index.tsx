@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -38,11 +39,37 @@ const TILES: { key: string; Icon: typeof ShoppingCart; color: string; to: string
 function Dashboard() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const [{ data: roles }, { data: company }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", user.id),
+        supabase.from("company_settings").select("id").limit(1).maybeSingle(),
+      ]);
+      const isOwner = roles?.some((r) => r.role === "owner");
+      if (isOwner && !company) {
+        navigate({ to: "/setup", replace: true });
+        return;
+      }
+      setReady(true);
+    })();
+  }, [navigate]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   };
+
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">{t("loading")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticated/masters'
 import { Route as AuthenticatedPurchasesIndexRouteImport } from './routes/_authenticated/purchases.index'
 import { Route as AuthenticatedPurchasesNewRouteImport } from './routes/_authenticated/purchases.new'
@@ -29,6 +30,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMastersRoute = AuthenticatedMastersRouteImport.update({
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/masters': typeof AuthenticatedMastersRoute
+  '/setup': typeof AuthenticatedSetupRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/masters': typeof AuthenticatedMastersRoute
+  '/setup': typeof AuthenticatedSetupRoute
   '/': typeof AuthenticatedIndexRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/purchases': typeof AuthenticatedPurchasesIndexRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/masters': typeof AuthenticatedMastersRoute
+  '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/_authenticated/purchases/': typeof AuthenticatedPurchasesIndexRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/masters'
+    | '/setup'
     | '/purchases/new'
     | '/purchases/'
     | '/vendors/$vendorId/ledger'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/masters'
+    | '/setup'
     | '/'
     | '/purchases/new'
     | '/purchases'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/masters'
+    | '/_authenticated/setup'
     | '/_authenticated/'
     | '/_authenticated/purchases/new'
     | '/_authenticated/purchases/'
@@ -135,6 +147,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/setup': {
+      id: '/_authenticated/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof AuthenticatedSetupRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/masters': {
@@ -170,6 +189,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMastersRoute: typeof AuthenticatedMastersRoute
+  AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedPurchasesNewRoute: typeof AuthenticatedPurchasesNewRoute
   AuthenticatedPurchasesIndexRoute: typeof AuthenticatedPurchasesIndexRoute
@@ -178,6 +198,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMastersRoute: AuthenticatedMastersRoute,
+  AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedPurchasesNewRoute: AuthenticatedPurchasesNewRoute,
   AuthenticatedPurchasesIndexRoute: AuthenticatedPurchasesIndexRoute,
