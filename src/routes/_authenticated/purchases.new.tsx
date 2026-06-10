@@ -22,12 +22,13 @@ export const Route = createFileRoute("/_authenticated/purchases/new")({
 
 type Vendor = { id: string; name: string };
 type Tractor = { id: string; number: string; default_empty_weight: number };
+type Bank = { id: string; name: string };
 
 const MAN_KG = 20;
+const CASH = "__cash__";
 
 function calcActualMan(netMan: number, type: "A" | "B") {
   if (type === "B") return netMan;
-  // Type A: 5 Man cut per 100 Man (proportional)
   const cut = (netMan / 100) * 5;
   return Math.max(0, netMan - cut);
 }
@@ -37,6 +38,7 @@ function NewPurchase() {
   const navigate = useNavigate();
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [tractors, setTractors] = useState<Tractor[]>([]);
+  const [banks, setBanks] = useState<Bank[]>([]);
 
   const today = new Date().toISOString().slice(0, 10);
   const [f, setF] = useState({
@@ -55,23 +57,24 @@ function NewPurchase() {
     other_expense: "",
     pay_now: false,
     paid_amount: "",
-    paid_mode: "cash" as "cash" | "dad_saving" | "dad_current" | "sunny_saving",
+    pay_target: CASH as string,
     remarks: "",
   });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const [v, tr] = await Promise.all([
+      const [v, tr, bk] = await Promise.all([
         supabase.from("vendors").select("id,name").order("name"),
         supabase.from("tractors").select("id,number,default_empty_weight").order("number"),
+        supabase.from("bank_accounts").select("id,name").eq("is_active", true).order("name"),
       ]);
       if (v.data) setVendors(v.data);
       if (tr.data) setTractors(tr.data);
+      if (bk.data) setBanks(bk.data);
     })();
   }, []);
 
-  // when tractor changes, prefill empty weight
   const onTractor = (id: string) => {
     const tr = tractors.find((x) => x.id === id);
     setF((p) => ({
@@ -104,6 +107,7 @@ function NewPurchase() {
     if (!f.vendor_id) return toast.error(t("vendor"));
     if (!f.entry_no.trim()) return toast.error(t("entry_no"));
     setSaving(true);
+    const bankId = f.pay_target === CASH ? null : f.pay_target;
     const payload = {
       entry_no: f.entry_no.trim(),
       entry_date: f.entry_date,
@@ -125,7 +129,8 @@ function NewPurchase() {
       total_cost: calc.totalCost,
       cost_per_man: calc.costPerMan,
       paid_amount: f.pay_now ? Number(f.paid_amount) || 0 : 0,
-      paid_mode: f.pay_now ? f.paid_mode : null,
+      paid_mode: f.pay_now ? ("cash" as const) : null,
+      bank_account_id: f.pay_now ? bankId : null,
       remarks: f.remarks.trim() || null,
     };
     const { data, error } = await supabase.from("purchases").insert(payload).select("id").single();
@@ -136,7 +141,8 @@ function NewPurchase() {
         vendor_id: f.vendor_id,
         payment_date: f.entry_date,
         amount: Number(f.paid_amount),
-        mode: f.paid_mode,
+        mode: "cash",
+        bank_account_id: bankId,
         purchase_id: data.id,
         remarks: `Purchase #${f.entry_no}`,
       });
@@ -238,13 +244,11 @@ function NewPurchase() {
                 <Input type="number" inputMode="decimal" value={f.paid_amount} onChange={(e) => setF({ ...f, paid_amount: e.target.value })} className="h-11 text-base" />
               </Field>
               <Field label={t("payment_mode")}>
-                <Select value={f.paid_mode} onValueChange={(v) => setF({ ...f, paid_mode: v as typeof f.paid_mode })}>
+                <Select value={f.pay_target} onValueChange={(v) => setF({ ...f, pay_target: v })}>
                   <SelectTrigger className="h-11 text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cash">{t("cash")}</SelectItem>
-                    <SelectItem value="dad_saving">{t("dad_saving")}</SelectItem>
-                    <SelectItem value="dad_current">{t("dad_current")}</SelectItem>
-                    <SelectItem value="sunny_saving">{t("sunny_saving")}</SelectItem>
+                    <SelectItem value={CASH}>{t("cash")}</SelectItem>
+                    {banks.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </Field>

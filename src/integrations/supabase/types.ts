@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      bank_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          opening_balance: number
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          opening_balance?: number
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          opening_balance?: number
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       company_settings: {
         Row: {
           company_name: string
@@ -21,9 +51,6 @@ export type Database = {
           id: string
           mobile: string | null
           opening_cash: number
-          opening_dad_current: number
-          opening_dad_saving: number
-          opening_sunny_saving: number
           owner_id: string
           owner_name: string
           setup_completed: boolean
@@ -36,9 +63,6 @@ export type Database = {
           id?: string
           mobile?: string | null
           opening_cash?: number
-          opening_dad_current?: number
-          opening_dad_saving?: number
-          opening_sunny_saving?: number
           owner_id: string
           owner_name: string
           setup_completed?: boolean
@@ -51,9 +75,6 @@ export type Database = {
           id?: string
           mobile?: string | null
           opening_cash?: number
-          opening_dad_current?: number
-          opening_dad_saving?: number
-          opening_sunny_saving?: number
           owner_id?: string
           owner_name?: string
           setup_completed?: boolean
@@ -69,7 +90,9 @@ export type Database = {
           created_by: string
           gstin: string | null
           id: string
+          mobile: string | null
           name: string
+          notes: string | null
           opening_balance: number
           type: Database["public"]["Enums"]["customer_type"]
           updated_at: string
@@ -80,7 +103,9 @@ export type Database = {
           created_by?: string
           gstin?: string | null
           id?: string
+          mobile?: string | null
           name: string
+          notes?: string | null
           opening_balance?: number
           type?: Database["public"]["Enums"]["customer_type"]
           updated_at?: string
@@ -91,7 +116,9 @@ export type Database = {
           created_by?: string
           gstin?: string | null
           id?: string
+          mobile?: string | null
           name?: string
+          notes?: string | null
           opening_balance?: number
           type?: Database["public"]["Enums"]["customer_type"]
           updated_at?: string
@@ -125,6 +152,7 @@ export type Database = {
       purchases: {
         Row: {
           actual_man: number
+          bank_account_id: string | null
           chai_pani_expense: number
           cost_per_man: number
           created_at: string
@@ -153,6 +181,7 @@ export type Database = {
         }
         Insert: {
           actual_man?: number
+          bank_account_id?: string | null
           chai_pani_expense?: number
           cost_per_man?: number
           created_at?: string
@@ -181,6 +210,7 @@ export type Database = {
         }
         Update: {
           actual_man?: number
+          bank_account_id?: string | null
           chai_pani_expense?: number
           cost_per_man?: number
           created_at?: string
@@ -209,6 +239,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "purchases_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "purchases_tractor_id_fkey"
             columns: ["tractor_id"]
             isOneToOne: false
@@ -229,8 +266,10 @@ export type Database = {
           created_at: string
           created_by: string
           default_empty_weight: number
+          driver_mobile: string | null
           driver_name: string | null
           id: string
+          notes: string | null
           number: string
           updated_at: string
         }
@@ -238,8 +277,10 @@ export type Database = {
           created_at?: string
           created_by?: string
           default_empty_weight?: number
+          driver_mobile?: string | null
           driver_name?: string | null
           id?: string
+          notes?: string | null
           number: string
           updated_at?: string
         }
@@ -247,8 +288,10 @@ export type Database = {
           created_at?: string
           created_by?: string
           default_empty_weight?: number
+          driver_mobile?: string | null
           driver_name?: string | null
           id?: string
+          notes?: string | null
           number?: string
           updated_at?: string
         }
@@ -275,9 +318,61 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_advances: {
+        Row: {
+          advance_date: string
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          remarks: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          advance_date?: string
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          remarks?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          advance_date?: string
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          remarks?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_advances_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_advances_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_payments: {
         Row: {
           amount: number
+          bank_account_id: string | null
           created_at: string
           created_by: string
           id: string
@@ -290,6 +385,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          bank_account_id?: string | null
           created_at?: string
           created_by?: string
           id?: string
@@ -302,6 +398,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          bank_account_id?: string | null
           created_at?: string
           created_by?: string
           id?: string
@@ -313,6 +410,13 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vendor_payments_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vendor_payments_purchase_id_fkey"
             columns: ["purchase_id"]
@@ -334,7 +438,10 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          mobile: string | null
           name: string
+          notes: string | null
+          opening_advance: number
           opening_balance: number
           updated_at: string
           village: string | null
@@ -343,7 +450,10 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          mobile?: string | null
           name: string
+          notes?: string | null
+          opening_advance?: number
           opening_balance?: number
           updated_at?: string
           village?: string | null
@@ -352,7 +462,10 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          mobile?: string | null
           name?: string
+          notes?: string | null
+          opening_advance?: number
           opening_balance?: number
           updated_at?: string
           village?: string | null
@@ -365,7 +478,10 @@ export type Database = {
           created_by: string
           daily_wage: number
           id: string
+          is_active: boolean
+          mobile: string | null
           name: string
+          opening_advance: number
           salary_type: Database["public"]["Enums"]["salary_type"]
           updated_at: string
         }
@@ -374,7 +490,10 @@ export type Database = {
           created_by?: string
           daily_wage?: number
           id?: string
+          is_active?: boolean
+          mobile?: string | null
           name: string
+          opening_advance?: number
           salary_type?: Database["public"]["Enums"]["salary_type"]
           updated_at?: string
         }
@@ -383,7 +502,10 @@ export type Database = {
           created_by?: string
           daily_wage?: number
           id?: string
+          is_active?: boolean
+          mobile?: string | null
           name?: string
+          opening_advance?: number
           salary_type?: Database["public"]["Enums"]["salary_type"]
           updated_at?: string
         }
