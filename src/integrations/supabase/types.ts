@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      company_settings: {
+        Row: {
+          company_name: string
+          created_at: string
+          id: string
+          mobile: string | null
+          opening_cash: number
+          opening_dad_current: number
+          opening_dad_saving: number
+          opening_sunny_saving: number
+          owner_id: string
+          owner_name: string
+          setup_completed: boolean
+          updated_at: string
+          village: string | null
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          id?: string
+          mobile?: string | null
+          opening_cash?: number
+          opening_dad_current?: number
+          opening_dad_saving?: number
+          opening_sunny_saving?: number
+          owner_id: string
+          owner_name: string
+          setup_completed?: boolean
+          updated_at?: string
+          village?: string | null
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          id?: string
+          mobile?: string | null
+          opening_cash?: number
+          opening_dad_current?: number
+          opening_dad_saving?: number
+          opening_sunny_saving?: number
+          owner_id?: string
+          owner_name?: string
+          setup_completed?: boolean
+          updated_at?: string
+          village?: string | null
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           address: string | null
