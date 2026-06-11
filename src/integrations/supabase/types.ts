@@ -152,6 +152,7 @@ export type Database = {
       purchases: {
         Row: {
           actual_man: number
+          advance_deducted: number
           bank_account_id: string | null
           chai_pani_expense: number
           cost_per_man: number
@@ -173,14 +174,21 @@ export type Database = {
           rate_per_man: number
           remarks: string | null
           total_cost: number
+          tractor_bank_account_id: string | null
           tractor_id: string | null
           tractor_labour: number
+          tractor_paid_amount: number
+          tractor_paid_mode: Database["public"]["Enums"]["payment_mode"] | null
+          tractor_payable: number
+          tractor_rate_per_man: number
           updated_at: string
           vendor_id: string
+          vendor_payable: number
           weight_with_material: number
         }
         Insert: {
           actual_man?: number
+          advance_deducted?: number
           bank_account_id?: string | null
           chai_pani_expense?: number
           cost_per_man?: number
@@ -202,14 +210,21 @@ export type Database = {
           rate_per_man?: number
           remarks?: string | null
           total_cost?: number
+          tractor_bank_account_id?: string | null
           tractor_id?: string | null
           tractor_labour?: number
+          tractor_paid_amount?: number
+          tractor_paid_mode?: Database["public"]["Enums"]["payment_mode"] | null
+          tractor_payable?: number
+          tractor_rate_per_man?: number
           updated_at?: string
           vendor_id: string
+          vendor_payable?: number
           weight_with_material?: number
         }
         Update: {
           actual_man?: number
+          advance_deducted?: number
           bank_account_id?: string | null
           chai_pani_expense?: number
           cost_per_man?: number
@@ -231,16 +246,29 @@ export type Database = {
           rate_per_man?: number
           remarks?: string | null
           total_cost?: number
+          tractor_bank_account_id?: string | null
           tractor_id?: string | null
           tractor_labour?: number
+          tractor_paid_amount?: number
+          tractor_paid_mode?: Database["public"]["Enums"]["payment_mode"] | null
+          tractor_payable?: number
+          tractor_rate_per_man?: number
           updated_at?: string
           vendor_id?: string
+          vendor_payable?: number
           weight_with_material?: number
         }
         Relationships: [
           {
             foreignKeyName: "purchases_bank_account_id_fkey"
             columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_tractor_bank_account_id_fkey"
+            columns: ["tractor_bank_account_id"]
             isOneToOne: false
             referencedRelation: "bank_accounts"
             referencedColumns: ["id"]
