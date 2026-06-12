@@ -528,6 +528,71 @@ const phase3: Record<Lang, Dict> = {
 };
 (Object.keys(phase3) as Lang[]).forEach((l) => Object.assign(translations[l], phase3[l]));
 
+// Phase 4 sales additions
+const phase4: Record<Lang, Dict> = {
+  en: {
+    sales: "Sales",
+    sale: "Sale",
+    waste_wood_sale: "Waste Wood Sale",
+    finished_wood_sale: "Finished Wood Sale",
+    view_sales: "View Sales",
+    customer: "Customer",
+    add_new_customer: "Add New Customer",
+    cft: "CFT",
+    rate: "Rate",
+    rate_per_kg: "Rate / KG",
+    rate_per_cft: "Rate / CFT",
+    sale_payment: "Sale Payment",
+    full_received: "Full Received",
+    partial_received: "Partial Received",
+    credit_sale: "Credit Sale",
+    amount_received: "Amount Received",
+    remaining_outstanding: "Remaining Outstanding",
+    paid: "Paid",
+  },
+  hi: {
+    sales: "बिक्री",
+    sale: "बिक्री",
+    waste_wood_sale: "वेस्ट वुड बिक्री",
+    finished_wood_sale: "तैयार लकड़ी बिक्री",
+    view_sales: "बिक्री देखें",
+    customer: "ग्राहक",
+    add_new_customer: "नया ग्राहक जोड़ें",
+    cft: "CFT",
+    rate: "भाव",
+    rate_per_kg: "भाव / किग्रा",
+    rate_per_cft: "भाव / CFT",
+    sale_payment: "बिक्री भुगतान",
+    full_received: "पूरा प्राप्त",
+    partial_received: "आंशिक प्राप्त",
+    credit_sale: "उधार बिक्री",
+    amount_received: "प्राप्त राशि",
+    remaining_outstanding: "बकाया राशि",
+    paid: "भुगतान",
+  },
+  gu: {
+    sales: "વેચાણ",
+    sale: "વેચાણ",
+    waste_wood_sale: "વેસ્ટ વુડ વેચાણ",
+    finished_wood_sale: "તૈયાર લાકડું વેચાણ",
+    view_sales: "વેચાણ જુઓ",
+    customer: "ગ્રાહક",
+    add_new_customer: "નવો ગ્રાહક ઉમેરો",
+    cft: "CFT",
+    rate: "ભાવ",
+    rate_per_kg: "ભાવ / કિગ્રા",
+    rate_per_cft: "ભાવ / CFT",
+    sale_payment: "વેચાણ ચુકવણી",
+    full_received: "પૂરું મળ્યું",
+    partial_received: "આંશિક મળ્યું",
+    credit_sale: "ઉધાર વેચાણ",
+    amount_received: "મળેલી રકમ",
+    remaining_outstanding: "બાકી રકમ",
+    paid: "ચૂકવેલ",
+  },
+};
+(Object.keys(phase4) as Lang[]).forEach((l) => Object.assign(translations[l], phase4[l]));
+
 interface I18nContextValue {
   lang: Lang;
   setLang: (l: Lang) => void;
