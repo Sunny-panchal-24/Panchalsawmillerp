@@ -83,6 +83,70 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_receipts: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          id: string
+          mode: string
+          receipt_date: string
+          remarks: string | null
+          sale_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by: string
+          customer_id: string
+          id?: string
+          mode?: string
+          receipt_date?: string
+          remarks?: string | null
+          sale_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          customer_id?: string
+          id?: string
+          mode?: string
+          receipt_date?: string
+          remarks?: string | null
+          sale_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_receipts_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_receipts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_receipts_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -285,6 +349,90 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          bank_account_id: string | null
+          cft: number
+          created_at: string
+          created_by: string
+          customer_id: string | null
+          empty_weight: number
+          gross_weight: number
+          id: string
+          net_weight: number
+          outstanding: number
+          paid_amount: number
+          payment_mode: string | null
+          payment_status: string
+          rate: number
+          remarks: string | null
+          sale_date: string
+          sale_no: string
+          sale_type: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          bank_account_id?: string | null
+          cft?: number
+          created_at?: string
+          created_by: string
+          customer_id?: string | null
+          empty_weight?: number
+          gross_weight?: number
+          id?: string
+          net_weight?: number
+          outstanding?: number
+          paid_amount?: number
+          payment_mode?: string | null
+          payment_status?: string
+          rate?: number
+          remarks?: string | null
+          sale_date?: string
+          sale_no: string
+          sale_type: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          bank_account_id?: string | null
+          cft?: number
+          created_at?: string
+          created_by?: string
+          customer_id?: string | null
+          empty_weight?: number
+          gross_weight?: number
+          id?: string
+          net_weight?: number
+          outstanding?: number
+          paid_amount?: number
+          payment_mode?: string | null
+          payment_status?: string
+          rate?: number
+          remarks?: string | null
+          sale_date?: string
+          sale_no?: string
+          sale_type?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]
