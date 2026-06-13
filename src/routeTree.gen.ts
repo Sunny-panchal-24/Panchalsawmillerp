@@ -14,8 +14,11 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticated/masters'
+import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedPurchasesIndexRouteImport } from './routes/_authenticated/purchases.index'
+import { Route as AuthenticatedWorkersSalaryRouteImport } from './routes/_authenticated/workers.salary'
+import { Route as AuthenticatedWorkersAdvanceRouteImport } from './routes/_authenticated/workers.advance'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedPurchasesNewRouteImport } from './routes/_authenticated/purchases.new'
 import { Route as AuthenticatedVendorsVendorIdLedgerRouteImport } from './routes/_authenticated/vendors.$vendorId.ledger'
@@ -44,6 +47,12 @@ const AuthenticatedMastersRoute = AuthenticatedMastersRouteImport.update({
   path: '/masters',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWorkersIndexRoute =
+  AuthenticatedWorkersIndexRouteImport.update({
+    id: '/workers/',
+    path: '/workers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   id: '/sales/',
   path: '/sales/',
@@ -53,6 +62,18 @@ const AuthenticatedPurchasesIndexRoute =
   AuthenticatedPurchasesIndexRouteImport.update({
     id: '/purchases/',
     path: '/purchases/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWorkersSalaryRoute =
+  AuthenticatedWorkersSalaryRouteImport.update({
+    id: '/workers/salary',
+    path: '/workers/salary',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWorkersAdvanceRoute =
+  AuthenticatedWorkersAdvanceRouteImport.update({
+    id: '/workers/advance',
+    path: '/workers/advance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
@@ -80,8 +101,11 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedSetupRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
+  '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
   '/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/workers/': typeof AuthenticatedWorkersIndexRoute
   '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
 export interface FileRoutesByTo {
@@ -91,8 +115,11 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
+  '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
   '/purchases': typeof AuthenticatedPurchasesIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
+  '/workers': typeof AuthenticatedWorkersIndexRoute
   '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
 export interface FileRoutesById {
@@ -104,8 +131,11 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
+  '/_authenticated/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
+  '/_authenticated/workers/salary': typeof AuthenticatedWorkersSalaryRoute
   '/_authenticated/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
   '/_authenticated/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
 export interface FileRouteTypes {
@@ -117,8 +147,11 @@ export interface FileRouteTypes {
     | '/setup'
     | '/purchases/new'
     | '/sales/new'
+    | '/workers/advance'
+    | '/workers/salary'
     | '/purchases/'
     | '/sales/'
+    | '/workers/'
     | '/vendors/$vendorId/ledger'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,8 +161,11 @@ export interface FileRouteTypes {
     | '/'
     | '/purchases/new'
     | '/sales/new'
+    | '/workers/advance'
+    | '/workers/salary'
     | '/purchases'
     | '/sales'
+    | '/workers'
     | '/vendors/$vendorId/ledger'
   id:
     | '__root__'
@@ -140,8 +176,11 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/purchases/new'
     | '/_authenticated/sales/new'
+    | '/_authenticated/workers/advance'
+    | '/_authenticated/workers/salary'
     | '/_authenticated/purchases/'
     | '/_authenticated/sales/'
+    | '/_authenticated/workers/'
     | '/_authenticated/vendors/$vendorId/ledger'
   fileRoutesById: FileRoutesById
 }
@@ -187,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMastersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/workers/': {
+      id: '/_authenticated/workers/'
+      path: '/workers'
+      fullPath: '/workers/'
+      preLoaderRoute: typeof AuthenticatedWorkersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sales/': {
       id: '/_authenticated/sales/'
       path: '/sales'
@@ -199,6 +245,20 @@ declare module '@tanstack/react-router' {
       path: '/purchases'
       fullPath: '/purchases/'
       preLoaderRoute: typeof AuthenticatedPurchasesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/workers/salary': {
+      id: '/_authenticated/workers/salary'
+      path: '/workers/salary'
+      fullPath: '/workers/salary'
+      preLoaderRoute: typeof AuthenticatedWorkersSalaryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/workers/advance': {
+      id: '/_authenticated/workers/advance'
+      path: '/workers/advance'
+      fullPath: '/workers/advance'
+      preLoaderRoute: typeof AuthenticatedWorkersAdvanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sales/new': {
@@ -231,8 +291,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedPurchasesNewRoute: typeof AuthenticatedPurchasesNewRoute
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
+  AuthenticatedWorkersAdvanceRoute: typeof AuthenticatedWorkersAdvanceRoute
+  AuthenticatedWorkersSalaryRoute: typeof AuthenticatedWorkersSalaryRoute
   AuthenticatedPurchasesIndexRoute: typeof AuthenticatedPurchasesIndexRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
+  AuthenticatedWorkersIndexRoute: typeof AuthenticatedWorkersIndexRoute
   AuthenticatedVendorsVendorIdLedgerRoute: typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
 
@@ -242,8 +305,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedPurchasesNewRoute: AuthenticatedPurchasesNewRoute,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
+  AuthenticatedWorkersAdvanceRoute: AuthenticatedWorkersAdvanceRoute,
+  AuthenticatedWorkersSalaryRoute: AuthenticatedWorkersSalaryRoute,
   AuthenticatedPurchasesIndexRoute: AuthenticatedPurchasesIndexRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
+  AuthenticatedWorkersIndexRoute: AuthenticatedWorkersIndexRoute,
   AuthenticatedVendorsVendorIdLedgerRoute:
     AuthenticatedVendorsVendorIdLedgerRoute,
 }
