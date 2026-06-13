@@ -17,6 +17,7 @@ import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedPurchasesIndexRouteImport } from './routes/_authenticated/purchases.index'
+import { Route as AuthenticatedWorkersAdvanceRouteImport } from './routes/_authenticated/workers.advance'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedPurchasesNewRouteImport } from './routes/_authenticated/purchases.new'
 import { Route as AuthenticatedVendorsVendorIdLedgerRouteImport } from './routes/_authenticated/vendors.$vendorId.ledger'
@@ -62,6 +63,12 @@ const AuthenticatedPurchasesIndexRoute =
     path: '/purchases/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWorkersAdvanceRoute =
+  AuthenticatedWorkersAdvanceRouteImport.update({
+    id: '/workers/advance',
+    path: '/workers/advance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
   id: '/sales/new',
   path: '/sales/new',
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedSetupRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/workers/': typeof AuthenticatedWorkersIndexRoute
@@ -99,6 +107,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/purchases': typeof AuthenticatedPurchasesIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/workers': typeof AuthenticatedWorkersIndexRoute
@@ -113,6 +122,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
+  '/_authenticated/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/_authenticated/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/setup'
     | '/purchases/new'
     | '/sales/new'
+    | '/workers/advance'
     | '/purchases/'
     | '/sales/'
     | '/workers/'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/purchases/new'
     | '/sales/new'
+    | '/workers/advance'
     | '/purchases'
     | '/sales'
     | '/workers'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/purchases/new'
     | '/_authenticated/sales/new'
+    | '/_authenticated/workers/advance'
     | '/_authenticated/purchases/'
     | '/_authenticated/sales/'
     | '/_authenticated/workers/'
@@ -221,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchasesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/workers/advance': {
+      id: '/_authenticated/workers/advance'
+      path: '/workers/advance'
+      fullPath: '/workers/advance'
+      preLoaderRoute: typeof AuthenticatedWorkersAdvanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sales/new': {
       id: '/_authenticated/sales/new'
       path: '/sales/new'
@@ -251,6 +271,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedPurchasesNewRoute: typeof AuthenticatedPurchasesNewRoute
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
+  AuthenticatedWorkersAdvanceRoute: typeof AuthenticatedWorkersAdvanceRoute
   AuthenticatedPurchasesIndexRoute: typeof AuthenticatedPurchasesIndexRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
   AuthenticatedWorkersIndexRoute: typeof AuthenticatedWorkersIndexRoute
@@ -263,6 +284,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedPurchasesNewRoute: AuthenticatedPurchasesNewRoute,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
+  AuthenticatedWorkersAdvanceRoute: AuthenticatedWorkersAdvanceRoute,
   AuthenticatedPurchasesIndexRoute: AuthenticatedPurchasesIndexRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
   AuthenticatedWorkersIndexRoute: AuthenticatedWorkersIndexRoute,
