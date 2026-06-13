@@ -636,7 +636,15 @@ const phase6: Record<Lang, Dict> = {
     maintenance: "મરામત",
     other_expense: "અન્ય ખર્ચ",
     description: "વિગત",
-    optional: 
+    optional: "વૈકલ્પિક",
+    expense_description_hint: "આ ખર્ચની વિગત દાખલ કરો",
+    select_bank: "બેંક પસંદ કરો",
+    bank: "બેંક",
+    save_expense: "ખર્ચ સેવ કરો",
+    saving: "સેવ થઈ રહ્યું છે...",
+  },
+};
+(Object.keys(phase6) as Lang[]).forEach((l) => Object.assign(translations[l], phase6[l]));
 
 interface I18nContextValue {
   lang: Lang;
