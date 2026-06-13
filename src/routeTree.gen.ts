@@ -17,6 +17,7 @@ import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedPurchasesIndexRouteImport } from './routes/_authenticated/purchases.index'
+import { Route as AuthenticatedWorkersSalaryRouteImport } from './routes/_authenticated/workers.salary'
 import { Route as AuthenticatedWorkersAdvanceRouteImport } from './routes/_authenticated/workers.advance'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedPurchasesNewRouteImport } from './routes/_authenticated/purchases.new'
@@ -63,6 +64,12 @@ const AuthenticatedPurchasesIndexRoute =
     path: '/purchases/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWorkersSalaryRoute =
+  AuthenticatedWorkersSalaryRouteImport.update({
+    id: '/workers/salary',
+    path: '/workers/salary',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWorkersAdvanceRoute =
   AuthenticatedWorkersAdvanceRouteImport.update({
     id: '/workers/advance',
@@ -95,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
+  '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
   '/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/workers/': typeof AuthenticatedWorkersIndexRoute
@@ -108,6 +116,7 @@ export interface FileRoutesByTo {
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
+  '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
   '/purchases': typeof AuthenticatedPurchasesIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/workers': typeof AuthenticatedWorkersIndexRoute
@@ -123,6 +132,7 @@ export interface FileRoutesById {
   '/_authenticated/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
+  '/_authenticated/workers/salary': typeof AuthenticatedWorkersSalaryRoute
   '/_authenticated/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/purchases/new'
     | '/sales/new'
     | '/workers/advance'
+    | '/workers/salary'
     | '/purchases/'
     | '/sales/'
     | '/workers/'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/purchases/new'
     | '/sales/new'
     | '/workers/advance'
+    | '/workers/salary'
     | '/purchases'
     | '/sales'
     | '/workers'
@@ -165,6 +177,7 @@ export interface FileRouteTypes {
     | '/_authenticated/purchases/new'
     | '/_authenticated/sales/new'
     | '/_authenticated/workers/advance'
+    | '/_authenticated/workers/salary'
     | '/_authenticated/purchases/'
     | '/_authenticated/sales/'
     | '/_authenticated/workers/'
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchasesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/workers/salary': {
+      id: '/_authenticated/workers/salary'
+      path: '/workers/salary'
+      fullPath: '/workers/salary'
+      preLoaderRoute: typeof AuthenticatedWorkersSalaryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/workers/advance': {
       id: '/_authenticated/workers/advance'
       path: '/workers/advance'
@@ -272,6 +292,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPurchasesNewRoute: typeof AuthenticatedPurchasesNewRoute
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
   AuthenticatedWorkersAdvanceRoute: typeof AuthenticatedWorkersAdvanceRoute
+  AuthenticatedWorkersSalaryRoute: typeof AuthenticatedWorkersSalaryRoute
   AuthenticatedPurchasesIndexRoute: typeof AuthenticatedPurchasesIndexRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
   AuthenticatedWorkersIndexRoute: typeof AuthenticatedWorkersIndexRoute
@@ -285,6 +306,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPurchasesNewRoute: AuthenticatedPurchasesNewRoute,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
   AuthenticatedWorkersAdvanceRoute: AuthenticatedWorkersAdvanceRoute,
+  AuthenticatedWorkersSalaryRoute: AuthenticatedWorkersSalaryRoute,
   AuthenticatedPurchasesIndexRoute: AuthenticatedPurchasesIndexRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
   AuthenticatedWorkersIndexRoute: AuthenticatedWorkersIndexRoute,
