@@ -17,10 +17,12 @@ import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedPurchasesIndexRouteImport } from './routes/_authenticated/purchases.index'
+import { Route as AuthenticatedExpensesIndexRouteImport } from './routes/_authenticated/expenses.index'
 import { Route as AuthenticatedWorkersSalaryRouteImport } from './routes/_authenticated/workers.salary'
 import { Route as AuthenticatedWorkersAdvanceRouteImport } from './routes/_authenticated/workers.advance'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedPurchasesNewRouteImport } from './routes/_authenticated/purchases.new'
+import { Route as AuthenticatedExpensesNewRouteImport } from './routes/_authenticated/expenses.new'
 import { Route as AuthenticatedVendorsVendorIdLedgerRouteImport } from './routes/_authenticated/vendors.$vendorId.ledger'
 
 const AuthRoute = AuthRouteImport.update({
@@ -64,6 +66,12 @@ const AuthenticatedPurchasesIndexRoute =
     path: '/purchases/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedExpensesIndexRoute =
+  AuthenticatedExpensesIndexRouteImport.update({
+    id: '/expenses/',
+    path: '/expenses/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWorkersSalaryRoute =
   AuthenticatedWorkersSalaryRouteImport.update({
     id: '/workers/salary',
@@ -87,6 +95,12 @@ const AuthenticatedPurchasesNewRoute =
     path: '/purchases/new',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedExpensesNewRoute =
+  AuthenticatedExpensesNewRouteImport.update({
+    id: '/expenses/new',
+    path: '/expenses/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedVendorsVendorIdLedgerRoute =
   AuthenticatedVendorsVendorIdLedgerRouteImport.update({
     id: '/vendors/$vendorId/ledger',
@@ -99,10 +113,12 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/masters': typeof AuthenticatedMastersRoute
   '/setup': typeof AuthenticatedSetupRoute
+  '/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
+  '/expenses/': typeof AuthenticatedExpensesIndexRoute
   '/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/workers/': typeof AuthenticatedWorkersIndexRoute
@@ -113,10 +129,12 @@ export interface FileRoutesByTo {
   '/masters': typeof AuthenticatedMastersRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/': typeof AuthenticatedIndexRoute
+  '/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
+  '/expenses': typeof AuthenticatedExpensesIndexRoute
   '/purchases': typeof AuthenticatedPurchasesIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/workers': typeof AuthenticatedWorkersIndexRoute
@@ -129,10 +147,12 @@ export interface FileRoutesById {
   '/_authenticated/masters': typeof AuthenticatedMastersRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/_authenticated/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/_authenticated/workers/salary': typeof AuthenticatedWorkersSalaryRoute
+  '/_authenticated/expenses/': typeof AuthenticatedExpensesIndexRoute
   '/_authenticated/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
@@ -145,10 +165,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/masters'
     | '/setup'
+    | '/expenses/new'
     | '/purchases/new'
     | '/sales/new'
     | '/workers/advance'
     | '/workers/salary'
+    | '/expenses/'
     | '/purchases/'
     | '/sales/'
     | '/workers/'
@@ -159,10 +181,12 @@ export interface FileRouteTypes {
     | '/masters'
     | '/setup'
     | '/'
+    | '/expenses/new'
     | '/purchases/new'
     | '/sales/new'
     | '/workers/advance'
     | '/workers/salary'
+    | '/expenses'
     | '/purchases'
     | '/sales'
     | '/workers'
@@ -174,10 +198,12 @@ export interface FileRouteTypes {
     | '/_authenticated/masters'
     | '/_authenticated/setup'
     | '/_authenticated/'
+    | '/_authenticated/expenses/new'
     | '/_authenticated/purchases/new'
     | '/_authenticated/sales/new'
     | '/_authenticated/workers/advance'
     | '/_authenticated/workers/salary'
+    | '/_authenticated/expenses/'
     | '/_authenticated/purchases/'
     | '/_authenticated/sales/'
     | '/_authenticated/workers/'
@@ -247,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchasesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/expenses/': {
+      id: '/_authenticated/expenses/'
+      path: '/expenses'
+      fullPath: '/expenses/'
+      preLoaderRoute: typeof AuthenticatedExpensesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/workers/salary': {
       id: '/_authenticated/workers/salary'
       path: '/workers/salary'
@@ -275,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPurchasesNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/expenses/new': {
+      id: '/_authenticated/expenses/new'
+      path: '/expenses/new'
+      fullPath: '/expenses/new'
+      preLoaderRoute: typeof AuthenticatedExpensesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/vendors/$vendorId/ledger': {
       id: '/_authenticated/vendors/$vendorId/ledger'
       path: '/vendors/$vendorId/ledger'
@@ -289,10 +329,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMastersRoute: typeof AuthenticatedMastersRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedExpensesNewRoute: typeof AuthenticatedExpensesNewRoute
   AuthenticatedPurchasesNewRoute: typeof AuthenticatedPurchasesNewRoute
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
   AuthenticatedWorkersAdvanceRoute: typeof AuthenticatedWorkersAdvanceRoute
   AuthenticatedWorkersSalaryRoute: typeof AuthenticatedWorkersSalaryRoute
+  AuthenticatedExpensesIndexRoute: typeof AuthenticatedExpensesIndexRoute
   AuthenticatedPurchasesIndexRoute: typeof AuthenticatedPurchasesIndexRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
   AuthenticatedWorkersIndexRoute: typeof AuthenticatedWorkersIndexRoute
@@ -303,10 +345,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMastersRoute: AuthenticatedMastersRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedExpensesNewRoute: AuthenticatedExpensesNewRoute,
   AuthenticatedPurchasesNewRoute: AuthenticatedPurchasesNewRoute,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
   AuthenticatedWorkersAdvanceRoute: AuthenticatedWorkersAdvanceRoute,
   AuthenticatedWorkersSalaryRoute: AuthenticatedWorkersSalaryRoute,
+  AuthenticatedExpensesIndexRoute: AuthenticatedExpensesIndexRoute,
   AuthenticatedPurchasesIndexRoute: AuthenticatedPurchasesIndexRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
   AuthenticatedWorkersIndexRoute: AuthenticatedWorkersIndexRoute,
