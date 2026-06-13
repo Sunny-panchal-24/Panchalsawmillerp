@@ -648,6 +648,138 @@ export type Database = {
         }
         Relationships: []
       }
+      worker_advances: {
+        Row: {
+          advance_date: string
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          payment_mode: string
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          advance_date?: string
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          payment_mode?: string
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          advance_date?: string
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          payment_mode?: string
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_advances_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_advances_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_salaries: {
+        Row: {
+          advance_deducted: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string
+          daily_wage: number
+          gross_salary: number
+          id: string
+          net_payable: number
+          notes: string | null
+          outstanding: number
+          paid_amount: number
+          payment_mode: string | null
+          period_end: string | null
+          period_label: string
+          period_start: string | null
+          present_days: number
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          advance_deducted?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          daily_wage?: number
+          gross_salary?: number
+          id?: string
+          net_payable?: number
+          notes?: string | null
+          outstanding?: number
+          paid_amount?: number
+          payment_mode?: string | null
+          period_end?: string | null
+          period_label: string
+          period_start?: string | null
+          present_days?: number
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          advance_deducted?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          daily_wage?: number
+          gross_salary?: number
+          id?: string
+          net_payable?: number
+          notes?: string | null
+          outstanding?: number
+          paid_amount?: number
+          payment_mode?: string | null
+          period_end?: string | null
+          period_label?: string
+          period_start?: string | null
+          present_days?: number
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_salaries_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_salaries_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workers: {
         Row: {
           created_at: string
