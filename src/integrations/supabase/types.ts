@@ -189,6 +189,53 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          expense_date: string
+          expense_type: Database["public"]["Enums"]["expense_type"]
+          id: string
+          payment_mode: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          expense_date?: string
+          expense_type: Database["public"]["Enums"]["expense_type"]
+          id?: string
+          payment_mode?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          expense_date?: string
+          expense_type?: Database["public"]["Enums"]["expense_type"]
+          id?: string
+          payment_mode?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -835,6 +882,7 @@ export type Database = {
     Enums: {
       app_role: "owner" | "accountant" | "worker"
       customer_type: "waste" | "finished" | "both"
+      expense_type: "maintenance" | "other"
       payment_mode: "cash" | "dad_saving" | "dad_current" | "sunny_saving"
       purchase_type: "A" | "B"
       salary_type: "weekly" | "monthly"
@@ -967,6 +1015,7 @@ export const Constants = {
     Enums: {
       app_role: ["owner", "accountant", "worker"],
       customer_type: ["waste", "finished", "both"],
+      expense_type: ["maintenance", "other"],
       payment_mode: ["cash", "dad_saving", "dad_current", "sunny_saving"],
       purchase_type: ["A", "B"],
       salary_type: ["weekly", "monthly"],
