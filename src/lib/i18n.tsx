@@ -593,6 +593,51 @@ const phase4: Record<Lang, Dict> = {
 };
 (Object.keys(phase4) as Lang[]).forEach((l) => Object.assign(translations[l], phase4[l]));
 
+// Phase 6 expense additions
+const phase6: Record<Lang, Dict> = {
+  en: {
+    expenses: "Expenses",
+    misc_expense: "Misc Expense",
+    new_expense: "New Expense",
+    view_expenses: "View Expenses",
+    expense_type_label: "Expense Type",
+    maintenance: "Maintenance",
+    other_expense: "Other Expense",
+    description: "Description",
+    optional: "Optional",
+    expense_description_hint: "Enter details about this expense",
+    select_bank: "Select Bank",
+    bank: "Bank",
+    save_expense: "Save Expense",
+    saving: "Saving...",
+  },
+  hi: {
+    expenses: "खर्च",
+    misc_expense: "अन्य खर्च",
+    new_expense: "नया खर्च",
+    view_expenses: "खर्च देखें",
+    expense_type_label: "खर्च प्रकार",
+    maintenance: "मरम्मत",
+    other_expense: "अन्य खर्च",
+    description: "विवरण",
+    optional: "वैकल्पिक",
+    expense_description_hint: "इस खर्च का विवरण दर्ज करें",
+    select_bank: "बैंक चुनें",
+    bank: "बैंक",
+    save_expense: "खर्च सेव करें",
+    saving: "सेव हो रहा है...",
+  },
+  gu: {
+    expenses: "ખર્ચ",
+    misc_expense: "અન્ય ખર્ચ",
+    new_expense: "નવો ખર્ચ",
+    view_expenses: "ખર્ચ જુઓ",
+    expense_type_label: "ખર્ચ પ્રકાર",
+    maintenance: "મરામત",
+    other_expense: "અન્ય ખર્ચ",
+    description: "વિગત",
+    optional: 
+
 interface I18nContextValue {
   lang: Lang;
   setLang: (l: Lang) => void;
