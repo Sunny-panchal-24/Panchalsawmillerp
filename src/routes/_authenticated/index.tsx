@@ -16,6 +16,7 @@ import {
   BarChart3,
   Settings as SettingsIcon,
   LogOut,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 
