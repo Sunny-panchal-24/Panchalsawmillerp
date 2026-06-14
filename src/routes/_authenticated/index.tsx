@@ -33,7 +33,7 @@ const TILES: { key: string; Icon: typeof ShoppingCart; color: string; to: string
   { key: "expenses", Icon: Receipt, color: "bg-orange-700", to: "/expenses" },
   { key: "cash_book", Icon: BookOpen, color: "bg-orange-500", to: null },
   { key: "bank_book", Icon: Landmark, color: "bg-teal-600", to: null },
-  { key: "reports", Icon: BarChart3, color: "bg-indigo-600", to: null },
+  { key: "reports", Icon: BarChart3, color: "bg-indigo-600", to: "/reports" },
   { key: "masters", Icon: SettingsIcon, color: "bg-slate-600", to: "/masters" },
 ];
 
