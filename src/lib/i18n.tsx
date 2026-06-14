@@ -646,6 +646,47 @@ const phase6: Record<Lang, Dict> = {
 };
 (Object.keys(phase6) as Lang[]).forEach((l) => Object.assign(translations[l], phase6[l]));
 
+// About page
+const phase7: Record<Lang, Dict> = {
+  en: {
+    about: "About",
+    about_title: "About Panchal Sawmill ERP",
+    founder: "Founder",
+    founder_name: "Sunny Panchal",
+    background: "Background",
+    background_text:
+      "Panchal Sawmill ERP was created after facing real-world challenges in managing sawmill purchases, vendor payments, tractor accounting, worker salaries, outstanding balances, and daily profit tracking. Existing ERP systems were either too complex or not designed for traditional sawmill operations. This software was designed from actual sawmill workflows to provide simple popup-based accounting, complete financial transparency, and elder-friendly operation.",
+    mission: "Mission",
+    mission_text:
+      "To digitize sawmill operations and create a simple ERP system that even non-technical business owners can use confidently.",
+  },
+  hi: {
+    about: "परिचय",
+    about_title: "पंचाल सॉमिल ERP के बारे में",
+    founder: "संस्थापक",
+    founder_name: "सनी पंचाल",
+    background: "पृष्ठभूमि",
+    background_text:
+      "पंचाल सॉमिल ERP को वास्तविक दुनिया की चुनौतियों का सामना करने के बाद बनाया गया था — जैसे कि सॉमिल खरीदारी, विक्रेता भुगतान, ट्रैक्टर लेखा, कर्मचारी वेतन, बकाया राशि और दैनिक लाभ ट्रैकिंग। मौजूदा ERP सिस्टम या तो बहुत जटिल थे या पारंपरिक सॉमिल संचालन के लिए डिज़ाइन नहीं किए गए थे। यह सॉफ्टवेयर वास्तविक सॉमिल वर्कफ्लो से डिज़ाइन किया गया है ताकि सरल पॉपअप आधारित लेखा, पूर्ण वित्तीय पारदर्शिता और वृद्ध-अनुकूल संचालन मिल सके।",
+    mission: "लक्ष्य",
+    mission_text:
+      "सॉमिल संचालन को डिजिटलाइज़ करना और एक सरल ERP सिस्टम बनाना जिसे गैर-तकनीकी व्यवसाय मालिक भी आत्मविश्वास से उपयोग कर सकें।",
+  },
+  gu: {
+    about: "વિશે",
+    about_title: "પંચાલ સોમિલ ERP વિશે",
+    founder: "સ્થાપક",
+    founder_name: "સની પંચાલ",
+    background: "પૃષ્ઠભૂમિ",
+    background_text:
+      "પંચાલ સોમિલ ERP વાસ્તવિક દુનિયાની પડકારોનો સામનો કર્યા પછી બનાવવામાં આવ્યું હતું — જેમ કે સોમિલ ખરીદી, વિક્રેતા ચુકવણી, ટ્રેક્ટર ખાતાકીય, કામદાર પગાર, બાકી રકમ અને દૈનિક નફા ટ્રેકિંગ. અસ્તિત્વમાં આવેલ ERP સિસ્ટમ્સ કાં તો ખૂબ જ જટિલ હતા અથવા પરંપરાગત સોમિલ કાર્યો માટે ડિઝાઇન નહોતા કરેલા. આ સોફ્ટવેર વાસ્તવિક સોમિલ વર્કફ્લોમાંથી ડિઝાઇન કરવામાં આવ્યું છે જેથી સરળ પોપઅપ આધારિત ખાતાકીય, સંપૂર્ણ નાણાકીય પારદર્શિતા અને વૃદ્ધ-મૈત્રીપૂર્ણ કાર્યશીલતા મળી શકે.",
+    mission: "લક્ષ્ય",
+    mission_text:
+      "સોમિલ કાર્યોને ડિજિટાઇઝ કરવા અને એક સરળ ERP સિસ્ટમ બનાવવી જે ગૈર-તકનિકી વ્યવસાય માલિકો પણ આત્મવિશ્વાસથી વાપરી શકે.",
+  },
+};
+(Object.keys(phase7) as Lang[]).forEach((l) => Object.assign(translations[l], phase7[l]));
+
 interface I18nContextValue {
   lang: Lang;
   setLang: (l: Lang) => void;

@@ -16,6 +16,7 @@ import {
   BarChart3,
   Settings as SettingsIcon,
   LogOut,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +36,7 @@ const TILES: { key: string; Icon: typeof ShoppingCart; color: string; to: string
   { key: "bank_book", Icon: Landmark, color: "bg-teal-600", to: null },
   { key: "reports", Icon: BarChart3, color: "bg-indigo-600", to: "/reports" },
   { key: "masters", Icon: SettingsIcon, color: "bg-slate-600", to: "/masters" },
+  { key: "about", Icon: Info, color: "bg-sky-600", to: "/about" },
 ];
 
 function Dashboard() {
