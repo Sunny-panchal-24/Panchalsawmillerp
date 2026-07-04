@@ -14,7 +14,6 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/sales/")({
   component: SalesIndex,
 });
-});
 
 type Row = {
   id: string;
