@@ -14,10 +14,6 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/sales/")({
   component: SalesIndex,
 });
-
-// (chooser dialog removed — dashboard tiles route directly)
-export const _unused = () => null;
-export const Route2 = null;
 });
 
 type Row = {
