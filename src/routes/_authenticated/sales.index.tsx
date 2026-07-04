@@ -97,45 +97,6 @@ function SalesIndex() {
         ))}
       </div>
 
-      <Dialog open={chooser} onOpenChange={(o) => { if (!o) setChooser(false); }}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="text-center text-xl">{t("what_do_you_want")}</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => { setChooser(false); navigate({ to: "/sales/new", search: { type: "waste" } }); }}
-              className="flex items-center gap-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 p-5 text-left active:scale-[0.98] transition-transform"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-600 text-white">
-                <Package className="h-7 w-7" />
-              </div>
-              <div className="text-lg font-bold">{t("waste_wood_sale")}</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setChooser(false); navigate({ to: "/sales/new", search: { type: "finished" } }); }}
-              className="flex items-center gap-3 rounded-xl border-2 border-amber-600 bg-amber-50 dark:bg-amber-950/30 p-5 text-left active:scale-[0.98] transition-transform"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-600 text-white">
-                <Hammer className="h-7 w-7" />
-              </div>
-              <div className="text-lg font-bold">{t("finished_wood_sale")}</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setChooser(false)}
-              className="flex items-center gap-3 rounded-xl border-2 border-border bg-card p-5 text-left active:scale-[0.98] transition-transform"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
-                <Eye className="h-7 w-7" />
-              </div>
-              <div className="text-lg font-bold">{t("view_sales")}</div>
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </AppShell>
   );
 }
