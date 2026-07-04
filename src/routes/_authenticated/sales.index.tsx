@@ -26,9 +26,7 @@ type Row = {
 
 function SalesIndex() {
   const { t } = useI18n();
-  const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
-  const [chooser, setChooser] = useState(true);
   const [q, setQ] = useState("");
 
   const load = async () => {
