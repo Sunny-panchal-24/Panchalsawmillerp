@@ -107,8 +107,10 @@ function Dashboard() {
               key={key}
               type="button"
               onClick={() => {
-                if (to) navigate({ to });
-                else toast.info(t("coming_soon"));
+                if (!to) return toast.info(t("coming_soon"));
+                const [path, qs] = to.split("?");
+                const search = qs ? Object.fromEntries(new URLSearchParams(qs)) : undefined;
+                navigate({ to: path, search } as never);
               }}
               className="group flex aspect-square flex-col items-center justify-center gap-3 rounded-2xl border-2 border-border bg-card p-4 text-card-foreground shadow-sm transition-all active:scale-95 active:shadow-inner"
             >
