@@ -26,8 +26,9 @@ export const Route = createFileRoute("/_authenticated/")({
 
 const TILES: { key: string; Icon: typeof ShoppingCart; color: string; to: string | null }[] = [
   { key: "purchases", Icon: ShoppingCart, color: "bg-blue-600", to: "/purchases" },
-  { key: "waste_wood_sales", Icon: Package, color: "bg-emerald-600", to: "/sales" },
-  { key: "finished_wood_sales", Icon: Hammer, color: "bg-amber-600", to: "/sales" },
+  { key: "waste_wood_sales", Icon: Package, color: "bg-emerald-600", to: "/sales/new?type=waste" },
+  { key: "finished_wood_sales", Icon: Hammer, color: "bg-amber-600", to: "/sales/new?type=finished" },
+  { key: "view_sales", Icon: Receipt, color: "bg-lime-600", to: "/sales" },
   { key: "vendor_payments", Icon: Wallet, color: "bg-rose-600", to: null },
   { key: "customer_receipts", Icon: Receipt, color: "bg-violet-600", to: null },
   { key: "workers", Icon: Users, color: "bg-cyan-600", to: "/workers" },
@@ -106,8 +107,10 @@ function Dashboard() {
               key={key}
               type="button"
               onClick={() => {
-                if (to) navigate({ to });
-                else toast.info(t("coming_soon"));
+                if (!to) return toast.info(t("coming_soon"));
+                const [path, qs] = to.split("?");
+                const search = qs ? Object.fromEntries(new URLSearchParams(qs)) : undefined;
+                navigate({ to: path, search } as never);
               }}
               className="group flex aspect-square flex-col items-center justify-center gap-3 rounded-2xl border-2 border-border bg-card p-4 text-card-foreground shadow-sm transition-all active:scale-95 active:shadow-inner"
             >
