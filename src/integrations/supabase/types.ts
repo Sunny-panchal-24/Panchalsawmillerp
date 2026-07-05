@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      archived_data: {
+        Row: {
+          archive_type: string
+          archived_at: string
+          id: string
+          owner_id: string
+          payload: Json
+          period_label: string
+          row_id: string | null
+          table_name: string
+        }
+        Insert: {
+          archive_type: string
+          archived_at?: string
+          id?: string
+          owner_id?: string
+          payload: Json
+          period_label: string
+          row_id?: string | null
+          table_name: string
+        }
+        Update: {
+          archive_type?: string
+          archived_at?: string
+          id?: string
+          owner_id?: string
+          payload?: Json
+          period_label?: string
+          row_id?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
       bank_accounts: {
         Row: {
           created_at: string
@@ -30,7 +63,7 @@ export type Database = {
           is_active?: boolean
           name: string
           opening_balance?: number
-          owner_id: string
+          owner_id?: string
           updated_at?: string
         }
         Update: {
@@ -63,7 +96,7 @@ export type Database = {
           id?: string
           mobile?: string | null
           opening_cash?: number
-          owner_id: string
+          owner_id?: string
           owner_name: string
           setup_completed?: boolean
           updated_at?: string
@@ -101,7 +134,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           created_at?: string
-          created_by: string
+          created_by?: string
           customer_id: string
           id?: string
           mode?: string
@@ -206,7 +239,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           created_at?: string
-          created_by: string
+          created_by?: string
           description?: string | null
           expense_date?: string
           expense_type: Database["public"]["Enums"]["expense_type"]
@@ -235,6 +268,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      monthly_closings: {
+        Row: {
+          bank_closing: Json
+          cash_closing: number
+          closed_at: string
+          customer_outstanding: number
+          id: string
+          owner_id: string
+          period_end: string
+          period_label: string
+          period_start: string
+          vendor_advance: number
+          vendor_outstanding: number
+          worker_advance: number
+        }
+        Insert: {
+          bank_closing?: Json
+          cash_closing?: number
+          closed_at?: string
+          customer_outstanding?: number
+          id?: string
+          owner_id?: string
+          period_end: string
+          period_label: string
+          period_start: string
+          vendor_advance?: number
+          vendor_outstanding?: number
+          worker_advance?: number
+        }
+        Update: {
+          bank_closing?: Json
+          cash_closing?: number
+          closed_at?: string
+          customer_outstanding?: number
+          id?: string
+          owner_id?: string
+          period_end?: string
+          period_label?: string
+          period_start?: string
+          vendor_advance?: number
+          vendor_outstanding?: number
+          worker_advance?: number
+        }
+        Relationships: []
+      }
+      monthly_exports: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          owner_id: string
+          period_label: string
+          size_bytes: number | null
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          owner_id?: string
+          period_label: string
+          size_bytes?: number | null
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          owner_id?: string
+          period_label?: string
+          size_bytes?: number | null
+          storage_path?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -427,7 +535,7 @@ export type Database = {
           bank_account_id?: string | null
           cft?: number
           created_at?: string
-          created_by: string
+          created_by?: string
           customer_id?: string | null
           empty_weight?: number
           gross_weight?: number
@@ -866,6 +974,51 @@ export type Database = {
         }
         Relationships: []
       }
+      yearly_closings: {
+        Row: {
+          bank_closing: Json
+          cash_closing: number
+          closed_at: string
+          customer_outstanding: number
+          fy_end: string
+          fy_label: string
+          fy_start: string
+          id: string
+          owner_id: string
+          vendor_advance: number
+          vendor_outstanding: number
+          worker_advance: number
+        }
+        Insert: {
+          bank_closing?: Json
+          cash_closing?: number
+          closed_at?: string
+          customer_outstanding?: number
+          fy_end: string
+          fy_label: string
+          fy_start: string
+          id?: string
+          owner_id?: string
+          vendor_advance?: number
+          vendor_outstanding?: number
+          worker_advance?: number
+        }
+        Update: {
+          bank_closing?: Json
+          cash_closing?: number
+          closed_at?: string
+          customer_outstanding?: number
+          fy_end?: string
+          fy_label?: string
+          fy_start?: string
+          id?: string
+          owner_id?: string
+          vendor_advance?: number
+          vendor_outstanding?: number
+          worker_advance?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -878,6 +1031,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "owner" | "accountant" | "worker" | "admin"
