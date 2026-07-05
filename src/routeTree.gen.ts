@@ -13,7 +13,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
+import { Route as AuthenticatedRecoveryRouteImport } from './routes/_authenticated/recovery'
 import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticated/masters'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAboutRouteImport } from './routes/_authenticated/about'
 import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
@@ -23,6 +25,7 @@ import { Route as AuthenticatedExpensesIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedWorkersSalaryRouteImport } from './routes/_authenticated/workers.salary'
 import { Route as AuthenticatedWorkersAdvanceRouteImport } from './routes/_authenticated/workers.advance'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
+import { Route as AuthenticatedReportsMonthlyExportRouteImport } from './routes/_authenticated/reports.monthly-export'
 import { Route as AuthenticatedPurchasesNewRouteImport } from './routes/_authenticated/purchases.new'
 import { Route as AuthenticatedExpensesNewRouteImport } from './routes/_authenticated/expenses.new'
 import { Route as AuthenticatedVendorsVendorIdLedgerRouteImport } from './routes/_authenticated/vendors.$vendorId.ledger'
@@ -46,9 +49,19 @@ const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
   path: '/setup',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRecoveryRoute = AuthenticatedRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMastersRoute = AuthenticatedMastersRouteImport.update({
   id: '/masters',
   path: '/masters',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAboutRoute = AuthenticatedAboutRouteImport.update({
@@ -102,6 +115,12 @@ const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
   path: '/sales/new',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReportsMonthlyExportRoute =
+  AuthenticatedReportsMonthlyExportRouteImport.update({
+    id: '/reports/monthly-export',
+    path: '/reports/monthly-export',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPurchasesNewRoute =
   AuthenticatedPurchasesNewRouteImport.update({
     id: '/purchases/new',
@@ -125,10 +144,13 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/about': typeof AuthenticatedAboutRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/masters': typeof AuthenticatedMastersRoute
+  '/recovery': typeof AuthenticatedRecoveryRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
+  '/reports/monthly-export': typeof AuthenticatedReportsMonthlyExportRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
@@ -142,11 +164,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/about': typeof AuthenticatedAboutRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/masters': typeof AuthenticatedMastersRoute
+  '/recovery': typeof AuthenticatedRecoveryRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/': typeof AuthenticatedIndexRoute
   '/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
+  '/reports/monthly-export': typeof AuthenticatedReportsMonthlyExportRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
   '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
@@ -162,11 +187,14 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/about': typeof AuthenticatedAboutRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/masters': typeof AuthenticatedMastersRoute
+  '/_authenticated/recovery': typeof AuthenticatedRecoveryRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/_authenticated/purchases/new': typeof AuthenticatedPurchasesNewRoute
+  '/_authenticated/reports/monthly-export': typeof AuthenticatedReportsMonthlyExportRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/_authenticated/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/_authenticated/workers/salary': typeof AuthenticatedWorkersSalaryRoute
@@ -183,10 +211,13 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/about'
+    | '/admin'
     | '/masters'
+    | '/recovery'
     | '/setup'
     | '/expenses/new'
     | '/purchases/new'
+    | '/reports/monthly-export'
     | '/sales/new'
     | '/workers/advance'
     | '/workers/salary'
@@ -200,11 +231,14 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/about'
+    | '/admin'
     | '/masters'
+    | '/recovery'
     | '/setup'
     | '/'
     | '/expenses/new'
     | '/purchases/new'
+    | '/reports/monthly-export'
     | '/sales/new'
     | '/workers/advance'
     | '/workers/salary'
@@ -219,11 +253,14 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/about'
+    | '/_authenticated/admin'
     | '/_authenticated/masters'
+    | '/_authenticated/recovery'
     | '/_authenticated/setup'
     | '/_authenticated/'
     | '/_authenticated/expenses/new'
     | '/_authenticated/purchases/new'
+    | '/_authenticated/reports/monthly-export'
     | '/_authenticated/sales/new'
     | '/_authenticated/workers/advance'
     | '/_authenticated/workers/salary'
@@ -270,11 +307,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSetupRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/recovery': {
+      id: '/_authenticated/recovery'
+      path: '/recovery'
+      fullPath: '/recovery'
+      preLoaderRoute: typeof AuthenticatedRecoveryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/masters': {
       id: '/_authenticated/masters'
       path: '/masters'
       fullPath: '/masters'
       preLoaderRoute: typeof AuthenticatedMastersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/about': {
@@ -340,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/reports/monthly-export': {
+      id: '/_authenticated/reports/monthly-export'
+      path: '/reports/monthly-export'
+      fullPath: '/reports/monthly-export'
+      preLoaderRoute: typeof AuthenticatedReportsMonthlyExportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/purchases/new': {
       id: '/_authenticated/purchases/new'
       path: '/purchases/new'
@@ -366,11 +424,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAboutRoute: typeof AuthenticatedAboutRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMastersRoute: typeof AuthenticatedMastersRoute
+  AuthenticatedRecoveryRoute: typeof AuthenticatedRecoveryRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedExpensesNewRoute: typeof AuthenticatedExpensesNewRoute
   AuthenticatedPurchasesNewRoute: typeof AuthenticatedPurchasesNewRoute
+  AuthenticatedReportsMonthlyExportRoute: typeof AuthenticatedReportsMonthlyExportRoute
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
   AuthenticatedWorkersAdvanceRoute: typeof AuthenticatedWorkersAdvanceRoute
   AuthenticatedWorkersSalaryRoute: typeof AuthenticatedWorkersSalaryRoute
@@ -384,11 +445,15 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAboutRoute: AuthenticatedAboutRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMastersRoute: AuthenticatedMastersRoute,
+  AuthenticatedRecoveryRoute: AuthenticatedRecoveryRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedExpensesNewRoute: AuthenticatedExpensesNewRoute,
   AuthenticatedPurchasesNewRoute: AuthenticatedPurchasesNewRoute,
+  AuthenticatedReportsMonthlyExportRoute:
+    AuthenticatedReportsMonthlyExportRoute,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
   AuthenticatedWorkersAdvanceRoute: AuthenticatedWorkersAdvanceRoute,
   AuthenticatedWorkersSalaryRoute: AuthenticatedWorkersSalaryRoute,

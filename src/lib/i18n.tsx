@@ -685,7 +685,13 @@ const phase7: Record<Lang, Dict> = {
       "સોમિલ કાર્યોને ડિજિટાઇઝ કરવા અને એક સરળ ERP સિસ્ટમ બનાવવી જે ગૈર-તકનિકી વ્યવસાય માલિકો પણ આત્મવિશ્વાસથી વાપરી શકે.",
   },
 };
+const phase8: Record<Lang, Dict> = {
+  en: { monthly_export: "Monthly Export", recovery: "Recovery", admin: "Admin" },
+  hi: { monthly_export: "मासिक निर्यात", recovery: "रिकवरी", admin: "एडमिन" },
+  gu: { monthly_export: "માસિક નિકાસ", recovery: "રિકવરી", admin: "એડમિન" },
+};
 (Object.keys(phase7) as Lang[]).forEach((l) => Object.assign(translations[l], phase7[l]));
+(Object.keys(phase8) as Lang[]).forEach((l) => Object.assign(translations[l], phase8[l]));
 
 interface I18nContextValue {
   lang: Lang;
