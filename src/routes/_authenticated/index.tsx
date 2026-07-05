@@ -17,6 +17,9 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Info,
+  FolderArchive,
+  Shield,
+  FileSpreadsheet,
 } from "lucide-react";
 import { toast } from "sonner";
 
