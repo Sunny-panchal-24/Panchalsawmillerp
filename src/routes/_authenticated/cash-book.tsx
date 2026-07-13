@@ -76,7 +76,7 @@ function CashBook() {
         if (r.payment_mode === "cash") list.push({ date: r.advance_date, label: `${t("worker_advance")}`, outAmt: Number(r.amount), inAmt: 0 });
       });
       (ws ?? []).forEach((r) => {
-        if (r.payment_mode === "cash" && Number(r.paid_amount ?? 0) > 0) list.push({ date: r.period_end, label: `${t("salary")}`, outAmt: Number(r.paid_amount), inAmt: 0 });
+        if (r.payment_mode === "cash" && Number(r.paid_amount ?? 0) > 0) list.push({ date: (r.period_end ?? "") as string, label: `${t("salary")}`, outAmt: Number(r.paid_amount), inAmt: 0 });
       });
       (va ?? []).forEach((r) => {
         if (!r.bank_account_id) list.push({ date: r.advance_date, label: `${t("vendor_advance")}`, outAmt: Number(r.amount), inAmt: 0 });
