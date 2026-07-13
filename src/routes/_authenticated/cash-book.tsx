@@ -70,7 +70,7 @@ function CashBook() {
         if (r.mode === "cash") list.push({ date: r.receipt_date, label: `${t("customer_receipt")}`, inAmt: Number(r.amount), outAmt: 0 });
       });
       (ex ?? []).forEach((r) => {
-        if (r.payment_mode === "cash") list.push({ date: r.expense_date ?? "", label: `${t(r.expense_type === "maintenance" ? "maintenance" : "other_expense")}`, outAmt: Number(r.amount), inAmt: 0 });
+        if (r.payment_mode === "cash") list.push({ date: (r.expense_date ?? "") as string, label: `${t(r.expense_type === "maintenance" ? "maintenance" : "other_expense")}`, outAmt: Number(r.amount), inAmt: 0 });
       });
       (wa ?? []).forEach((r) => {
         if (r.payment_mode === "cash") list.push({ date: r.advance_date, label: `${t("worker_advance")}`, outAmt: Number(r.amount), inAmt: 0 });

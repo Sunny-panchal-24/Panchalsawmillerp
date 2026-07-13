@@ -57,7 +57,7 @@ function BankBook() {
       });
       (vp ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0 }));
       (cr ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0 }));
-      (ex ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.expense_date, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense") ?? "", outAmt: Number(r.amount), inAmt: 0 }));
+      (ex ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: (r.expense_date ?? "") as string, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense"), outAmt: Number(r.amount), inAmt: 0 }));
       (wa ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.advance_date, label: t("worker_advance"), outAmt: Number(r.amount), inAmt: 0 }));
       (ws ?? []).forEach((r) => r.bank_account_id && Number(r.paid_amount ?? 0) > 0 && push(r.bank_account_id, { date: r.period_end, label: t("salary"), outAmt: Number(r.paid_amount), inAmt: 0 }));
       (va ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.advance_date, label: t("vendor_advance"), outAmt: Number(r.amount), inAmt: 0 }));
