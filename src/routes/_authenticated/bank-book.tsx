@@ -28,7 +28,7 @@ function BankBook() {
         { data: cr }, { data: ex }, { data: wa }, { data: ws }, { data: va },
       ] = await Promise.all([
         supabase.from("bank_accounts").select("id,name,opening_balance").eq("is_active", true).order("name"),
-        supabase.from("purchases").select("entry_date,entry_no,paid_amount,paid_mode,bank_account_id,tractor_paid_amount,tractor_paid_mode,tractor_paid_bank_id"),
+        supabase.from("purchases").select("entry_date,entry_no,paid_amount,paid_mode,bank_account_id,tractor_paid_amount,tractor_paid_mode,tractor_bank_account_id"),
         supabase.from("sales").select("sale_date,sale_no,paid_amount,payment_mode,bank_account_id"),
         supabase.from("vendor_payments").select("payment_date,amount,mode,bank_account_id"),
         supabase.from("customer_receipts").select("receipt_date,amount,mode,bank_account_id"),
@@ -46,10 +46,10 @@ function BankBook() {
         map[id].push(tx);
       };
 
-      (pu ?? []).forEach((r) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (pu ?? []).forEach((r: any) => {
         if (Number(r.paid_amount ?? 0) > 0 && r.bank_account_id) push(r.bank_account_id, { date: r.entry_date, label: `${t("purchase")} ${r.entry_no}`, outAmt: Number(r.paid_amount), inAmt: 0 });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const tp = (r as any).tractor_paid_amount; const tb = (r as any).tractor_paid_bank_id;
+        const tp = r.tractor_paid_amount; const tb = r.tractor_bank_account_id;
         if (Number(tp ?? 0) > 0 && tb) push(tb, { date: r.entry_date, label: `${t("tractor_payment")} ${r.entry_no}`, outAmt: Number(tp), inAmt: 0 });
       });
       (sa ?? []).forEach((r) => {
@@ -57,7 +57,7 @@ function BankBook() {
       });
       (vp ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0 }));
       (cr ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0 }));
-      (ex ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.expense_date, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense"), outAmt: Number(r.amount), inAmt: 0 }));
+      (ex ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.expense_date, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense") ?? "", outAmt: Number(r.amount), inAmt: 0 }));
       (wa ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.advance_date, label: t("worker_advance"), outAmt: Number(r.amount), inAmt: 0 }));
       (ws ?? []).forEach((r) => r.bank_account_id && Number(r.paid_amount ?? 0) > 0 && push(r.bank_account_id, { date: r.period_end, label: t("salary"), outAmt: Number(r.paid_amount), inAmt: 0 }));
       (va ?? []).forEach((r) => r.bank_account_id && push(r.bank_account_id, { date: r.advance_date, label: t("vendor_advance"), outAmt: Number(r.amount), inAmt: 0 }));
