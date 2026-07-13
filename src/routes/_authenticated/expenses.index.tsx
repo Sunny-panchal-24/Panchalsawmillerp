@@ -24,7 +24,7 @@ type ExpenseRow = {
 function ExpensesIndex() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const [showChooser, setShowChooser] = useState(true);
+  const [showChooser, setShowChooser] = useState(false);
   const [list, setList] = useState<ExpenseRow[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);

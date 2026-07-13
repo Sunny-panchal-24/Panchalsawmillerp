@@ -693,6 +693,40 @@ const phase8: Record<Lang, Dict> = {
 (Object.keys(phase7) as Lang[]).forEach((l) => Object.assign(translations[l], phase7[l]));
 (Object.keys(phase8) as Lang[]).forEach((l) => Object.assign(translations[l], phase8[l]));
 
+const phase9: Record<Lang, Dict> = {
+  en: {
+    new: "New", new_vendor_payment: "New Vendor Payment", new_customer_receipt: "New Customer Receipt",
+    current_outstanding: "Current Outstanding", receipt_amount: "Receipt Amount",
+    exceeds_outstanding_msg: "Amount exceeds outstanding. Mark as advance to continue.",
+    mark_as_advance: "Mark as advance payment", mark_as_advance_receipt: "Mark as advance receipt",
+    customer_receipt: "Customer Receipt", worker_advance: "Worker Advance", vendor_advance: "Vendor Advance",
+    salary: "Salary", cash_in: "Cash In", cash_out: "Cash Out", money_in: "Money In", money_out: "Money Out",
+    current_balance: "Current Balance", today: "Today", week: "Week", month: "Month", custom: "Custom", all: "All",
+    export_excel: "Export CSV",
+  },
+  hi: {
+    new: "नया", new_vendor_payment: "नया विक्रेता भुगतान", new_customer_receipt: "नई ग्राहक रसीद",
+    current_outstanding: "वर्तमान बकाया", receipt_amount: "रसीद राशि",
+    exceeds_outstanding_msg: "राशि बकाया से अधिक है। जारी रखने के लिए एडवांस चुनें।",
+    mark_as_advance: "एडवांस के रूप में चिह्नित करें", mark_as_advance_receipt: "एडवांस रसीद के रूप में चिह्नित करें",
+    customer_receipt: "ग्राहक रसीद", worker_advance: "मज़दूर एडवांस", vendor_advance: "विक्रेता एडवांस",
+    salary: "वेतन", cash_in: "नकद आय", cash_out: "नकद खर्च", money_in: "जमा", money_out: "निकासी",
+    current_balance: "वर्तमान बैलेंस", today: "आज", week: "सप्ताह", month: "महीना", custom: "कस्टम", all: "सभी",
+    export_excel: "CSV एक्सपोर्ट",
+  },
+  gu: {
+    new: "નવું", new_vendor_payment: "નવી વેન્ડર ચુકવણી", new_customer_receipt: "નવી ગ્રાહક રસીદ",
+    current_outstanding: "વર્તમાન બાકી", receipt_amount: "રસીદ રકમ",
+    exceeds_outstanding_msg: "રકમ બાકી કરતાં વધુ છે. ચાલુ રાખવા માટે એડવાન્સ પસંદ કરો.",
+    mark_as_advance: "એડવાન્સ તરીકે ચિહ્નિત કરો", mark_as_advance_receipt: "એડવાન્સ રસીદ તરીકે ચિહ્નિત કરો",
+    customer_receipt: "ગ્રાહક રસીદ", worker_advance: "કામદાર એડવાન્સ", vendor_advance: "વેન્ડર એડવાન્સ",
+    salary: "પગાર", cash_in: "રોકડ આવક", cash_out: "રોકડ ખર્ચ", money_in: "જમા", money_out: "ઉપાડ",
+    current_balance: "વર્તમાન બેલેન્સ", today: "આજે", week: "અઠવાડિયું", month: "મહિનો", custom: "કસ્ટમ", all: "બધા",
+    export_excel: "CSV એક્સપોર્ટ",
+  },
+};
+(Object.keys(phase9) as Lang[]).forEach((l) => Object.assign(translations[l], phase9[l]));
+
 interface I18nContextValue {
   lang: Lang;
   setLang: (l: Lang) => void;
