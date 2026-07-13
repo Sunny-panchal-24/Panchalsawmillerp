@@ -15,19 +15,25 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedRecoveryRouteImport } from './routes/_authenticated/recovery'
 import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticated/masters'
+import { Route as AuthenticatedCashBookRouteImport } from './routes/_authenticated/cash-book'
+import { Route as AuthenticatedBankBookRouteImport } from './routes/_authenticated/bank-book'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAboutRouteImport } from './routes/_authenticated/about'
 import { Route as AuthenticatedWorkersIndexRouteImport } from './routes/_authenticated/workers.index'
+import { Route as AuthenticatedVendorPaymentsIndexRouteImport } from './routes/_authenticated/vendor-payments.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports.index'
 import { Route as AuthenticatedPurchasesIndexRouteImport } from './routes/_authenticated/purchases.index'
 import { Route as AuthenticatedExpensesIndexRouteImport } from './routes/_authenticated/expenses.index'
+import { Route as AuthenticatedCustomerReceiptsIndexRouteImport } from './routes/_authenticated/customer-receipts.index'
 import { Route as AuthenticatedWorkersSalaryRouteImport } from './routes/_authenticated/workers.salary'
 import { Route as AuthenticatedWorkersAdvanceRouteImport } from './routes/_authenticated/workers.advance'
+import { Route as AuthenticatedVendorPaymentsNewRouteImport } from './routes/_authenticated/vendor-payments.new'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as AuthenticatedReportsMonthlyExportRouteImport } from './routes/_authenticated/reports.monthly-export'
 import { Route as AuthenticatedPurchasesNewRouteImport } from './routes/_authenticated/purchases.new'
 import { Route as AuthenticatedExpensesNewRouteImport } from './routes/_authenticated/expenses.new'
+import { Route as AuthenticatedCustomerReceiptsNewRouteImport } from './routes/_authenticated/customer-receipts.new'
 import { Route as AuthenticatedVendorsVendorIdLedgerRouteImport } from './routes/_authenticated/vendors.$vendorId.ledger'
 
 const AuthRoute = AuthRouteImport.update({
@@ -59,6 +65,16 @@ const AuthenticatedMastersRoute = AuthenticatedMastersRouteImport.update({
   path: '/masters',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCashBookRoute = AuthenticatedCashBookRouteImport.update({
+  id: '/cash-book',
+  path: '/cash-book',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBankBookRoute = AuthenticatedBankBookRouteImport.update({
+  id: '/bank-book',
+  path: '/bank-book',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -73,6 +89,12 @@ const AuthenticatedWorkersIndexRoute =
   AuthenticatedWorkersIndexRouteImport.update({
     id: '/workers/',
     path: '/workers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedVendorPaymentsIndexRoute =
+  AuthenticatedVendorPaymentsIndexRouteImport.update({
+    id: '/vendor-payments/',
+    path: '/vendor-payments/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
@@ -98,6 +120,12 @@ const AuthenticatedExpensesIndexRoute =
     path: '/expenses/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCustomerReceiptsIndexRoute =
+  AuthenticatedCustomerReceiptsIndexRouteImport.update({
+    id: '/customer-receipts/',
+    path: '/customer-receipts/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWorkersSalaryRoute =
   AuthenticatedWorkersSalaryRouteImport.update({
     id: '/workers/salary',
@@ -108,6 +136,12 @@ const AuthenticatedWorkersAdvanceRoute =
   AuthenticatedWorkersAdvanceRouteImport.update({
     id: '/workers/advance',
     path: '/workers/advance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedVendorPaymentsNewRoute =
+  AuthenticatedVendorPaymentsNewRouteImport.update({
+    id: '/vendor-payments/new',
+    path: '/vendor-payments/new',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
@@ -133,6 +167,12 @@ const AuthenticatedExpensesNewRoute =
     path: '/expenses/new',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCustomerReceiptsNewRoute =
+  AuthenticatedCustomerReceiptsNewRouteImport.update({
+    id: '/customer-receipts/new',
+    path: '/customer-receipts/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedVendorsVendorIdLedgerRoute =
   AuthenticatedVendorsVendorIdLedgerRouteImport.update({
     id: '/vendors/$vendorId/ledger',
@@ -145,19 +185,25 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/about': typeof AuthenticatedAboutRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/bank-book': typeof AuthenticatedBankBookRoute
+  '/cash-book': typeof AuthenticatedCashBookRoute
   '/masters': typeof AuthenticatedMastersRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
   '/setup': typeof AuthenticatedSetupRoute
+  '/customer-receipts/new': typeof AuthenticatedCustomerReceiptsNewRoute
   '/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/reports/monthly-export': typeof AuthenticatedReportsMonthlyExportRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/vendor-payments/new': typeof AuthenticatedVendorPaymentsNewRoute
   '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
+  '/customer-receipts/': typeof AuthenticatedCustomerReceiptsIndexRoute
   '/expenses/': typeof AuthenticatedExpensesIndexRoute
   '/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/reports/': typeof AuthenticatedReportsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
+  '/vendor-payments/': typeof AuthenticatedVendorPaymentsIndexRoute
   '/workers/': typeof AuthenticatedWorkersIndexRoute
   '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
@@ -165,20 +211,26 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/about': typeof AuthenticatedAboutRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/bank-book': typeof AuthenticatedBankBookRoute
+  '/cash-book': typeof AuthenticatedCashBookRoute
   '/masters': typeof AuthenticatedMastersRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/': typeof AuthenticatedIndexRoute
+  '/customer-receipts/new': typeof AuthenticatedCustomerReceiptsNewRoute
   '/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/reports/monthly-export': typeof AuthenticatedReportsMonthlyExportRoute
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/vendor-payments/new': typeof AuthenticatedVendorPaymentsNewRoute
   '/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/workers/salary': typeof AuthenticatedWorkersSalaryRoute
+  '/customer-receipts': typeof AuthenticatedCustomerReceiptsIndexRoute
   '/expenses': typeof AuthenticatedExpensesIndexRoute
   '/purchases': typeof AuthenticatedPurchasesIndexRoute
   '/reports': typeof AuthenticatedReportsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
+  '/vendor-payments': typeof AuthenticatedVendorPaymentsIndexRoute
   '/workers': typeof AuthenticatedWorkersIndexRoute
   '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
@@ -188,20 +240,26 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/about': typeof AuthenticatedAboutRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/bank-book': typeof AuthenticatedBankBookRoute
+  '/_authenticated/cash-book': typeof AuthenticatedCashBookRoute
   '/_authenticated/masters': typeof AuthenticatedMastersRoute
   '/_authenticated/recovery': typeof AuthenticatedRecoveryRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/customer-receipts/new': typeof AuthenticatedCustomerReceiptsNewRoute
   '/_authenticated/expenses/new': typeof AuthenticatedExpensesNewRoute
   '/_authenticated/purchases/new': typeof AuthenticatedPurchasesNewRoute
   '/_authenticated/reports/monthly-export': typeof AuthenticatedReportsMonthlyExportRoute
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
+  '/_authenticated/vendor-payments/new': typeof AuthenticatedVendorPaymentsNewRoute
   '/_authenticated/workers/advance': typeof AuthenticatedWorkersAdvanceRoute
   '/_authenticated/workers/salary': typeof AuthenticatedWorkersSalaryRoute
+  '/_authenticated/customer-receipts/': typeof AuthenticatedCustomerReceiptsIndexRoute
   '/_authenticated/expenses/': typeof AuthenticatedExpensesIndexRoute
   '/_authenticated/purchases/': typeof AuthenticatedPurchasesIndexRoute
   '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
+  '/_authenticated/vendor-payments/': typeof AuthenticatedVendorPaymentsIndexRoute
   '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
   '/_authenticated/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
@@ -212,19 +270,25 @@ export interface FileRouteTypes {
     | '/auth'
     | '/about'
     | '/admin'
+    | '/bank-book'
+    | '/cash-book'
     | '/masters'
     | '/recovery'
     | '/setup'
+    | '/customer-receipts/new'
     | '/expenses/new'
     | '/purchases/new'
     | '/reports/monthly-export'
     | '/sales/new'
+    | '/vendor-payments/new'
     | '/workers/advance'
     | '/workers/salary'
+    | '/customer-receipts/'
     | '/expenses/'
     | '/purchases/'
     | '/reports/'
     | '/sales/'
+    | '/vendor-payments/'
     | '/workers/'
     | '/vendors/$vendorId/ledger'
   fileRoutesByTo: FileRoutesByTo
@@ -232,20 +296,26 @@ export interface FileRouteTypes {
     | '/auth'
     | '/about'
     | '/admin'
+    | '/bank-book'
+    | '/cash-book'
     | '/masters'
     | '/recovery'
     | '/setup'
     | '/'
+    | '/customer-receipts/new'
     | '/expenses/new'
     | '/purchases/new'
     | '/reports/monthly-export'
     | '/sales/new'
+    | '/vendor-payments/new'
     | '/workers/advance'
     | '/workers/salary'
+    | '/customer-receipts'
     | '/expenses'
     | '/purchases'
     | '/reports'
     | '/sales'
+    | '/vendor-payments'
     | '/workers'
     | '/vendors/$vendorId/ledger'
   id:
@@ -254,20 +324,26 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/about'
     | '/_authenticated/admin'
+    | '/_authenticated/bank-book'
+    | '/_authenticated/cash-book'
     | '/_authenticated/masters'
     | '/_authenticated/recovery'
     | '/_authenticated/setup'
     | '/_authenticated/'
+    | '/_authenticated/customer-receipts/new'
     | '/_authenticated/expenses/new'
     | '/_authenticated/purchases/new'
     | '/_authenticated/reports/monthly-export'
     | '/_authenticated/sales/new'
+    | '/_authenticated/vendor-payments/new'
     | '/_authenticated/workers/advance'
     | '/_authenticated/workers/salary'
+    | '/_authenticated/customer-receipts/'
     | '/_authenticated/expenses/'
     | '/_authenticated/purchases/'
     | '/_authenticated/reports/'
     | '/_authenticated/sales/'
+    | '/_authenticated/vendor-payments/'
     | '/_authenticated/workers/'
     | '/_authenticated/vendors/$vendorId/ledger'
   fileRoutesById: FileRoutesById
@@ -321,6 +397,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMastersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cash-book': {
+      id: '/_authenticated/cash-book'
+      path: '/cash-book'
+      fullPath: '/cash-book'
+      preLoaderRoute: typeof AuthenticatedCashBookRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/bank-book': {
+      id: '/_authenticated/bank-book'
+      path: '/bank-book'
+      fullPath: '/bank-book'
+      preLoaderRoute: typeof AuthenticatedBankBookRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -340,6 +430,13 @@ declare module '@tanstack/react-router' {
       path: '/workers'
       fullPath: '/workers/'
       preLoaderRoute: typeof AuthenticatedWorkersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/vendor-payments/': {
+      id: '/_authenticated/vendor-payments/'
+      path: '/vendor-payments'
+      fullPath: '/vendor-payments/'
+      preLoaderRoute: typeof AuthenticatedVendorPaymentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sales/': {
@@ -370,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExpensesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/customer-receipts/': {
+      id: '/_authenticated/customer-receipts/'
+      path: '/customer-receipts'
+      fullPath: '/customer-receipts/'
+      preLoaderRoute: typeof AuthenticatedCustomerReceiptsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/workers/salary': {
       id: '/_authenticated/workers/salary'
       path: '/workers/salary'
@@ -382,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/workers/advance'
       fullPath: '/workers/advance'
       preLoaderRoute: typeof AuthenticatedWorkersAdvanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/vendor-payments/new': {
+      id: '/_authenticated/vendor-payments/new'
+      path: '/vendor-payments/new'
+      fullPath: '/vendor-payments/new'
+      preLoaderRoute: typeof AuthenticatedVendorPaymentsNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sales/new': {
@@ -412,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedExpensesNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/customer-receipts/new': {
+      id: '/_authenticated/customer-receipts/new'
+      path: '/customer-receipts/new'
+      fullPath: '/customer-receipts/new'
+      preLoaderRoute: typeof AuthenticatedCustomerReceiptsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/vendors/$vendorId/ledger': {
       id: '/_authenticated/vendors/$vendorId/ledger'
       path: '/vendors/$vendorId/ledger'
@@ -425,20 +543,26 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAboutRoute: typeof AuthenticatedAboutRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedBankBookRoute: typeof AuthenticatedBankBookRoute
+  AuthenticatedCashBookRoute: typeof AuthenticatedCashBookRoute
   AuthenticatedMastersRoute: typeof AuthenticatedMastersRoute
   AuthenticatedRecoveryRoute: typeof AuthenticatedRecoveryRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedCustomerReceiptsNewRoute: typeof AuthenticatedCustomerReceiptsNewRoute
   AuthenticatedExpensesNewRoute: typeof AuthenticatedExpensesNewRoute
   AuthenticatedPurchasesNewRoute: typeof AuthenticatedPurchasesNewRoute
   AuthenticatedReportsMonthlyExportRoute: typeof AuthenticatedReportsMonthlyExportRoute
   AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
+  AuthenticatedVendorPaymentsNewRoute: typeof AuthenticatedVendorPaymentsNewRoute
   AuthenticatedWorkersAdvanceRoute: typeof AuthenticatedWorkersAdvanceRoute
   AuthenticatedWorkersSalaryRoute: typeof AuthenticatedWorkersSalaryRoute
+  AuthenticatedCustomerReceiptsIndexRoute: typeof AuthenticatedCustomerReceiptsIndexRoute
   AuthenticatedExpensesIndexRoute: typeof AuthenticatedExpensesIndexRoute
   AuthenticatedPurchasesIndexRoute: typeof AuthenticatedPurchasesIndexRoute
   AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
+  AuthenticatedVendorPaymentsIndexRoute: typeof AuthenticatedVendorPaymentsIndexRoute
   AuthenticatedWorkersIndexRoute: typeof AuthenticatedWorkersIndexRoute
   AuthenticatedVendorsVendorIdLedgerRoute: typeof AuthenticatedVendorsVendorIdLedgerRoute
 }
@@ -446,21 +570,28 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAboutRoute: AuthenticatedAboutRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedBankBookRoute: AuthenticatedBankBookRoute,
+  AuthenticatedCashBookRoute: AuthenticatedCashBookRoute,
   AuthenticatedMastersRoute: AuthenticatedMastersRoute,
   AuthenticatedRecoveryRoute: AuthenticatedRecoveryRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedCustomerReceiptsNewRoute: AuthenticatedCustomerReceiptsNewRoute,
   AuthenticatedExpensesNewRoute: AuthenticatedExpensesNewRoute,
   AuthenticatedPurchasesNewRoute: AuthenticatedPurchasesNewRoute,
   AuthenticatedReportsMonthlyExportRoute:
     AuthenticatedReportsMonthlyExportRoute,
   AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
+  AuthenticatedVendorPaymentsNewRoute: AuthenticatedVendorPaymentsNewRoute,
   AuthenticatedWorkersAdvanceRoute: AuthenticatedWorkersAdvanceRoute,
   AuthenticatedWorkersSalaryRoute: AuthenticatedWorkersSalaryRoute,
+  AuthenticatedCustomerReceiptsIndexRoute:
+    AuthenticatedCustomerReceiptsIndexRoute,
   AuthenticatedExpensesIndexRoute: AuthenticatedExpensesIndexRoute,
   AuthenticatedPurchasesIndexRoute: AuthenticatedPurchasesIndexRoute,
   AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
+  AuthenticatedVendorPaymentsIndexRoute: AuthenticatedVendorPaymentsIndexRoute,
   AuthenticatedWorkersIndexRoute: AuthenticatedWorkersIndexRoute,
   AuthenticatedVendorsVendorIdLedgerRoute:
     AuthenticatedVendorsVendorIdLedgerRoute,
