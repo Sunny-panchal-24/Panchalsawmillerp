@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Plus, Search, Check } from "lucide-react";
+import { entryNoExists, nextEntryNo } from "@/lib/entry-no";
 
 export const Route = createFileRoute("/_authenticated/purchases/new")({
   component: NewPurchaseWizard,
@@ -36,10 +37,9 @@ type Bank = { id: string; name: string };
 
 type PayMode = typeof CASH | string;
 
-function autoEntryNo() {
-  const d = new Date();
-  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  return `${ymd}-${String(Date.now()).slice(-4)}`;
+function dateFromInput(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, (month || 1) - 1, day || 1);
 }
 
 function NewPurchaseWizard() {
@@ -56,7 +56,7 @@ function NewPurchaseWizard() {
   // Form
   const today = new Date().toISOString().slice(0, 10);
   const [entryMode, setEntryMode] = useState<"auto" | "manual">("auto");
-  const [entryNo, setEntryNo] = useState(autoEntryNo());
+  const [entryNo, setEntryNo] = useState("");
   const [dateMode, setDateMode] = useState<"today" | "manual">("today");
   const [entryDate, setEntryDate] = useState(today);
 
@@ -107,6 +107,15 @@ function NewPurchaseWizard() {
     if (bk.data) setBanks(bk.data);
   };
   useEffect(() => { loadAll(); }, []);
+
+  useEffect(() => {
+    if (entryMode !== "auto" || !entryDate) return;
+    let cancelled = false;
+    nextEntryNo("purchases", "entry_no", dateFromInput(entryDate))
+      .then((value) => { if (!cancelled) setEntryNo(value); })
+      .catch(() => { if (!cancelled) setEntryNo(""); });
+    return () => { cancelled = true; };
+  }, [entryMode, entryDate]);
 
   // Fetch available advance for vendor
   useEffect(() => {
@@ -183,7 +192,6 @@ function NewPurchaseWizard() {
           <RadioRow value={entryMode} onChange={(v) => {
             const m = v as "auto" | "manual";
             setEntryMode(m);
-            if (m === "auto") setEntryNo(autoEntryNo());
           }} options={[
             { val: "auto", label: t("auto_generate") },
             { val: "manual", label: t("manual_entry") },
@@ -483,59 +491,73 @@ function NewPurchaseWizard() {
   const save = async () => {
     if (!vendorId) return toast.error(t("vendor"));
     setSaving(true);
-    const vendorBankId = vendorPayMode === "now" && vendorPayTarget !== CASH ? vendorPayTarget : null;
-    const tractorBankId = tractorPayMode === "now" && tractorPayTarget !== CASH ? tractorPayTarget : null;
-    const vAmt = vendorPayMode === "now" ? Number(vendorPayAmt) || 0 : 0;
-    const tAmt = tractorPayMode === "now" ? Number(tractorPayAmt) || 0 : 0;
+    try {
+      const finalEntryNo = entryMode === "auto"
+        ? await nextEntryNo("purchases", "entry_no", dateFromInput(entryDate))
+        : entryNo.trim();
+      if (!finalEntryNo) throw new Error(t("required"));
+      if (await entryNoExists("purchases", "entry_no", finalEntryNo)) {
+        throw new Error("Entry number already exists");
+      }
+      setEntryNo(finalEntryNo);
 
-    const payload = {
-      entry_no: entryNo.trim(),
-      entry_date: entryDate,
-      vendor_id: vendorId,
-      tractor_id: tractorId || null,
-      weight_with_material: Number(grossWeight) || 0,
-      empty_weight: Number(emptyWeight) || 0,
-      net_weight: calc.netWeight,
-      net_man: calc.netMan,
-      ptype: "A" as const,
-      actual_man: calc.finalMan,
-      rate_per_man: calc.rate,
-      material_cost: calc.materialValue,
-      forest_expense: calc.fcp,
-      chai_pani_expense: 0,
-      tractor_labour: calc.tractorLabour,
-      diesel_expense: calc.tDsl,
-      other_expense: calc.extra,
-      total_cost: calc.rawMaterialCost,
-      cost_per_man: calc.costPerMan,
-      advance_deducted: calc.advDed,
-      vendor_payable: calc.vendorPayable,
-      tractor_rate_per_man: calc.trRate,
-      tractor_payable: calc.tractorPayable,
-      tractor_paid_amount: tAmt,
-      tractor_paid_mode: tractorPayMode === "now" ? ("cash" as const) : null,
-      tractor_bank_account_id: tractorBankId,
-      paid_amount: vAmt,
-      paid_mode: vendorPayMode === "now" ? ("cash" as const) : null,
-      bank_account_id: vendorBankId,
-      remarks: remarks.trim() || null,
-    };
+      const vendorBankId = vendorPayMode === "now" && vendorPayTarget !== CASH ? vendorPayTarget : null;
+      const tractorBankId = tractorPayMode === "now" && tractorPayTarget !== CASH ? tractorPayTarget : null;
+      const vAmt = vendorPayMode === "now" ? Number(vendorPayAmt) || 0 : 0;
+      const tAmt = tractorPayMode === "now" ? Number(tractorPayAmt) || 0 : 0;
 
-    const { data, error } = await supabase.from("purchases").insert(payload).select("id").single();
-    if (error) { setSaving(false); return toast.error(error.message); }
+      const payload = {
+        entry_no: finalEntryNo,
+        entry_date: entryDate,
+        vendor_id: vendorId,
+        tractor_id: tractorId || null,
+        weight_with_material: Number(grossWeight) || 0,
+        empty_weight: Number(emptyWeight) || 0,
+        net_weight: calc.netWeight,
+        net_man: calc.netMan,
+        ptype: "A" as const,
+        actual_man: calc.finalMan,
+        rate_per_man: calc.rate,
+        material_cost: calc.materialValue,
+        forest_expense: calc.fcp,
+        chai_pani_expense: 0,
+        tractor_labour: calc.tractorLabour,
+        diesel_expense: calc.tDsl,
+        other_expense: calc.extra,
+        total_cost: calc.rawMaterialCost,
+        cost_per_man: calc.costPerMan,
+        advance_deducted: calc.advDed,
+        vendor_payable: calc.vendorPayable,
+        tractor_rate_per_man: calc.trRate,
+        tractor_payable: calc.tractorPayable,
+        tractor_paid_amount: tAmt,
+        tractor_paid_mode: tractorPayMode === "now" ? ("cash" as const) : null,
+        tractor_bank_account_id: tractorBankId,
+        paid_amount: vAmt,
+        paid_mode: vendorPayMode === "now" ? ("cash" as const) : null,
+        bank_account_id: vendorBankId,
+        remarks: remarks.trim() || null,
+      };
 
-    if (vendorPayMode === "now" && vAmt > 0) {
-      const { error: pErr } = await supabase.from("vendor_payments").insert({
-        vendor_id: vendorId, payment_date: entryDate, amount: vAmt,
-        mode: "cash", bank_account_id: vendorBankId, purchase_id: data.id,
-        remarks: `Purchase #${entryNo}`,
-      });
-      if (pErr) toast.error(pErr.message);
+      const { data, error } = await supabase.from("purchases").insert(payload).select("id").single();
+      if (error) throw error;
+
+      if (vendorPayMode === "now" && vAmt > 0) {
+        const { error: pErr } = await supabase.from("vendor_payments").insert({
+          vendor_id: vendorId, payment_date: entryDate, amount: vAmt,
+          mode: "cash", bank_account_id: vendorBankId, purchase_id: data.id,
+          remarks: `Purchase #${finalEntryNo}`,
+        });
+        if (pErr) toast.error(pErr.message);
+      }
+
+      toast.success(t("saved"));
+      navigate({ to: "/purchases" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
     }
-
-    toast.success(t("saved"));
-    setSaving(false);
-    navigate({ to: "/purchases" });
   };
 
   const pct = Math.round(((step + 1) / steps.length) * 100);
