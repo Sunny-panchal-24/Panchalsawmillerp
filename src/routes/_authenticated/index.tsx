@@ -53,7 +53,8 @@ function Dashboard() {
 
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
       if (!user) return;
       const [{ data: roles }, { data: company }] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", user.id),
@@ -69,7 +70,7 @@ function Dashboard() {
   }, [navigate]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     navigate({ to: "/auth", replace: true });
   };
 
