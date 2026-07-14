@@ -14,16 +14,16 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Plus, Search, Check } from "lucide-react";
+import { entryNoExists, nextEntryNo } from "@/lib/entry-no";
 
 const CASH = "__cash__";
 
 type Customer = { id: string; name: string; mobile: string | null };
 type Bank = { id: string; name: string };
 
-function autoSaleNo() {
-  const d = new Date();
-  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  return `S${ymd}-${String(Date.now()).slice(-4)}`;
+function dateFromInput(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, (month || 1) - 1, day || 1);
 }
 
 export const Route = createFileRoute("/_authenticated/sales/new")({
@@ -45,7 +45,7 @@ function NewSaleWizard() {
 
   const today = new Date().toISOString().slice(0, 10);
   const [entryMode, setEntryMode] = useState<"auto" | "manual">("auto");
-  const [saleNo, setSaleNo] = useState(autoSaleNo());
+  const [saleNo, setSaleNo] = useState("");
   const [dateMode, setDateMode] = useState<"today" | "manual">("today");
   const [saleDate, setSaleDate] = useState(today);
 
@@ -72,8 +72,6 @@ function NewSaleWizard() {
   const [addCustOpen, setAddCustOpen] = useState(false);
   const [newCust, setNewCust] = useState({ name: "", mobile: "", address: "" });
 
-  useEffect(() => { setSaleNo(autoSaleNo()); /* refresh once */ }, []);
-
   const loadAll = async () => {
     const [{ data: c }, { data: b }] = await Promise.all([
       supabase.from("customers").select("id,name,mobile").order("name"),
@@ -83,6 +81,15 @@ function NewSaleWizard() {
     setBanks((b ?? []) as Bank[]);
   };
   useEffect(() => { loadAll(); }, []);
+
+  useEffect(() => {
+    if (entryMode !== "auto" || !saleDate) return;
+    let cancelled = false;
+    nextEntryNo("sales", "sale_no", dateFromInput(saleDate))
+      .then((value) => { if (!cancelled) setSaleNo(value); })
+      .catch(() => { if (!cancelled) setSaleNo(""); });
+    return () => { cancelled = true; };
+  }, [entryMode, saleDate]);
 
   // Calculations
   const netWeight = useMemo(() => {
@@ -157,13 +164,21 @@ function NewSaleWizard() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
+      const finalSaleNo = entryMode === "auto"
+        ? await nextEntryNo("sales", "sale_no", dateFromInput(saleDate))
+        : saleNo.trim();
+      if (!finalSaleNo) throw new Error(t("required"));
+      if (await entryNoExists("sales", "sale_no", finalSaleNo)) {
+        throw new Error("Entry number already exists");
+      }
+      setSaleNo(finalSaleNo);
       const bankId = payStatus !== "credit" && payMode !== CASH ? payMode : null;
       const mode = payStatus === "credit" ? null : (payMode === CASH ? "cash" : "bank");
 
       const { data: sale, error } = await supabase
         .from("sales")
         .insert({
-          sale_no: saleNo.trim(),
+          sale_no: finalSaleNo,
           sale_date: saleDate,
           customer_id: customerId,
           sale_type: saleType,
@@ -193,7 +208,7 @@ function NewSaleWizard() {
           amount: computedPaid,
           mode: payMode === CASH ? "cash" : "bank",
           bank_account_id: bankId,
-          remarks: t("sale") + " " + saleNo,
+          remarks: t("sale") + " " + finalSaleNo,
           created_by: user.id,
         });
       }
@@ -221,7 +236,7 @@ function NewSaleWizard() {
           <Label className="text-base font-semibold">{t("entry_no_mode")}</Label>
           <div className="grid grid-cols-2 gap-2">
             <Button variant={entryMode === "auto" ? "default" : "outline"} className="h-12"
-              onClick={() => { setEntryMode("auto"); setSaleNo(autoSaleNo()); }}>
+              onClick={() => setEntryMode("auto")}>
               {t("auto_generate")}
             </Button>
             <Button variant={entryMode === "manual" ? "default" : "outline"} className="h-12"

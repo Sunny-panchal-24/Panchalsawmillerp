@@ -10,6 +10,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   head: () => ({
     meta: [{ title: "Sign In — Panchal Sawmill" }],
   }),
@@ -27,7 +28,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/" });
+      if (data.session) navigate({ to: "/", replace: true });
     });
   }, [navigate]);
 
@@ -46,11 +47,11 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success(t("welcome"));
-        navigate({ to: "/" });
+        navigate({ to: "/", replace: true });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/" });
+        navigate({ to: "/", replace: true });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error");
