@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArrowLeft, BarChart3, TrendingUp, Wallet, Landmark, ShoppingCart, Receipt, Users, AlertCircle } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/reports/")({
@@ -362,11 +363,49 @@ function ReportsPage() {
               <Stat label="Receipts In" value={fmt(totals.received)} color="text-blue-600" />
             </div>
 
-            <SectionTitle icon={TrendingUp} title="Daily Profit" />
+            <SectionTitle icon={TrendingUp} title="Daily Profit / Loss" />
+            <Card className="p-3">
+              {dailyProfit.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-8">No data</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={dailyProfit}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Bar dataKey="profit">
+                      {dailyProfit.map((d, i) => (
+                        <Cell key={i} fill={d.profit >= 0 ? "#10b981" : "#e11d48"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </Card>
             <Table headers={["Date", "Income", "Cost", "Expense", "Profit"]}
               rows={dailyProfit.map((d) => [d.date, fmt(d.income), fmt(d.cost), fmt(d.expense), fmt(d.profit)])} />
 
-            <SectionTitle icon={BarChart3} title="Monthly Profit" />
+            <SectionTitle icon={BarChart3} title="Monthly Profit / Loss" />
+            <Card className="p-3">
+              {monthlyProfit.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-8">No data</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={monthlyProfit}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Bar dataKey="profit">
+                      {monthlyProfit.map((d, i) => (
+                        <Cell key={i} fill={d.profit >= 0 ? "#10b981" : "#e11d48"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </Card>
             <Table headers={["Month", "Income", "Cost", "Expense", "Profit"]}
               rows={monthlyProfit.map((d) => [d.month, fmt(d.income), fmt(d.cost), fmt(d.expense), fmt(d.profit)])} />
 
