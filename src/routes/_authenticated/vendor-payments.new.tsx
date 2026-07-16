@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Check, Search } from "lucide-react";
+import { nextRef } from "@/lib/entry-no";
 
 export const Route = createFileRoute("/_authenticated/vendor-payments/new")({
   component: NewVendorPaymentWizard,
@@ -17,11 +18,6 @@ export const Route = createFileRoute("/_authenticated/vendor-payments/new")({
 const CASH = "__cash__";
 type Vendor = { id: string; name: string; village: string | null };
 type Bank = { id: string; name: string };
-
-function autoRef() {
-  const d = new Date();
-  return `VP${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}-${String(Date.now()).slice(-4)}`;
-}
 
 function NewVendorPaymentWizard() {
   const { t } = useI18n();
@@ -34,7 +30,7 @@ function NewVendorPaymentWizard() {
   const [vendorId, setVendorId] = useState("");
   const [search, setSearch] = useState("");
   const [entryMode, setEntryMode] = useState<"auto" | "manual">("auto");
-  const [ref, setRef] = useState(autoRef());
+  const [ref, setRef] = useState("");
   const [dateMode, setDateMode] = useState<"today" | "manual">("today");
   const [date, setDate] = useState(today);
   const [outstanding, setOutstanding] = useState(0);
