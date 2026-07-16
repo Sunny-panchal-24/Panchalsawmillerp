@@ -31,7 +31,6 @@ const TILES: { key: string; Icon: typeof ShoppingCart; color: string; to: string
   { key: "purchases", Icon: ShoppingCart, color: "bg-blue-600", to: "/purchases" },
   { key: "waste_wood_sales", Icon: Package, color: "bg-emerald-600", to: "/sales/new?type=waste" },
   { key: "finished_wood_sales", Icon: Hammer, color: "bg-amber-600", to: "/sales/new?type=finished" },
-  { key: "view_sales", Icon: Receipt, color: "bg-lime-600", to: "/sales" },
   { key: "vendor_payments", Icon: Wallet, color: "bg-rose-600", to: "/vendor-payments" },
   { key: "customer_receipts", Icon: Receipt, color: "bg-violet-600", to: "/customer-receipts" },
   { key: "workers", Icon: Users, color: "bg-cyan-600", to: "/workers" },

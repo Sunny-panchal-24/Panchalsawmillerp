@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Check, Search } from "lucide-react";
+import { nextRef } from "@/lib/entry-no";
 
 export const Route = createFileRoute("/_authenticated/vendor-payments/new")({
   component: NewVendorPaymentWizard,
@@ -17,11 +18,6 @@ export const Route = createFileRoute("/_authenticated/vendor-payments/new")({
 const CASH = "__cash__";
 type Vendor = { id: string; name: string; village: string | null };
 type Bank = { id: string; name: string };
-
-function autoRef() {
-  const d = new Date();
-  return `VP${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}-${String(Date.now()).slice(-4)}`;
-}
 
 function NewVendorPaymentWizard() {
   const { t } = useI18n();
@@ -34,7 +30,7 @@ function NewVendorPaymentWizard() {
   const [vendorId, setVendorId] = useState("");
   const [search, setSearch] = useState("");
   const [entryMode, setEntryMode] = useState<"auto" | "manual">("auto");
-  const [ref, setRef] = useState(autoRef());
+  const [ref, setRef] = useState("");
   const [dateMode, setDateMode] = useState<"today" | "manual">("today");
   const [date, setDate] = useState(today);
   const [outstanding, setOutstanding] = useState(0);
@@ -54,6 +50,9 @@ function NewVendorPaymentWizard() {
       setBanks((b ?? []) as Bank[]);
     })();
   }, []);
+
+  const genRef = async () => setRef(await nextRef({ table: "vendor_payments", column: "remarks", type: "VP", scanRemarks: true }));
+  useEffect(() => { if (entryMode === "auto") genRef(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [entryMode]);
 
   useEffect(() => {
     if (!vendorId) { setOutstanding(0); return; }
@@ -103,7 +102,7 @@ function NewVendorPaymentWizard() {
         amount: amt,
         mode: "cash",
         bank_account_id: bankId,
-        remarks: (remarks.trim() || ref).slice(0, 500),
+        remarks: `${ref}${remarks.trim() ? ` · ${remarks.trim()}` : ""}`.slice(0, 500),
         created_by: user.id,
       } as any);
       if (error) throw error;
@@ -144,7 +143,7 @@ function NewVendorPaymentWizard() {
           <Label className="text-base font-semibold">{t("entry_no_mode")}</Label>
           <div className="grid grid-cols-2 gap-2">
             <Button variant={entryMode === "auto" ? "default" : "outline"} className="h-12"
-              onClick={() => { setEntryMode("auto"); setRef(autoRef()); }}>{t("auto_generate")}</Button>
+              onClick={() => { setEntryMode("auto"); genRef(); }}>{t("auto_generate")}</Button>
             <Button variant={entryMode === "manual" ? "default" : "outline"} className="h-12"
               onClick={() => setEntryMode("manual")}>{t("manual_entry")}</Button>
           </div>
