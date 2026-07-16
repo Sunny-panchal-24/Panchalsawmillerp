@@ -51,6 +51,9 @@ function NewVendorPaymentWizard() {
     })();
   }, []);
 
+  const genRef = async () => setRef(await nextRef({ table: "vendor_payments", column: "remarks", type: "VP", scanRemarks: true }));
+  useEffect(() => { if (entryMode === "auto") genRef(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [entryMode]);
+
   useEffect(() => {
     if (!vendorId) { setOutstanding(0); return; }
     (async () => {
@@ -140,7 +143,7 @@ function NewVendorPaymentWizard() {
           <Label className="text-base font-semibold">{t("entry_no_mode")}</Label>
           <div className="grid grid-cols-2 gap-2">
             <Button variant={entryMode === "auto" ? "default" : "outline"} className="h-12"
-              onClick={() => { setEntryMode("auto"); setRef(autoRef()); }}>{t("auto_generate")}</Button>
+              onClick={() => { setEntryMode("auto"); genRef(); }}>{t("auto_generate")}</Button>
             <Button variant={entryMode === "manual" ? "default" : "outline"} className="h-12"
               onClick={() => setEntryMode("manual")}>{t("manual_entry")}</Button>
           </div>
