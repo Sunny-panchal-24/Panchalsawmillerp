@@ -102,7 +102,7 @@ function NewVendorPaymentWizard() {
         amount: amt,
         mode: "cash",
         bank_account_id: bankId,
-        remarks: (remarks.trim() || ref).slice(0, 500),
+        remarks: `${ref}${remarks.trim() ? ` · ${remarks.trim()}` : ""}`.slice(0, 500),
         created_by: user.id,
       } as any);
       if (error) throw error;
