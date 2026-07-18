@@ -182,11 +182,11 @@ function VendorLedger() {
 function TableShell({ head, children }: { head: string[]; children: React.ReactNode }) {
   return (
     <div className="overflow-x-auto rounded-lg border">
-      <table className="w-full text-sm">
+      <table className="w-full min-w-[500px] text-sm">
         <thead className="bg-muted">
           <tr>
             {head.map((h, i) => (
-              <th key={i} className={`p-2 ${i === head.length - 1 ? "text-right" : "text-left"}`}>{h}</th>
+              <th key={i} className={`p-2 whitespace-nowrap ${i === head.length - 1 ? "text-right" : "text-left"}`}>{h}</th>
             ))}
           </tr>
         </thead>
