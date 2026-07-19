@@ -5,7 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Wallet, Calculator, Eye, Trash2 } from "lucide-react";
+import { Wallet, Calculator, Eye, Trash2, CalendarCheck, BookOpen } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/workers/")({
@@ -21,6 +22,7 @@ type AdvRow = {
 };
 type SalRow = {
   id: string;
+  worker_id: string;
   period_label: string;
   present_days: number;
   daily_wage: number;
@@ -43,7 +45,7 @@ function WorkersIndex() {
   const load = async () => {
     const [a, s] = await Promise.all([
       supabase.from("worker_advances").select("id,advance_date,amount,payment_mode,workers(name)").order("advance_date", { ascending: false }).limit(100),
-      supabase.from("worker_salaries").select("id,period_label,present_days,daily_wage,gross_salary,advance_deducted,net_payable,paid_amount,outstanding,workers(name)").order("created_at", { ascending: false }).limit(100),
+      supabase.from("worker_salaries").select("id,worker_id,period_label,present_days,daily_wage,gross_salary,advance_deducted,net_payable,paid_amount,outstanding,workers(name)").order("created_at", { ascending: false }).limit(100),
     ]);
     setAdvances((a.data ?? []) as unknown as AdvRow[]);
     setSalaries((s.data ?? []) as unknown as SalRow[]);
@@ -75,26 +77,7 @@ function WorkersIndex() {
           {salaries.length === 0 ? (
             <div className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">{t("no_records") || "No records"}</div>
           ) : salaries.map((r) => (
-            <div key={r.id} className="rounded-lg border bg-card p-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-sm text-muted-foreground">{r.period_label}</div>
-                  <div className="text-base font-semibold">{r.workers?.name ?? "—"}</div>
-                  <div className="text-sm">
-                    {r.present_days} × ₹{Number(r.daily_wage).toFixed(2)} = <strong>₹{Number(r.gross_salary).toFixed(2)}</strong>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Adv: ₹{Number(r.advance_deducted).toFixed(2)} · Net: ₹{Number(r.net_payable).toFixed(2)} · Paid: ₹{Number(r.paid_amount).toFixed(2)}
-                  </div>
-                  {Number(r.outstanding) > 0 && (
-                    <div className="text-sm text-rose-600 font-medium">Outstanding: ₹{Number(r.outstanding).toFixed(2)}</div>
-                  )}
-                </div>
-                <Button size="icon" variant="destructive" onClick={() => delSal(r.id)} aria-label={t("delete")}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <SalaryRow key={r.id} r={r} onDelete={() => delSal(r.id)} />
           ))}
         </div>
       ) : (
@@ -124,6 +107,16 @@ function WorkersIndex() {
             <DialogTitle className="text-center text-xl">{t("what_do_you_want") || "What do you want to do?"}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => { setChooser(false); navigate({ to: "/workers/attendance" }); }}
+              className="flex items-center gap-3 rounded-xl border-2 border-sky-600 bg-sky-50 dark:bg-sky-950/30 p-5 text-left active:scale-[0.98] transition-transform"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-sky-600 text-white">
+                <CalendarCheck className="h-7 w-7" />
+              </div>
+              <div className="text-lg font-bold">Mark Attendance</div>
+            </button>
             <button
               type="button"
               onClick={() => { setChooser(false); navigate({ to: "/workers/salary" }); }}
@@ -158,5 +151,35 @@ function WorkersIndex() {
         </DialogContent>
       </Dialog>
     </AppShell>
+  );
+}
+
+function SalaryRow({ r, onDelete }: { r: SalRow; onDelete: () => void }) {
+  return (
+    <div className="rounded-lg border bg-card p-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-sm text-muted-foreground">{r.period_label}</div>
+          <div className="text-base font-semibold">{r.workers?.name ?? "—"}</div>
+          <div className="text-sm">
+            {r.present_days} × ₹{Number(r.daily_wage).toFixed(2)} = <strong>₹{Number(r.gross_salary).toFixed(2)}</strong>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Adv: ₹{Number(r.advance_deducted).toFixed(2)} · Net: ₹{Number(r.net_payable).toFixed(2)} · Paid: ₹{Number(r.paid_amount).toFixed(2)}
+          </div>
+          {Number(r.outstanding) > 0 && (
+            <div className="text-sm text-rose-600 font-medium">Outstanding: ₹{Number(r.outstanding).toFixed(2)}</div>
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <Link to="/workers/$workerId/ledger" params={{ workerId: r.worker_id }}>
+            <Button size="icon" variant="outline" aria-label="Ledger"><BookOpen className="h-4 w-4" /></Button>
+          </Link>
+          <Button size="icon" variant="destructive" onClick={onDelete} aria-label="Delete">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
