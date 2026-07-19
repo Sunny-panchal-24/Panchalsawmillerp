@@ -857,6 +857,47 @@ export type Database = {
           },
         ]
       }
+      worker_attendance: {
+        Row: {
+          attendance_date: string
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["attendance_status"]
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          attendance_date: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          status: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          attendance_date?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_attendance_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       worker_salaries: {
         Row: {
           advance_deducted: number
@@ -864,6 +905,7 @@ export type Database = {
           created_at: string
           created_by: string
           daily_wage: number
+          extra_work: number
           gross_salary: number
           id: string
           net_payable: number
@@ -884,6 +926,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           daily_wage?: number
+          extra_work?: number
           gross_salary?: number
           id?: string
           net_payable?: number
@@ -904,6 +947,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           daily_wage?: number
+          extra_work?: number
           gross_salary?: number
           id?: string
           net_payable?: number
@@ -1035,6 +1079,7 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "accountant" | "worker" | "admin"
+      attendance_status: "present" | "half" | "absent" | "weekly_off"
       customer_type: "waste" | "finished" | "both"
       expense_type: "maintenance" | "other"
       payment_mode: "cash" | "dad_saving" | "dad_current" | "sunny_saving"
@@ -1168,6 +1213,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "accountant", "worker", "admin"],
+      attendance_status: ["present", "half", "absent", "weekly_off"],
       customer_type: ["waste", "finished", "both"],
       expense_type: ["maintenance", "other"],
       payment_mode: ["cash", "dad_saving", "dad_current", "sunny_saving"],
