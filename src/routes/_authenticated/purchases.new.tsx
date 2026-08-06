@@ -149,6 +149,12 @@ function NewPurchaseWizard() {
       setExtraDeduction(String(data.other_expense ?? ""));
       setTractorRate(String(data.tractor_rate_per_man ?? ""));
       setDiesel(String(data.diesel_expense ?? ""));
+      setTractorChai(String(data.chai_pani_expense ?? ""));
+      {
+        const labour = Number(data.tractor_labour ?? 0);
+        const extra = Number(data.tractor_payable ?? 0) - labour - Number(data.chai_pani_expense ?? 0) - Number(data.diesel_expense ?? 0);
+        setTractorExtra(extra > 0 ? String(Number(extra.toFixed(2))) : "");
+      }
       if (Number(data.paid_amount ?? 0) > 0) {
         setVendorPayMode("now");
         setVendorPayAmt(String(data.paid_amount));
@@ -580,7 +586,7 @@ function NewPurchaseWizard() {
         rate_per_man: calc.rate,
         material_cost: calc.materialValue,
         forest_expense: calc.fcp,
-        chai_pani_expense: 0,
+        chai_pani_expense: calc.tCp,
         tractor_labour: calc.tractorLabour,
         diesel_expense: calc.tDsl,
         other_expense: calc.extra,
