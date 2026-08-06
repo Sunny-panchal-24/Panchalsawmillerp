@@ -1,11 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Search } from "lucide-react";
+import { Trash2, Search, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/sales/")({
@@ -26,6 +26,7 @@ type Row = {
 
 function SalesIndex() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
 
@@ -84,9 +85,14 @@ function SalesIndex() {
                   </div>
                 )}
               </div>
-              <Button size="icon" variant="destructive" onClick={() => remove(r.id)} aria-label={t("delete")}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button size="icon" variant="outline" onClick={() => navigate({ to: "/sales/new", search: { type: r.sale_type, id: r.id } })} aria-label={t("edit")}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="destructive" onClick={() => remove(r.id)} aria-label={t("delete")}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         ))}

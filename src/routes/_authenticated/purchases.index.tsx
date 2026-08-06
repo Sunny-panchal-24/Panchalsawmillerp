@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Trash2, Search, ShoppingCart, Eye } from "lucide-react";
+import { Plus, Trash2, Search, ShoppingCart, Eye, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/purchases/")({
@@ -95,9 +95,14 @@ function PurchasesList() {
                     {t("total")}: <strong>₹{Number(r.total_cost).toFixed(2)}</strong> · {t("payment")}: ₹{Number(r.paid_amount).toFixed(2)}
                   </div>
                 </div>
-                <Button size="icon" variant="destructive" onClick={() => remove(r.id)} aria-label={t("delete")}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button size="icon" variant="outline" onClick={() => navigate({ to: "/purchases/new", search: { id: r.id } })} aria-label={t("edit")}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="destructive" onClick={() => remove(r.id)} aria-label={t("delete")}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
