@@ -49,10 +49,12 @@ function dateFromInput(value: string) {
 function NewPurchaseWizard() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const { id: editId } = Route.useSearch();
 
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [tractors, setTractors] = useState<Tractor[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
+
 
   // Step
   const [step, setStep] = useState(0);
