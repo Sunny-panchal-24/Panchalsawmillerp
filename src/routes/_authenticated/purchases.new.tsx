@@ -171,14 +171,16 @@ function NewPurchaseWizard() {
       const [v, advRows, dedRows] = await Promise.all([
         supabase.from("vendors").select("opening_advance").eq("id", vendorId).single(),
         supabase.from("vendor_advances").select("amount").eq("vendor_id", vendorId),
-        supabase.from("purchases").select("advance_deducted").eq("vendor_id", vendorId),
+        supabase.from("purchases").select("id,advance_deducted").eq("vendor_id", vendorId),
       ]);
       const opening = Number(v.data?.opening_advance ?? 0);
       const adv = (advRows.data ?? []).reduce((s, r) => s + Number(r.amount), 0);
-      const ded = (dedRows.data ?? []).reduce((s, r) => s + Number(r.advance_deducted ?? 0), 0);
+      const ded = (dedRows.data ?? [])
+        .filter((r) => r.id !== editId)
+        .reduce((s, r) => s + Number(r.advance_deducted ?? 0), 0);
       setAvailableAdvance(Math.max(0, opening + adv - ded));
     })();
-  }, [vendorId]);
+  }, [vendorId, editId]);
 
   // Computations
   const calc = useMemo(() => {
@@ -186,8 +188,9 @@ function NewPurchaseWizard() {
     const empty = Number(emptyWeight) || 0;
     const netWeight = Math.max(0, gross - empty);
     const netMan = netWeight / MAN_KG; // original man
-    const nilCut = (netMan / 100) * 5;
+    const nilCut = applyNilCut ? (netMan / 100) * 5 : 0;
     const finalMan = Math.max(0, netMan - nilCut);
+
     const rate = Number(ratePerMan) || 0;
     const materialValue = finalMan * rate;
     const advDed = advanceMode === "deduct" ? Math.min(Number(advanceDeduct) || 0, availableAdvance) : 0;
