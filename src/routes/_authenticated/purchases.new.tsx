@@ -25,8 +25,12 @@ import { ChevronLeft, ChevronRight, Plus, Search, Check } from "lucide-react";
 import { entryNoExists, nextEntryNo } from "@/lib/entry-no";
 
 export const Route = createFileRoute("/_authenticated/purchases/new")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    id: typeof s.id === "string" && s.id ? s.id : undefined,
+  }),
   component: NewPurchaseWizard,
 });
+
 
 const MAN_KG = 20;
 const CASH = "__cash__";
