@@ -346,12 +346,19 @@ function NewPurchaseWizard() {
           <Field label={t("empty_weight")}>
             <Input type="number" inputMode="decimal" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} className="h-14 text-2xl" />
           </Field>
+          <Field label={t("nil_cut")}>
+            <RadioRow value={applyNilCut ? "yes" : "no"} onChange={(v) => setApplyNilCut(v === "yes")} options={[
+              { val: "yes", label: `${t("yes")} (5%)` },
+              { val: "no", label: t("no") },
+            ]} />
+          </Field>
           <SummaryBox rows={[
             [t("net_weight"), `${calc.netWeight.toFixed(2)} kg`],
             [t("net_man"), calc.netMan.toFixed(2)],
-            [t("nil_cut"), `- ${calc.nilCut.toFixed(2)}`],
+            [t("nil_cut"), applyNilCut ? `- ${calc.nilCut.toFixed(2)}` : "—"],
             [t("final_man"), <strong key="fm" className="text-lg">{calc.finalMan.toFixed(2)}</strong>],
           ]} />
+
         </div>
       ),
       valid: () => calc.netWeight > 0,
