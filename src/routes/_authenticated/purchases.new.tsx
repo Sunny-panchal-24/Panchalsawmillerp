@@ -575,7 +575,7 @@ function NewPurchaseWizard() {
         empty_weight: Number(emptyWeight) || 0,
         net_weight: calc.netWeight,
         net_man: calc.netMan,
-        ptype: "A" as const,
+        ptype: (applyNilCut ? "A" : "B") as "A" | "B",
         actual_man: calc.finalMan,
         rate_per_man: calc.rate,
         material_cost: calc.materialValue,
