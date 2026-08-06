@@ -213,7 +213,7 @@ function NewPurchaseWizard() {
       netWeight, netMan, nilCut, finalMan, rate, materialValue, advDed, fcp, extra, vendorPayable,
       trRate, tractorLabour, tCp, tDsl, tExt, tractorPayable, rawMaterialCost, costPerMan, costPerKg,
     };
-  }, [grossWeight, emptyWeight, ratePerMan, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
+  }, [grossWeight, emptyWeight, ratePerMan, applyNilCut, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
 
   const onTractorPick = (id: string) => {
     setTractorId(id);
