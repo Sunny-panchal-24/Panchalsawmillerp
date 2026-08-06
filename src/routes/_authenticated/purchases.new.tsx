@@ -117,13 +117,52 @@ function NewPurchaseWizard() {
   useEffect(() => { loadAll(); }, []);
 
   useEffect(() => {
-    if (entryMode !== "auto" || !entryDate) return;
+    if (editId || entryMode !== "auto" || !entryDate) return;
     let cancelled = false;
     nextEntryNo("purchases", "entry_no", dateFromInput(entryDate))
       .then((value) => { if (!cancelled) setEntryNo(value); })
       .catch(() => { if (!cancelled) setEntryNo(""); });
     return () => { cancelled = true; };
-  }, [entryMode, entryDate]);
+  }, [entryMode, entryDate, editId]);
+
+  // Load existing purchase for editing
+  useEffect(() => {
+    if (!editId) return;
+    (async () => {
+      const { data, error } = await supabase.from("purchases").select("*").eq("id", editId).maybeSingle();
+      if (error || !data) { toast.error(error?.message ?? t("no_records")); return; }
+      setEntryMode("manual");
+      setEntryNo(data.entry_no);
+      setDateMode("manual");
+      setEntryDate(data.entry_date);
+      setVendorId(data.vendor_id);
+      setTractorId(data.tractor_id ?? "");
+      setGrossWeight(String(data.weight_with_material ?? ""));
+      setEmptyWeight(String(data.empty_weight ?? ""));
+      setRatePerMan(String(data.rate_per_man ?? ""));
+      setApplyNilCut(data.ptype !== "B");
+      if (Number(data.advance_deducted ?? 0) > 0) {
+        setAdvanceMode("deduct");
+        setAdvanceDeduct(String(data.advance_deducted));
+      }
+      setForestChaiPani(String(data.forest_expense ?? ""));
+      setExtraDeduction(String(data.other_expense ?? ""));
+      setTractorRate(String(data.tractor_rate_per_man ?? ""));
+      setDiesel(String(data.diesel_expense ?? ""));
+      if (Number(data.paid_amount ?? 0) > 0) {
+        setVendorPayMode("now");
+        setVendorPayAmt(String(data.paid_amount));
+        setVendorPayTarget(data.bank_account_id ?? CASH);
+      }
+      if (Number(data.tractor_paid_amount ?? 0) > 0) {
+        setTractorPayMode("now");
+        setTractorPayAmt(String(data.tractor_paid_amount));
+        setTractorPayTarget(data.tractor_bank_account_id ?? CASH);
+      }
+      setRemarks(data.remarks ?? "");
+    })();
+  }, [editId, t]);
+
 
   // Fetch available advance for vendor
   useEffect(() => {
