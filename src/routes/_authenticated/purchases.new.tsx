@@ -549,14 +549,17 @@ function NewPurchaseWizard() {
     if (!vendorId) return toast.error(t("vendor"));
     setSaving(true);
     try {
-      const finalEntryNo = entryMode === "auto"
-        ? await nextEntryNo("purchases", "entry_no", dateFromInput(entryDate))
-        : entryNo.trim();
+      const finalEntryNo = editId
+        ? entryNo.trim()
+        : entryMode === "auto"
+          ? await nextEntryNo("purchases", "entry_no", dateFromInput(entryDate))
+          : entryNo.trim();
       if (!finalEntryNo) throw new Error(t("required"));
-      if (await entryNoExists("purchases", "entry_no", finalEntryNo)) {
+      if (!editId && await entryNoExists("purchases", "entry_no", finalEntryNo)) {
         throw new Error("Entry number already exists");
       }
       setEntryNo(finalEntryNo);
+
 
       const vendorBankId = vendorPayMode === "now" && vendorPayTarget !== CASH ? vendorPayTarget : null;
       const tractorBankId = tractorPayMode === "now" && tractorPayTarget !== CASH ? tractorPayTarget : null;
