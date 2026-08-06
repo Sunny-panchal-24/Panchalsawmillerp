@@ -5,7 +5,8 @@ import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Search, Trash2, Wrench, FileText } from "lucide-react";
+import { ArrowLeft, Plus, Search, Trash2, Wrench, FileText , Pencil } from "lucide-react";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/expenses/")({
@@ -27,6 +28,8 @@ function ExpensesIndex() {
   const [showChooser, setShowChooser] = useState(false);
   const [list, setList] = useState<ExpenseRow[]>([]);
   const [search, setSearch] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [editRow, setEditRow] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchExpenses = async () => {
@@ -179,14 +182,14 @@ function ExpensesIndex() {
                         </div>
                         <div className="text-right">
                           <p className="font-bold">₹{Number(e.amount).toFixed(2)}</p>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="mt-1 h-8 w-8 text-red-600"
-                            onClick={() => handleDelete(e.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="mt-1 flex justify-end gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditRow(e)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleDelete(e.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -195,6 +198,21 @@ function ExpensesIndex() {
               </>
             )}
           </>
+        )}
+        {editRow && (
+          <EditRecordDialog
+            open={!!editRow}
+            onClose={() => setEditRow(null)}
+            onSaved={fetchExpenses}
+            table="expenses"
+            id={editRow.id}
+            row={editRow}
+            fields={[
+              { key: "expense_date", label: t("date"), type: "date" },
+              { key: "amount", label: t("amount"), type: "number" },
+              { key: "description", label: t("description") },
+            ]}
+          />
         )}
       </main>
     </div>

@@ -25,8 +25,12 @@ import { ChevronLeft, ChevronRight, Plus, Search, Check } from "lucide-react";
 import { entryNoExists, nextEntryNo } from "@/lib/entry-no";
 
 export const Route = createFileRoute("/_authenticated/purchases/new")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    id: typeof s.id === "string" && s.id ? s.id : undefined,
+  }),
   component: NewPurchaseWizard,
 });
+
 
 const MAN_KG = 20;
 const CASH = "__cash__";
@@ -45,10 +49,12 @@ function dateFromInput(value: string) {
 function NewPurchaseWizard() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const { id: editId } = Route.useSearch();
 
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [tractors, setTractors] = useState<Tractor[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
+
 
   // Step
   const [step, setStep] = useState(0);
@@ -68,6 +74,8 @@ function NewPurchaseWizard() {
   const [grossWeight, setGrossWeight] = useState("");
   const [emptyWeight, setEmptyWeight] = useState("");
   const [ratePerMan, setRatePerMan] = useState("");
+  const [applyNilCut, setApplyNilCut] = useState(true);
+
 
   const [availableAdvance, setAvailableAdvance] = useState(0);
   const [advanceMode, setAdvanceMode] = useState<"deduct" | "pending">("pending");
@@ -109,13 +117,58 @@ function NewPurchaseWizard() {
   useEffect(() => { loadAll(); }, []);
 
   useEffect(() => {
-    if (entryMode !== "auto" || !entryDate) return;
+    if (editId || entryMode !== "auto" || !entryDate) return;
     let cancelled = false;
     nextEntryNo("purchases", "entry_no", dateFromInput(entryDate))
       .then((value) => { if (!cancelled) setEntryNo(value); })
       .catch(() => { if (!cancelled) setEntryNo(""); });
     return () => { cancelled = true; };
-  }, [entryMode, entryDate]);
+  }, [entryMode, entryDate, editId]);
+
+  // Load existing purchase for editing
+  useEffect(() => {
+    if (!editId) return;
+    (async () => {
+      const { data, error } = await supabase.from("purchases").select("*").eq("id", editId).maybeSingle();
+      if (error || !data) { toast.error(error?.message ?? t("no_records")); return; }
+      setEntryMode("manual");
+      setEntryNo(data.entry_no);
+      setDateMode("manual");
+      setEntryDate(data.entry_date);
+      setVendorId(data.vendor_id);
+      setTractorId(data.tractor_id ?? "");
+      setGrossWeight(String(data.weight_with_material ?? ""));
+      setEmptyWeight(String(data.empty_weight ?? ""));
+      setRatePerMan(String(data.rate_per_man ?? ""));
+      setApplyNilCut(data.ptype !== "B");
+      if (Number(data.advance_deducted ?? 0) > 0) {
+        setAdvanceMode("deduct");
+        setAdvanceDeduct(String(data.advance_deducted));
+      }
+      setForestChaiPani(String(data.forest_expense ?? ""));
+      setExtraDeduction(String(data.other_expense ?? ""));
+      setTractorRate(String(data.tractor_rate_per_man ?? ""));
+      setDiesel(String(data.diesel_expense ?? ""));
+      setTractorChai(String(data.chai_pani_expense ?? ""));
+      {
+        const labour = Number(data.tractor_labour ?? 0);
+        const extra = Number(data.tractor_payable ?? 0) - labour - Number(data.chai_pani_expense ?? 0) - Number(data.diesel_expense ?? 0);
+        setTractorExtra(extra > 0 ? String(Number(extra.toFixed(2))) : "");
+      }
+      if (Number(data.paid_amount ?? 0) > 0) {
+        setVendorPayMode("now");
+        setVendorPayAmt(String(data.paid_amount));
+        setVendorPayTarget(data.bank_account_id ?? CASH);
+      }
+      if (Number(data.tractor_paid_amount ?? 0) > 0) {
+        setTractorPayMode("now");
+        setTractorPayAmt(String(data.tractor_paid_amount));
+        setTractorPayTarget(data.tractor_bank_account_id ?? CASH);
+      }
+      setRemarks(data.remarks ?? "");
+    })();
+  }, [editId, t]);
+
 
   // Fetch available advance for vendor
   useEffect(() => {
@@ -124,14 +177,16 @@ function NewPurchaseWizard() {
       const [v, advRows, dedRows] = await Promise.all([
         supabase.from("vendors").select("opening_advance").eq("id", vendorId).single(),
         supabase.from("vendor_advances").select("amount").eq("vendor_id", vendorId),
-        supabase.from("purchases").select("advance_deducted").eq("vendor_id", vendorId),
+        supabase.from("purchases").select("id,advance_deducted").eq("vendor_id", vendorId),
       ]);
       const opening = Number(v.data?.opening_advance ?? 0);
       const adv = (advRows.data ?? []).reduce((s, r) => s + Number(r.amount), 0);
-      const ded = (dedRows.data ?? []).reduce((s, r) => s + Number(r.advance_deducted ?? 0), 0);
+      const ded = (dedRows.data ?? [])
+        .filter((r) => r.id !== editId)
+        .reduce((s, r) => s + Number(r.advance_deducted ?? 0), 0);
       setAvailableAdvance(Math.max(0, opening + adv - ded));
     })();
-  }, [vendorId]);
+  }, [vendorId, editId]);
 
   // Computations
   const calc = useMemo(() => {
@@ -139,8 +194,9 @@ function NewPurchaseWizard() {
     const empty = Number(emptyWeight) || 0;
     const netWeight = Math.max(0, gross - empty);
     const netMan = netWeight / MAN_KG; // original man
-    const nilCut = (netMan / 100) * 5;
+    const nilCut = applyNilCut ? (netMan / 100) * 5 : 0;
     const finalMan = Math.max(0, netMan - nilCut);
+
     const rate = Number(ratePerMan) || 0;
     const materialValue = finalMan * rate;
     const advDed = advanceMode === "deduct" ? Math.min(Number(advanceDeduct) || 0, availableAdvance) : 0;
@@ -163,7 +219,7 @@ function NewPurchaseWizard() {
       netWeight, netMan, nilCut, finalMan, rate, materialValue, advDed, fcp, extra, vendorPayable,
       trRate, tractorLabour, tCp, tDsl, tExt, tractorPayable, rawMaterialCost, costPerMan, costPerKg,
     };
-  }, [grossWeight, emptyWeight, ratePerMan, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
+  }, [grossWeight, emptyWeight, ratePerMan, applyNilCut, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
 
   const onTractorPick = (id: string) => {
     setTractorId(id);
@@ -296,12 +352,19 @@ function NewPurchaseWizard() {
           <Field label={t("empty_weight")}>
             <Input type="number" inputMode="decimal" value={emptyWeight} onChange={(e) => setEmptyWeight(e.target.value)} className="h-14 text-2xl" />
           </Field>
+          <Field label={t("nil_cut")}>
+            <RadioRow value={applyNilCut ? "yes" : "no"} onChange={(v) => setApplyNilCut(v === "yes")} options={[
+              { val: "yes", label: `${t("yes")} (5%)` },
+              { val: "no", label: t("no") },
+            ]} />
+          </Field>
           <SummaryBox rows={[
             [t("net_weight"), `${calc.netWeight.toFixed(2)} kg`],
             [t("net_man"), calc.netMan.toFixed(2)],
-            [t("nil_cut"), `- ${calc.nilCut.toFixed(2)}`],
+            [t("nil_cut"), applyNilCut ? `- ${calc.nilCut.toFixed(2)}` : "—"],
             [t("final_man"), <strong key="fm" className="text-lg">{calc.finalMan.toFixed(2)}</strong>],
           ]} />
+
         </div>
       ),
       valid: () => calc.netWeight > 0,
@@ -492,14 +555,17 @@ function NewPurchaseWizard() {
     if (!vendorId) return toast.error(t("vendor"));
     setSaving(true);
     try {
-      const finalEntryNo = entryMode === "auto"
-        ? await nextEntryNo("purchases", "entry_no", dateFromInput(entryDate))
-        : entryNo.trim();
+      const finalEntryNo = editId
+        ? entryNo.trim()
+        : entryMode === "auto"
+          ? await nextEntryNo("purchases", "entry_no", dateFromInput(entryDate))
+          : entryNo.trim();
       if (!finalEntryNo) throw new Error(t("required"));
-      if (await entryNoExists("purchases", "entry_no", finalEntryNo)) {
+      if (!editId && await entryNoExists("purchases", "entry_no", finalEntryNo)) {
         throw new Error("Entry number already exists");
       }
       setEntryNo(finalEntryNo);
+
 
       const vendorBankId = vendorPayMode === "now" && vendorPayTarget !== CASH ? vendorPayTarget : null;
       const tractorBankId = tractorPayMode === "now" && tractorPayTarget !== CASH ? tractorPayTarget : null;
@@ -515,12 +581,12 @@ function NewPurchaseWizard() {
         empty_weight: Number(emptyWeight) || 0,
         net_weight: calc.netWeight,
         net_man: calc.netMan,
-        ptype: "A" as const,
+        ptype: (applyNilCut ? "A" : "B") as "A" | "B",
         actual_man: calc.finalMan,
         rate_per_man: calc.rate,
         material_cost: calc.materialValue,
         forest_expense: calc.fcp,
-        chai_pani_expense: 0,
+        chai_pani_expense: calc.tCp,
         tractor_labour: calc.tractorLabour,
         diesel_expense: calc.tDsl,
         other_expense: calc.extra,
@@ -539,13 +605,22 @@ function NewPurchaseWizard() {
         remarks: remarks.trim() || null,
       };
 
-      const { data, error } = await supabase.from("purchases").insert(payload).select("id").single();
-      if (error) throw error;
+      let purchaseId = editId ?? "";
+      if (editId) {
+        const { error } = await supabase.from("purchases").update(payload).eq("id", editId);
+        if (error) throw error;
+        // rebuild linked vendor payment so ledgers/books stay correct
+        await supabase.from("vendor_payments").delete().eq("purchase_id", editId);
+      } else {
+        const { data, error } = await supabase.from("purchases").insert(payload).select("id").single();
+        if (error) throw error;
+        purchaseId = data.id;
+      }
 
       if (vendorPayMode === "now" && vAmt > 0) {
         const { error: pErr } = await supabase.from("vendor_payments").insert({
           vendor_id: vendorId, payment_date: entryDate, amount: vAmt,
-          mode: "cash", bank_account_id: vendorBankId, purchase_id: data.id,
+          mode: "cash", bank_account_id: vendorBankId, purchase_id: purchaseId,
           remarks: `Purchase #${finalEntryNo}`,
         });
         if (pErr) toast.error(pErr.message);
@@ -563,7 +638,8 @@ function NewPurchaseWizard() {
   const pct = Math.round(((step + 1) / steps.length) * 100);
 
   return (
-    <AppShell title={t("new_purchase")} backTo="/purchases">
+    <AppShell title={editId ? t("edit_entry") : t("new_purchase")} backTo="/purchases">
+
       <div className="pb-32">
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm text-muted-foreground mb-1">

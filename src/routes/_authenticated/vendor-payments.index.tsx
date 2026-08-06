@@ -5,7 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, BookOpen, Trash2 } from "lucide-react";
+import { Plus, Search, BookOpen, Trash2, Pencil } from "lucide-react";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/vendor-payments/")({
@@ -23,6 +24,7 @@ function VendorPaymentsIndex() {
   const [vendorNames, setVendorNames] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editRow, setEditRow] = useState<Payment | null>(null);
 
   const load = async () => {
     const [{ data: vendors }, { data: purchases }, { data: pay }, { data: advances }] = await Promise.all([
@@ -130,7 +132,10 @@ function VendorPaymentsIndex() {
                     <div className="text-right ml-2">
                       <div className="font-bold text-rose-700">₹{Number(p.amount).toFixed(2)}</div>
                     </div>
-                    <Button size="icon" variant="ghost" className="ml-1 h-8 w-8 text-red-600" onClick={() => removePayment(p.id)}>
+                    <Button size="icon" variant="ghost" className="ml-1 h-8 w-8" onClick={() => setEditRow(p)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600" onClick={() => removePayment(p.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -139,6 +144,21 @@ function VendorPaymentsIndex() {
             )}
           </div>
         </>
+      )}
+      {editRow && (
+        <EditRecordDialog
+          open={!!editRow}
+          onClose={() => setEditRow(null)}
+          onSaved={load}
+          table="vendor_payments"
+          id={editRow.id}
+          row={editRow as unknown as Record<string, unknown>}
+          fields={[
+            { key: "payment_date", label: t("date"), type: "date" },
+            { key: "amount", label: t("amount"), type: "number" },
+            { key: "remarks", label: t("remarks") },
+          ]}
+        />
       )}
     </AppShell>
   );

@@ -5,7 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Trash2 } from "lucide-react";
+import { Plus, Search, Trash2 , Pencil } from "lucide-react";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/customer-receipts/")({
@@ -23,6 +24,8 @@ function CustomerReceiptsIndex() {
   const [names, setNames] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [editRow, setEditRow] = useState<any | null>(null);
 
   const load = async () => {
     const [{ data: cust }, { data: sales }, { data: recs }] = await Promise.all([
@@ -111,7 +114,10 @@ function CustomerReceiptsIndex() {
                     <div className="text-right ml-2">
                       <div className="font-bold text-emerald-700">₹{Number(p.amount).toFixed(2)}</div>
                     </div>
-                    <Button size="icon" variant="ghost" className="ml-1 h-8 w-8 text-red-600" onClick={() => remove(p.id)}>
+                    <Button size="icon" variant="ghost" className="ml-1 h-8 w-8" onClick={() => setEditRow(p)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600" onClick={() => remove(p.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -120,6 +126,21 @@ function CustomerReceiptsIndex() {
             )}
           </div>
         </>
+      )}
+      {editRow && (
+        <EditRecordDialog
+          open={!!editRow}
+          onClose={() => setEditRow(null)}
+          onSaved={load}
+          table="customer_receipts"
+          id={editRow.id}
+          row={editRow}
+          fields={[
+            { key: "receipt_date", label: t("date"), type: "date" },
+            { key: "amount", label: t("amount"), type: "number" },
+            { key: "remarks", label: t("remarks") },
+          ]}
+        />
       )}
     </AppShell>
   );

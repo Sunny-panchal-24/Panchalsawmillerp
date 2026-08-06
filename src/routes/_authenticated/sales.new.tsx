@@ -29,6 +29,7 @@ function dateFromInput(value: string) {
 export const Route = createFileRoute("/_authenticated/sales/new")({
   validateSearch: (s: Record<string, unknown>) => ({
     type: (s.type === "finished" ? "finished" : "waste") as "waste" | "finished",
+    id: typeof s.id === "string" && s.id ? s.id : undefined,
   }),
   component: NewSaleWizard,
 });
@@ -36,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/sales/new")({
 function NewSaleWizard() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { type: saleType } = Route.useSearch();
+  const { type: saleType, id: editId } = Route.useSearch();
   const isWaste = saleType === "waste";
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -83,13 +84,36 @@ function NewSaleWizard() {
   useEffect(() => { loadAll(); }, []);
 
   useEffect(() => {
+    if (editId) return;
     if (entryMode !== "auto" || !saleDate) return;
     let cancelled = false;
     nextEntryNo("sales", "sale_no", dateFromInput(saleDate))
       .then((value) => { if (!cancelled) setSaleNo(value); })
       .catch(() => { if (!cancelled) setSaleNo(""); });
     return () => { cancelled = true; };
-  }, [entryMode, saleDate]);
+  }, [entryMode, saleDate, editId]);
+
+  // Load existing sale for editing
+  useEffect(() => {
+    if (!editId) return;
+    (async () => {
+      const { data, error } = await supabase.from("sales").select("*").eq("id", editId).maybeSingle();
+      if (error || !data) { toast.error(error?.message ?? "Not found"); return; }
+      setEntryMode("manual");
+      setSaleNo(data.sale_no);
+      setDateMode("manual");
+      setSaleDate(data.sale_date);
+      setCustomerId(data.customer_id ?? "");
+      setGrossWeight(String(data.gross_weight ?? ""));
+      setEmptyWeight(String(data.empty_weight ?? ""));
+      setCft(String(data.cft ?? ""));
+      setRate(String(data.rate ?? ""));
+      setPayStatus((data.payment_status as "full" | "partial" | "credit") ?? "full");
+      setPaidAmount(String(data.paid_amount ?? ""));
+      setPayMode(data.bank_account_id ?? CASH);
+      setRemarks(data.remarks ?? "");
+    })();
+  }, [editId]);
 
   // Calculations
   const netWeight = useMemo(() => {
@@ -164,20 +188,20 @@ function NewSaleWizard() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in");
-      const finalSaleNo = entryMode === "auto"
-        ? await nextEntryNo("sales", "sale_no", dateFromInput(saleDate))
-        : saleNo.trim();
+      const finalSaleNo = editId
+        ? saleNo.trim()
+        : entryMode === "auto"
+          ? await nextEntryNo("sales", "sale_no", dateFromInput(saleDate))
+          : saleNo.trim();
       if (!finalSaleNo) throw new Error(t("required"));
-      if (await entryNoExists("sales", "sale_no", finalSaleNo)) {
+      if (!editId && await entryNoExists("sales", "sale_no", finalSaleNo)) {
         throw new Error("Entry number already exists");
       }
       setSaleNo(finalSaleNo);
       const bankId = payStatus !== "credit" && payMode !== CASH ? payMode : null;
       const mode = payStatus === "credit" ? null : (payMode === CASH ? "cash" : "bank");
 
-      const { data: sale, error } = await supabase
-        .from("sales")
-        .insert({
+      const salePayload = {
           sale_no: finalSaleNo,
           sale_date: saleDate,
           customer_id: customerId,
@@ -195,15 +219,23 @@ function NewSaleWizard() {
           bank_account_id: bankId,
           remarks: remarks.trim() || null,
           created_by: user.id,
-        })
-        .select("id")
-        .single();
-      if (error) throw error;
+      };
+
+      let saleId = editId ?? "";
+      if (editId) {
+        const { error } = await supabase.from("sales").update(salePayload).eq("id", editId);
+        if (error) throw error;
+        await supabase.from("customer_receipts").delete().eq("sale_id", editId);
+      } else {
+        const { data: sale, error } = await supabase.from("sales").insert(salePayload).select("id").single();
+        if (error) throw error;
+        saleId = sale!.id;
+      }
 
       if (computedPaid > 0) {
         await supabase.from("customer_receipts").insert({
           customer_id: customerId,
-          sale_id: sale!.id,
+          sale_id: saleId,
           receipt_date: saleDate,
           amount: computedPaid,
           mode: payMode === CASH ? "cash" : "bank",
@@ -222,7 +254,7 @@ function NewSaleWizard() {
     }
   };
 
-  const title = isWaste ? t("waste_wood_sale") : t("finished_wood_sale");
+  const title = editId ? t("edit_entry") : (isWaste ? t("waste_wood_sale") : t("finished_wood_sale"));
 
   return (
     <AppShell title={title} backTo="/sales">

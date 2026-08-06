@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/workers/$workerId/ledger")({
@@ -17,6 +18,8 @@ type Entry = {
   description: string;
   debit: number; // owed to worker
   credit: number; // paid / advance given
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  raw?: any;
 };
 
 function WorkerLedger() {
@@ -24,6 +27,7 @@ function WorkerLedger() {
   const [name, setName] = useState("");
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editRow, setEditRow] = useState<Entry | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -48,6 +52,7 @@ function WorkerLedger() {
         description: `Salary ${r.period_label} (${r.present_days}d × ₹${Number(r.daily_wage).toFixed(0)}${Number(r.extra_work ?? 0) > 0 ? ` + Extra ₹${Number(r.extra_work).toFixed(0)}` : ""})`,
         debit: Number(r.gross_salary) + Number(r.extra_work ?? 0),
         credit: Number(r.advance_deducted) + Number(r.paid_amount),
+        raw: r,
       });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,6 +64,7 @@ function WorkerLedger() {
         description: `Advance (${r.payment_mode})`,
         debit: 0,
         credit: Number(r.amount),
+        raw: r,
       });
     });
     items.sort((x, y) => (x.date < y.date ? -1 : 1));
@@ -126,9 +132,14 @@ function WorkerLedger() {
                   <td className="p-2 text-right whitespace-nowrap font-medium">₹{e.balance.toFixed(2)}</td>
                   <td className="p-2">
                     {e.source !== "opening" && (
-                      <Button size="icon" variant="ghost" onClick={() => del(e)} aria-label="Delete">
-                        <Trash2 className="h-4 w-4 text-rose-600" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => setEditRow(e)} aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => del(e)} aria-label="Delete">
+                          <Trash2 className="h-4 w-4 text-rose-600" />
+                        </Button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -136,6 +147,27 @@ function WorkerLedger() {
             </tbody>
           </table>
         </div>
+      )}
+      {editRow && (
+        <EditRecordDialog
+          open={!!editRow}
+          onClose={() => setEditRow(null)}
+          onSaved={load}
+          table={editRow.source === "salary" ? "worker_salaries" : "worker_advances"}
+          id={editRow.id}
+          row={editRow.raw ?? {}}
+          fields={editRow.source === "salary" ? [
+            { key: "present_days", label: "Present Days", type: "number" },
+            { key: "daily_wage", label: "Daily Wage", type: "number" },
+            { key: "extra_work", label: "Extra Work", type: "number" },
+            { key: "advance_deducted", label: "Advance Deducted", type: "number" },
+            { key: "paid_amount", label: "Paid Amount", type: "number" },
+          ] : [
+            { key: "advance_date", label: "Date", type: "date" },
+            { key: "amount", label: "Amount", type: "number" },
+            { key: "notes", label: "Notes" },
+          ]}
+        />
       )}
     </AppShell>
   );
