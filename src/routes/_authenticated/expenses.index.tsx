@@ -203,7 +203,7 @@ function ExpensesIndex() {
           <EditRecordDialog
             open={!!editRow}
             onClose={() => setEditRow(null)}
-            onSaved={load}
+            onSaved={fetchExpenses}
             table="expenses"
             id={editRow.id}
             row={editRow}
