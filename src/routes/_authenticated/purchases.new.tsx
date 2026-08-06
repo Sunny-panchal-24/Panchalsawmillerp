@@ -599,13 +599,22 @@ function NewPurchaseWizard() {
         remarks: remarks.trim() || null,
       };
 
-      const { data, error } = await supabase.from("purchases").insert(payload).select("id").single();
-      if (error) throw error;
+      let purchaseId = editId ?? "";
+      if (editId) {
+        const { error } = await supabase.from("purchases").update(payload).eq("id", editId);
+        if (error) throw error;
+        // rebuild linked vendor payment so ledgers/books stay correct
+        await supabase.from("vendor_payments").delete().eq("purchase_id", editId);
+      } else {
+        const { data, error } = await supabase.from("purchases").insert(payload).select("id").single();
+        if (error) throw error;
+        purchaseId = data.id;
+      }
 
       if (vendorPayMode === "now" && vAmt > 0) {
         const { error: pErr } = await supabase.from("vendor_payments").insert({
           vendor_id: vendorId, payment_date: entryDate, amount: vAmt,
-          mode: "cash", bank_account_id: vendorBankId, purchase_id: data.id,
+          mode: "cash", bank_account_id: vendorBankId, purchase_id: purchaseId,
           remarks: `Purchase #${finalEntryNo}`,
         });
         if (pErr) toast.error(pErr.message);
@@ -623,7 +632,8 @@ function NewPurchaseWizard() {
   const pct = Math.round(((step + 1) / steps.length) * 100);
 
   return (
-    <AppShell title={t("new_purchase")} backTo="/purchases">
+    <AppShell title={editId ? t("edit_entry") : t("new_purchase")} backTo="/purchases">
+
       <div className="pb-32">
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm text-muted-foreground mb-1">
