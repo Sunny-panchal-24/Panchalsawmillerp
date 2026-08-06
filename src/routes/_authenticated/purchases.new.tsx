@@ -74,6 +74,8 @@ function NewPurchaseWizard() {
   const [grossWeight, setGrossWeight] = useState("");
   const [emptyWeight, setEmptyWeight] = useState("");
   const [ratePerMan, setRatePerMan] = useState("");
+  const [applyNilCut, setApplyNilCut] = useState(true);
+
 
   const [availableAdvance, setAvailableAdvance] = useState(0);
   const [advanceMode, setAdvanceMode] = useState<"deduct" | "pending">("pending");
