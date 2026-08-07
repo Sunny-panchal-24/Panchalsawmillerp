@@ -324,6 +324,119 @@ function ReportsPage() {
     </Card>
   );
 
+  // ===== Transaction ledgers: edit / delete =====
+  const [editState, setEditState] = useState<{ table: string; row: Row; fields: EditField[]; title: string } | null>(null);
+
+  const removeRow = async (table: string, id: string, cleanup?: () => Promise<void>) => {
+    if (!confirm(t("confirm_delete") || "Delete this entry?")) return;
+    if (cleanup) await cleanup();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from(table as any) as any).delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(t("deleted") || "Deleted");
+    fetchAll();
+  };
+
+  const nameOf = (list: Row[], id: string) => list.find((x) => x.id === id)?.name || "—";
+
+  const salesLedger = useMemo(
+    () => [...sales].sort((a, b) => (a.sale_date < b.sale_date ? 1 : -1)).map((s) => ({
+      id: s.id,
+      date: s.sale_date,
+      title: `#${s.sale_no} · ${nameOf(customers, s.customer_id)}`,
+      subtitle: `${s.sale_type} · ${t("paid")}: ₹${Number(s.paid_amount || 0).toFixed(0)}${Number(s.outstanding || 0) > 0 ? ` · ${t("outstanding")}: ₹${Number(s.outstanding).toFixed(0)}` : ""}`,
+      amount: Number(s.total_amount || 0),
+      tone: "in" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sales, customers],
+  );
+
+  const purchaseLedger = useMemo(
+    () => [...purchases].sort((a, b) => (a.entry_date < b.entry_date ? 1 : -1)).map((p) => ({
+      id: p.id,
+      date: p.entry_date,
+      title: `#${p.entry_no} · ${nameOf(vendors, p.vendor_id)}`,
+      subtitle: `${Number(p.actual_man || 0).toFixed(2)} Man · ₹${Number(p.cost_per_man || 0).toFixed(2)}/Man`,
+      amount: Number(p.total_cost || 0),
+      tone: "out" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [purchases, vendors],
+  );
+
+  const salaryLedger = useMemo(
+    () => workerSalaries
+      .filter((x) => x.period_end >= from && x.period_end <= to)
+      .map((s) => ({
+        id: s.id,
+        date: s.period_end || s.period_label,
+        title: nameOf(workers, s.worker_id),
+        subtitle: `${s.period_label} · ${t("paid")}: ₹${Number(s.paid_amount || 0).toFixed(0)}`,
+        amount: Number(s.net_payable || 0),
+        tone: "out" as const,
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [workerSalaries, workers, from, to],
+  );
+
+  const advanceLedger = useMemo(
+    () => workerAdvances.map((a) => ({
+      id: a.id,
+      date: a.advance_date,
+      title: nameOf(workers, a.worker_id),
+      subtitle: a.notes || a.payment_mode,
+      amount: Number(a.amount || 0),
+      tone: "out" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [workerAdvances, workers],
+  );
+
+  const expenseLedger = useMemo(
+    () => expenses.map((e) => ({
+      id: e.id,
+      date: e.expense_date,
+      title: e.expense_type,
+      subtitle: e.description || e.payment_mode,
+      amount: Number(e.amount || 0),
+      tone: "out" as const,
+    })),
+    [expenses],
+  );
+
+  const receiptLedger = useMemo(
+    () => receipts.map((r) => ({
+      id: r.id,
+      date: r.receipt_date,
+      title: nameOf(customers, r.customer_id),
+      subtitle: r.remarks || r.mode,
+      amount: Number(r.amount || 0),
+      tone: "in" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [receipts, customers],
+  );
+
+  const vendorPaymentLedger = useMemo(
+    () => vendorPayments.map((p) => ({
+      id: p.id,
+      date: p.payment_date,
+      title: nameOf(vendors, p.vendor_id),
+      subtitle: p.remarks || p.mode,
+      amount: Number(p.amount || 0),
+      tone: "out" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [vendorPayments, vendors],
+  );
+
+  const openEdit = (table: string, list: Row[], id: string, fields: EditField[], title: string) => {
+    const row = list.find((x) => x.id === id);
+    if (row) setEditState({ table, row, fields, title });
+  };
+
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b bg-primary text-primary-foreground shadow-md">
