@@ -5,6 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/cash-book")({
   component: CashBook,
@@ -18,6 +20,9 @@ function CashBook() {
   const { t } = useI18n();
   const [txns, setTxns] = useState<Txn[]>([]);
   const [opening, setOpening] = useState(0);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
+  const [editOpening, setEditOpening] = useState(false);
+  const [openingInput, setOpeningInput] = useState("");
   const [filter, setFilter] = useState<Filter>("month");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -31,7 +36,8 @@ function CashBook() {
         { data: cr }, { data: ex }, { data: wa }, { data: ws },
         { data: va },
       ] = await Promise.all([
-        supabase.from("company_settings").select("opening_cash").limit(1).maybeSingle(),
+        supabase.from("company_settings").select("id,opening_cash").limit(1).maybeSingle(),
+
         supabase.from("purchases").select("entry_date,entry_no,paid_amount,paid_mode,tractor_paid_amount,tractor_paid_mode"),
         supabase.from("sales").select("sale_date,sale_no,paid_amount,payment_mode,payment_status"),
         supabase.from("vendor_payments").select("payment_date,amount,mode,vendor_id,remarks"),
@@ -43,6 +49,8 @@ function CashBook() {
       ]);
 
       setOpening(Number(cs?.opening_cash ?? 0));
+      setSettingsId(cs?.id ?? null);
+
       const list: Txn[] = [];
       (pu ?? []).forEach((r) => {
         if (Number(r.paid_amount ?? 0) > 0 && r.paid_mode === "cash") {
@@ -124,14 +132,47 @@ function CashBook() {
     URL.revokeObjectURL(url);
   };
 
+  const saveOpening = async () => {
+    if (!settingsId) return;
+    const val = Number(openingInput) || 0;
+    const { error } = await supabase.from("company_settings").update({ opening_cash: val }).eq("id", settingsId);
+    if (error) return toast.error(error.message);
+    setOpening(val);
+    setEditOpening(false);
+    toast.success(t("saved") || "Saved");
+  };
+
   return (
     <AppShell title={t("cash_book")}>
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <Stat label={t("opening_cash")} value={opening} />
+        <div className="rounded-xl border bg-card p-3">
+          <div className="text-xs text-muted-foreground">{t("opening_cash")}</div>
+          {editOpening ? (
+            <div className="mt-1 flex gap-1">
+              <Input
+                type="number"
+                inputMode="decimal"
+                className="h-9"
+                value={openingInput}
+                onChange={(e) => setOpeningInput(e.target.value)}
+              />
+              <Button size="sm" onClick={saveOpening}>{t("save")}</Button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="text-left font-bold text-lg underline decoration-dotted"
+              onClick={() => { setOpeningInput(String(opening)); setEditOpening(true); }}
+            >
+              ₹{opening.toFixed(2)}
+            </button>
+          )}
+        </div>
         <Stat label={t("current_balance")} value={closing} highlight />
         <Stat label={t("cash_in")} value={totalIn} color="text-emerald-700" />
         <Stat label={t("cash_out")} value={totalOut} color="text-rose-700" />
       </div>
+
 
       <div className="mb-3 grid grid-cols-4 gap-1">
         {(["today", "week", "month", "custom"] as const).map((f) => (

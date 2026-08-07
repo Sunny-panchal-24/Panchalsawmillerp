@@ -8,7 +8,10 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArrowLeft, BarChart3, TrendingUp, Wallet, Landmark, ShoppingCart, Receipt, Users, AlertCircle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
+import { TxnLedger } from "@/components/TxnLedger";
+import { EditRecordDialog, type EditField } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/reports/")({
   component: ReportsPage,
@@ -321,6 +324,119 @@ function ReportsPage() {
     </Card>
   );
 
+  // ===== Transaction ledgers: edit / delete =====
+  const [editState, setEditState] = useState<{ table: string; row: Row; fields: EditField[]; title: string } | null>(null);
+
+  const removeRow = async (table: string, id: string, cleanup?: () => Promise<void>) => {
+    if (!confirm(t("confirm_delete") || "Delete this entry?")) return;
+    if (cleanup) await cleanup();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from(table as any) as any).delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(t("deleted") || "Deleted");
+    fetchAll();
+  };
+
+  const nameOf = (list: Row[], id: string) => list.find((x) => x.id === id)?.name || "—";
+
+  const salesLedger = useMemo(
+    () => [...sales].sort((a, b) => (a.sale_date < b.sale_date ? 1 : -1)).map((s) => ({
+      id: s.id,
+      date: s.sale_date,
+      title: `#${s.sale_no} · ${nameOf(customers, s.customer_id)}`,
+      subtitle: `${s.sale_type} · ${t("paid")}: ₹${Number(s.paid_amount || 0).toFixed(0)}${Number(s.outstanding || 0) > 0 ? ` · ${t("outstanding")}: ₹${Number(s.outstanding).toFixed(0)}` : ""}`,
+      amount: Number(s.total_amount || 0),
+      tone: "in" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sales, customers],
+  );
+
+  const purchaseLedger = useMemo(
+    () => [...purchases].sort((a, b) => (a.entry_date < b.entry_date ? 1 : -1)).map((p) => ({
+      id: p.id,
+      date: p.entry_date,
+      title: `#${p.entry_no} · ${nameOf(vendors, p.vendor_id)}`,
+      subtitle: `${Number(p.actual_man || 0).toFixed(2)} Man · ₹${Number(p.cost_per_man || 0).toFixed(2)}/Man`,
+      amount: Number(p.total_cost || 0),
+      tone: "out" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [purchases, vendors],
+  );
+
+  const salaryLedger = useMemo(
+    () => workerSalaries
+      .filter((x) => x.period_end >= from && x.period_end <= to)
+      .map((s) => ({
+        id: s.id,
+        date: s.period_end || s.period_label,
+        title: nameOf(workers, s.worker_id),
+        subtitle: `${s.period_label} · ${t("paid")}: ₹${Number(s.paid_amount || 0).toFixed(0)}`,
+        amount: Number(s.net_payable || 0),
+        tone: "out" as const,
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [workerSalaries, workers, from, to],
+  );
+
+  const advanceLedger = useMemo(
+    () => workerAdvances.map((a) => ({
+      id: a.id,
+      date: a.advance_date,
+      title: nameOf(workers, a.worker_id),
+      subtitle: a.notes || a.payment_mode,
+      amount: Number(a.amount || 0),
+      tone: "out" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [workerAdvances, workers],
+  );
+
+  const expenseLedger = useMemo(
+    () => expenses.map((e) => ({
+      id: e.id,
+      date: e.expense_date,
+      title: e.expense_type,
+      subtitle: e.description || e.payment_mode,
+      amount: Number(e.amount || 0),
+      tone: "out" as const,
+    })),
+    [expenses],
+  );
+
+  const receiptLedger = useMemo(
+    () => receipts.map((r) => ({
+      id: r.id,
+      date: r.receipt_date,
+      title: nameOf(customers, r.customer_id),
+      subtitle: r.remarks || r.mode,
+      amount: Number(r.amount || 0),
+      tone: "in" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [receipts, customers],
+  );
+
+  const vendorPaymentLedger = useMemo(
+    () => vendorPayments.map((p) => ({
+      id: p.id,
+      date: p.payment_date,
+      title: nameOf(vendors, p.vendor_id),
+      subtitle: p.remarks || p.mode,
+      amount: Number(p.amount || 0),
+      tone: "out" as const,
+    })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [vendorPayments, vendors],
+  );
+
+  const openEdit = (table: string, list: Row[], id: string, fields: EditField[], title: string) => {
+    const row = list.find((x) => x.id === id);
+    if (row) setEditState({ table, row, fields, title });
+  };
+
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b bg-primary text-primary-foreground shadow-md">
@@ -419,9 +535,50 @@ function ReportsPage() {
             <SectionTitle icon={Landmark} title="Bank Flow" />
             <Table headers={["Bank", "Inflow", "Outflow", "Net"]}
               rows={bankFlow.map((b) => [b.name, fmt(b.inflow), fmt(b.outflow), fmt(b.net)])} />
+
+            <SectionTitle icon={Wallet} title="Expense Transactions (tap to edit)" />
+            <TxnLedger
+              items={expenseLedger}
+              onEdit={(id) => openEdit("expenses", expenses, id, [
+                { key: "expense_date", label: t("date"), type: "date" },
+                { key: "amount", label: t("amount"), type: "number" },
+                { key: "description", label: t("remarks") },
+              ], t("expenses") || "Expense")}
+              onDelete={(id) => removeRow("expenses", id)}
+            />
+
+            <SectionTitle icon={Receipt} title="Customer Receipts (tap to edit)" />
+            <TxnLedger
+              items={receiptLedger}
+              onEdit={(id) => openEdit("customer_receipts", receipts, id, [
+                { key: "receipt_date", label: t("date"), type: "date" },
+                { key: "amount", label: t("amount"), type: "number" },
+                { key: "remarks", label: t("remarks") },
+              ], t("customer_receipts") || "Receipt")}
+              onDelete={(id) => removeRow("customer_receipts", id)}
+            />
+
+            <SectionTitle icon={Wallet} title="Vendor Payments (tap to edit)" />
+            <TxnLedger
+              items={vendorPaymentLedger}
+              onEdit={(id) => openEdit("vendor_payments", vendorPayments, id, [
+                { key: "payment_date", label: t("date"), type: "date" },
+                { key: "amount", label: t("amount"), type: "number" },
+                { key: "remarks", label: t("remarks") },
+              ], t("vendor_payments") || "Payment")}
+              onDelete={(id) => removeRow("vendor_payments", id)}
+            />
           </TabsContent>
 
           <TabsContent value="purchase" className="space-y-3">
+            <SectionTitle icon={ShoppingCart} title="Purchase Transactions (tap to edit)" />
+            <TxnLedger
+              items={purchaseLedger}
+              onEdit={(id) => navigate({ to: "/purchases/new", search: { id } })}
+              onDelete={(id) => removeRow("purchases", id, async () => {
+                await supabase.from("vendor_payments").delete().eq("purchase_id", id);
+              })}
+            />
             <SectionTitle icon={ShoppingCart} title="Vendor Wise" />
             <Table headers={["Vendor", "Man", "Amount"]}
               rows={purchaseByVendor.map((p) => [p.name, p.qty.toFixed(0), fmt(p.amount)])} />
@@ -434,6 +591,17 @@ function ReportsPage() {
           </TabsContent>
 
           <TabsContent value="sales" className="space-y-3">
+            <SectionTitle icon={Receipt} title="Sales Transactions (tap to edit)" />
+            <TxnLedger
+              items={salesLedger}
+              onEdit={(id) => {
+                const s = sales.find((x) => x.id === id);
+                navigate({ to: "/sales/new", search: { id, type: (s?.sale_type as "waste" | "finished") ?? "waste" } });
+              }}
+              onDelete={(id) => removeRow("sales", id, async () => {
+                await supabase.from("customer_receipts").delete().eq("sale_id", id);
+              })}
+            />
             <SectionTitle icon={Receipt} title="Customer Wise" />
             <Table headers={["Customer", "Sales", "Outstanding"]}
               rows={salesByCustomer.map((s) => [s.name, fmt(s.amount), fmt(s.outstanding)])} />
@@ -443,6 +611,28 @@ function ReportsPage() {
           </TabsContent>
 
           <TabsContent value="worker" className="space-y-3">
+            <SectionTitle icon={Users} title="Salary Transactions (tap to edit)" />
+            <TxnLedger
+              items={salaryLedger}
+              onEdit={(id) => openEdit("worker_salaries", workerSalaries, id, [
+                { key: "present_days", label: t("present_days") || "Present days", type: "number" },
+                { key: "daily_wage", label: t("daily_wage") || "Daily wage", type: "number" },
+                { key: "extra_work", label: t("extra_work") || "Extra work", type: "number" },
+                { key: "advance_deducted", label: t("advance") || "Advance deducted", type: "number" },
+                { key: "paid_amount", label: t("paid") || "Paid", type: "number" },
+              ], t("salary") || "Salary")}
+              onDelete={(id) => removeRow("worker_salaries", id)}
+            />
+            <SectionTitle icon={Users} title="Worker Advances (tap to edit)" />
+            <TxnLedger
+              items={advanceLedger}
+              onEdit={(id) => openEdit("worker_advances", workerAdvances, id, [
+                { key: "advance_date", label: t("date"), type: "date" },
+                { key: "amount", label: t("amount"), type: "number" },
+                { key: "notes", label: t("remarks") },
+              ], t("advance") || "Advance")}
+              onDelete={(id) => removeRow("worker_advances", id)}
+            />
             <SectionTitle icon={Users} title="Attendance (Days)" />
             <Table headers={["Worker", "Present Days"]}
               rows={workerAttendance.map((w) => [w.name, w.days])} />
@@ -465,9 +655,24 @@ function ReportsPage() {
             <Table headers={["Worker", "Balance"]}
               rows={outWorkers.map((w) => [w.name, fmt(w.balance)])} />
           </TabsContent>
+
         </Tabs>
 
         {loading && <p className="text-center text-sm text-muted-foreground">{t("loading")}</p>}
+
+        {editState && (
+          <EditRecordDialog
+            open
+            onClose={() => setEditState(null)}
+            onSaved={fetchAll}
+            table={editState.table}
+            id={editState.row.id}
+            row={editState.row}
+            fields={editState.fields}
+            title={editState.title}
+          />
+        )}
+
       </main>
     </div>
   );
