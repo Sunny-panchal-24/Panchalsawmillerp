@@ -47,6 +47,8 @@ function CashBook() {
       ]);
 
       setOpening(Number(cs?.opening_cash ?? 0));
+      setSettingsId(cs?.id ?? null);
+
       const list: Txn[] = [];
       (pu ?? []).forEach((r) => {
         if (Number(r.paid_amount ?? 0) > 0 && r.paid_mode === "cash") {
