@@ -659,6 +659,20 @@ function ReportsPage() {
         </Tabs>
 
         {loading && <p className="text-center text-sm text-muted-foreground">{t("loading")}</p>}
+
+        {editState && (
+          <EditRecordDialog
+            open
+            onClose={() => setEditState(null)}
+            onSaved={fetchAll}
+            table={editState.table}
+            id={editState.row.id}
+            row={editState.row}
+            fields={editState.fields}
+            title={editState.title}
+          />
+        )}
+
       </main>
     </div>
   );
