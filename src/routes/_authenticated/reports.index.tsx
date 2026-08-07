@@ -535,9 +535,50 @@ function ReportsPage() {
             <SectionTitle icon={Landmark} title="Bank Flow" />
             <Table headers={["Bank", "Inflow", "Outflow", "Net"]}
               rows={bankFlow.map((b) => [b.name, fmt(b.inflow), fmt(b.outflow), fmt(b.net)])} />
+
+            <SectionTitle icon={Wallet} title="Expense Transactions (tap to edit)" />
+            <TxnLedger
+              items={expenseLedger}
+              onEdit={(id) => openEdit("expenses", expenses, id, [
+                { key: "expense_date", label: t("date"), type: "date" },
+                { key: "amount", label: t("amount"), type: "number" },
+                { key: "description", label: t("remarks") },
+              ], t("expenses") || "Expense")}
+              onDelete={(id) => removeRow("expenses", id)}
+            />
+
+            <SectionTitle icon={Receipt} title="Customer Receipts (tap to edit)" />
+            <TxnLedger
+              items={receiptLedger}
+              onEdit={(id) => openEdit("customer_receipts", receipts, id, [
+                { key: "receipt_date", label: t("date"), type: "date" },
+                { key: "amount", label: t("amount"), type: "number" },
+                { key: "remarks", label: t("remarks") },
+              ], t("customer_receipts") || "Receipt")}
+              onDelete={(id) => removeRow("customer_receipts", id)}
+            />
+
+            <SectionTitle icon={Wallet} title="Vendor Payments (tap to edit)" />
+            <TxnLedger
+              items={vendorPaymentLedger}
+              onEdit={(id) => openEdit("vendor_payments", vendorPayments, id, [
+                { key: "payment_date", label: t("date"), type: "date" },
+                { key: "amount", label: t("amount"), type: "number" },
+                { key: "remarks", label: t("remarks") },
+              ], t("vendor_payments") || "Payment")}
+              onDelete={(id) => removeRow("vendor_payments", id)}
+            />
           </TabsContent>
 
           <TabsContent value="purchase" className="space-y-3">
+            <SectionTitle icon={ShoppingCart} title="Purchase Transactions (tap to edit)" />
+            <TxnLedger
+              items={purchaseLedger}
+              onEdit={(id) => navigate({ to: "/purchases/new", search: { id } })}
+              onDelete={(id) => removeRow("purchases", id, async () => {
+                await supabase.from("vendor_payments").delete().eq("purchase_id", id);
+              })}
+            />
             <SectionTitle icon={ShoppingCart} title="Vendor Wise" />
             <Table headers={["Vendor", "Man", "Amount"]}
               rows={purchaseByVendor.map((p) => [p.name, p.qty.toFixed(0), fmt(p.amount)])} />
@@ -550,6 +591,17 @@ function ReportsPage() {
           </TabsContent>
 
           <TabsContent value="sales" className="space-y-3">
+            <SectionTitle icon={Receipt} title="Sales Transactions (tap to edit)" />
+            <TxnLedger
+              items={salesLedger}
+              onEdit={(id) => {
+                const s = sales.find((x) => x.id === id);
+                navigate({ to: "/sales/new", search: { id, type: (s?.sale_type as "waste" | "finished") ?? "waste" } });
+              }}
+              onDelete={(id) => removeRow("sales", id, async () => {
+                await supabase.from("customer_receipts").delete().eq("sale_id", id);
+              })}
+            />
             <SectionTitle icon={Receipt} title="Customer Wise" />
             <Table headers={["Customer", "Sales", "Outstanding"]}
               rows={salesByCustomer.map((s) => [s.name, fmt(s.amount), fmt(s.outstanding)])} />
@@ -559,6 +611,28 @@ function ReportsPage() {
           </TabsContent>
 
           <TabsContent value="worker" className="space-y-3">
+            <SectionTitle icon={Users} title="Salary Transactions (tap to edit)" />
+            <TxnLedger
+              items={salaryLedger}
+              onEdit={(id) => openEdit("worker_salaries", workerSalaries, id, [
+                { key: "present_days", label: t("present_days") || "Present days", type: "number" },
+                { key: "daily_wage", label: t("daily_wage") || "Daily wage", type: "number" },
+                { key: "extra_work", label: t("extra_work") || "Extra work", type: "number" },
+                { key: "advance_deducted", label: t("advance") || "Advance deducted", type: "number" },
+                { key: "paid_amount", label: t("paid") || "Paid", type: "number" },
+              ], t("salary") || "Salary")}
+              onDelete={(id) => removeRow("worker_salaries", id)}
+            />
+            <SectionTitle icon={Users} title="Worker Advances (tap to edit)" />
+            <TxnLedger
+              items={advanceLedger}
+              onEdit={(id) => openEdit("worker_advances", workerAdvances, id, [
+                { key: "advance_date", label: t("date"), type: "date" },
+                { key: "amount", label: t("amount"), type: "number" },
+                { key: "notes", label: t("remarks") },
+              ], t("advance") || "Advance")}
+              onDelete={(id) => removeRow("worker_advances", id)}
+            />
             <SectionTitle icon={Users} title="Attendance (Days)" />
             <Table headers={["Worker", "Present Days"]}
               rows={workerAttendance.map((w) => [w.name, w.days])} />
@@ -581,6 +655,7 @@ function ReportsPage() {
             <Table headers={["Worker", "Balance"]}
               rows={outWorkers.map((w) => [w.name, fmt(w.balance)])} />
           </TabsContent>
+
         </Tabs>
 
         {loading && <p className="text-center text-sm text-muted-foreground">{t("loading")}</p>}
