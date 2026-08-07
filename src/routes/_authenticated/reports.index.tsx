@@ -8,7 +8,10 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArrowLeft, BarChart3, TrendingUp, Wallet, Landmark, ShoppingCart, Receipt, Users, AlertCircle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
+import { TxnLedger } from "@/components/TxnLedger";
+import { EditRecordDialog, type EditField } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/reports/")({
   component: ReportsPage,
