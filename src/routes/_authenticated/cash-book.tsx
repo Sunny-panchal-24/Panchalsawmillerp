@@ -130,14 +130,47 @@ function CashBook() {
     URL.revokeObjectURL(url);
   };
 
+  const saveOpening = async () => {
+    if (!settingsId) return;
+    const val = Number(openingInput) || 0;
+    const { error } = await supabase.from("company_settings").update({ opening_cash: val }).eq("id", settingsId);
+    if (error) return toast.error(error.message);
+    setOpening(val);
+    setEditOpening(false);
+    toast.success(t("saved") || "Saved");
+  };
+
   return (
     <AppShell title={t("cash_book")}>
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <Stat label={t("opening_cash")} value={opening} />
+        <div className="rounded-xl border bg-card p-3">
+          <div className="text-xs text-muted-foreground">{t("opening_cash")}</div>
+          {editOpening ? (
+            <div className="mt-1 flex gap-1">
+              <Input
+                type="number"
+                inputMode="decimal"
+                className="h-9"
+                value={openingInput}
+                onChange={(e) => setOpeningInput(e.target.value)}
+              />
+              <Button size="sm" onClick={saveOpening}>{t("save")}</Button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="text-left font-bold text-lg underline decoration-dotted"
+              onClick={() => { setOpeningInput(String(opening)); setEditOpening(true); }}
+            >
+              ₹{opening.toFixed(2)}
+            </button>
+          )}
+        </div>
         <Stat label={t("current_balance")} value={closing} highlight />
         <Stat label={t("cash_in")} value={totalIn} color="text-emerald-700" />
         <Stat label={t("cash_out")} value={totalOut} color="text-rose-700" />
       </div>
+
 
       <div className="mb-3 grid grid-cols-4 gap-1">
         {(["today", "week", "month", "custom"] as const).map((f) => (
