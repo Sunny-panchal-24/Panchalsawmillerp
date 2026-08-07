@@ -18,6 +18,9 @@ function CashBook() {
   const { t } = useI18n();
   const [txns, setTxns] = useState<Txn[]>([]);
   const [opening, setOpening] = useState(0);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
+  const [editOpening, setEditOpening] = useState(false);
+  const [openingInput, setOpeningInput] = useState("");
   const [filter, setFilter] = useState<Filter>("month");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -31,7 +34,8 @@ function CashBook() {
         { data: cr }, { data: ex }, { data: wa }, { data: ws },
         { data: va },
       ] = await Promise.all([
-        supabase.from("company_settings").select("opening_cash").limit(1).maybeSingle(),
+        supabase.from("company_settings").select("id,opening_cash").limit(1).maybeSingle(),
+
         supabase.from("purchases").select("entry_date,entry_no,paid_amount,paid_mode,tractor_paid_amount,tractor_paid_mode"),
         supabase.from("sales").select("sale_date,sale_no,paid_amount,payment_mode,payment_status"),
         supabase.from("vendor_payments").select("payment_date,amount,mode,vendor_id,remarks"),
