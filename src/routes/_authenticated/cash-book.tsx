@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
@@ -6,18 +6,69 @@ import { useI18n } from "@/lib/i18n";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
+import { Pencil, Trash2 } from "lucide-react";
+import { EditRecordDialog, type EditField } from "@/components/EditRecordDialog";
 
 export const Route = createFileRoute("/_authenticated/cash-book")({
   component: CashBook,
 });
 
-type Txn = { date: string; label: string; ref?: string; inAmt: number; outAmt: number };
+type Txn = {
+  date: string;
+  label: string;
+  inAmt: number;
+  outAmt: number;
+  table: string;
+  id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  row: Record<string, any>;
+  wizard?: "purchase" | "sale";
+  saleType?: string;
+};
 
 type Filter = "today" | "week" | "month" | "custom" | "all";
 
+const FIELDS: Record<string, (t: (k: string) => string) => EditField[]> = {
+  purchases: (t) => [
+    { key: "entry_date", label: t("date"), type: "date" },
+    { key: "paid_amount", label: t("amount"), type: "number" },
+  ],
+  sales: (t) => [
+    { key: "sale_date", label: t("date"), type: "date" },
+    { key: "paid_amount", label: t("amount"), type: "number" },
+  ],
+  vendor_payments: (t) => [
+    { key: "payment_date", label: t("date"), type: "date" },
+    { key: "amount", label: t("amount"), type: "number" },
+    { key: "remarks", label: t("remarks") },
+  ],
+  customer_receipts: (t) => [
+    { key: "receipt_date", label: t("date"), type: "date" },
+    { key: "amount", label: t("amount"), type: "number" },
+    { key: "remarks", label: t("remarks") },
+  ],
+  expenses: (t) => [
+    { key: "expense_date", label: t("date"), type: "date" },
+    { key: "amount", label: t("amount"), type: "number" },
+    { key: "description", label: t("description") },
+  ],
+  worker_advances: (t) => [
+    { key: "advance_date", label: t("date"), type: "date" },
+    { key: "amount", label: t("amount"), type: "number" },
+  ],
+  worker_salaries: (t) => [
+    { key: "paid_amount", label: t("amount"), type: "number" },
+    { key: "outstanding", label: t("outstanding"), type: "number" },
+  ],
+  vendor_advances: (t) => [
+    { key: "advance_date", label: t("date"), type: "date" },
+    { key: "amount", label: t("amount"), type: "number" },
+  ],
+};
+
 function CashBook() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [txns, setTxns] = useState<Txn[]>([]);
   const [opening, setOpening] = useState(0);
   const [settingsId, setSettingsId] = useState<string | null>(null);
@@ -28,73 +79,92 @@ function CashBook() {
   const [toDate, setToDate] = useState("");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editTxn, setEditTxn] = useState<Txn | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      const [
-        { data: cs }, { data: pu }, { data: sa }, { data: vp },
-        { data: cr }, { data: ex }, { data: wa }, { data: ws },
-        { data: va },
-      ] = await Promise.all([
-        supabase.from("company_settings").select("id,opening_cash").limit(1).maybeSingle(),
+  const load = async () => {
+    const [
+      { data: cs }, { data: pu }, { data: sa }, { data: vp },
+      { data: cr }, { data: ex }, { data: wa }, { data: ws },
+      { data: va },
+    ] = await Promise.all([
+      supabase.from("company_settings").select("id,opening_cash").limit(1).maybeSingle(),
+      supabase.from("purchases").select("id,entry_date,entry_no,paid_amount,paid_mode,tractor_paid_amount,tractor_paid_mode"),
+      supabase.from("sales").select("id,sale_date,sale_no,sale_type,paid_amount,payment_mode,payment_status"),
+      supabase.from("vendor_payments").select("id,payment_date,amount,mode,vendor_id,remarks"),
+      supabase.from("customer_receipts").select("id,receipt_date,amount,mode,customer_id,remarks"),
+      supabase.from("expenses").select("id,expense_date,amount,payment_mode,description,expense_type"),
+      supabase.from("worker_advances").select("id,advance_date,amount,payment_mode,worker_id"),
+      supabase.from("worker_salaries").select("id,period_end,paid_amount,payment_mode,worker_id,outstanding"),
+      supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id,vendor_id"),
+    ]);
 
-        supabase.from("purchases").select("entry_date,entry_no,paid_amount,paid_mode,tractor_paid_amount,tractor_paid_mode"),
-        supabase.from("sales").select("sale_date,sale_no,paid_amount,payment_mode,payment_status"),
-        supabase.from("vendor_payments").select("payment_date,amount,mode,vendor_id,remarks"),
-        supabase.from("customer_receipts").select("receipt_date,amount,mode,customer_id,remarks"),
-        supabase.from("expenses").select("expense_date,amount,payment_mode,description,expense_type"),
-        supabase.from("worker_advances").select("advance_date,amount,payment_mode,worker_id"),
-        supabase.from("worker_salaries").select("period_end,paid_amount,payment_mode,worker_id"),
-        supabase.from("vendor_advances").select("advance_date,amount,bank_account_id,vendor_id"),
-      ]);
+    setOpening(Number(cs?.opening_cash ?? 0));
+    setSettingsId(cs?.id ?? null);
 
-      setOpening(Number(cs?.opening_cash ?? 0));
-      setSettingsId(cs?.id ?? null);
+    const list: Txn[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (pu ?? []).forEach((r: any) => {
+      if (Number(r.paid_amount ?? 0) > 0 && r.paid_mode === "cash") {
+        list.push({ date: r.entry_date, label: `${t("purchase")} ${r.entry_no}`, outAmt: Number(r.paid_amount), inAmt: 0, table: "purchases", id: r.id, row: r, wizard: "purchase" });
+      }
+      if (Number(r.tractor_paid_amount ?? 0) > 0 && r.tractor_paid_mode === "cash") {
+        list.push({ date: r.entry_date, label: `${t("tractor_payment")} ${r.entry_no}`, outAmt: Number(r.tractor_paid_amount), inAmt: 0, table: "purchases", id: r.id, row: r, wizard: "purchase" });
+      }
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (sa ?? []).forEach((r: any) => {
+      if (Number(r.paid_amount ?? 0) > 0 && r.payment_mode === "cash") {
+        list.push({ date: r.sale_date, label: `${t("sale")} ${r.sale_no}`, inAmt: Number(r.paid_amount), outAmt: 0, table: "sales", id: r.id, row: r, wizard: "sale", saleType: r.sale_type });
+      }
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (vp ?? []).forEach((r: any) => {
+      if (r.mode === "cash") list.push({ date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_payments", id: r.id, row: r });
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (cr ?? []).forEach((r: any) => {
+      if (r.mode === "cash") list.push({ date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0, table: "customer_receipts", id: r.id, row: r });
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ex ?? []).forEach((r: any) => {
+      if (r.payment_mode === "cash") list.push({ date: (r.expense_date ?? "") as string, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense"), outAmt: Number(r.amount), inAmt: 0, table: "expenses", id: r.id, row: r });
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (wa ?? []).forEach((r: any) => {
+      if (r.payment_mode === "cash") list.push({ date: r.advance_date, label: t("worker_advance"), outAmt: Number(r.amount), inAmt: 0, table: "worker_advances", id: r.id, row: r });
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ws ?? []).forEach((r: any) => {
+      if (r.payment_mode === "cash" && Number(r.paid_amount ?? 0) > 0) list.push({ date: (r.period_end ?? "") as string, label: t("salary"), outAmt: Number(r.paid_amount), inAmt: 0, table: "worker_salaries", id: r.id, row: r });
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (va ?? []).forEach((r: any) => {
+      if (!r.bank_account_id) list.push({ date: r.advance_date, label: t("vendor_advance"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_advances", id: r.id, row: r });
+    });
 
-      const list: Txn[] = [];
-      (pu ?? []).forEach((r) => {
-        if (Number(r.paid_amount ?? 0) > 0 && r.paid_mode === "cash") {
-          list.push({ date: r.entry_date, label: `${t("purchase")} ${r.entry_no}`, outAmt: Number(r.paid_amount), inAmt: 0 });
-        }
-        // tractor_paid columns exist as tractor_paid_amount/mode
-        // deliberately kept if present
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const tp = (r as any).tractor_paid_amount;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const tm = (r as any).tractor_paid_mode;
-        if (Number(tp ?? 0) > 0 && tm === "cash") {
-          list.push({ date: r.entry_date, label: `${t("tractor_payment")} ${r.entry_no}`, outAmt: Number(tp), inAmt: 0 });
-        }
-      });
-      (sa ?? []).forEach((r) => {
-        if (Number(r.paid_amount ?? 0) > 0 && r.payment_mode === "cash") {
-          list.push({ date: r.sale_date, label: `${t("sale")} ${r.sale_no}`, inAmt: Number(r.paid_amount), outAmt: 0 });
-        }
-      });
-      (vp ?? []).forEach((r) => {
-        if (r.mode === "cash") list.push({ date: r.payment_date, label: `${t("vendor_payment")}`, outAmt: Number(r.amount), inAmt: 0 });
-      });
-      (cr ?? []).forEach((r) => {
-        if (r.mode === "cash") list.push({ date: r.receipt_date, label: `${t("customer_receipt")}`, inAmt: Number(r.amount), outAmt: 0 });
-      });
-      (ex ?? []).forEach((r) => {
-        if (r.payment_mode === "cash") list.push({ date: (r.expense_date ?? "") as string, label: `${t(r.expense_type === "maintenance" ? "maintenance" : "other_expense")}`, outAmt: Number(r.amount), inAmt: 0 });
-      });
-      (wa ?? []).forEach((r) => {
-        if (r.payment_mode === "cash") list.push({ date: r.advance_date, label: `${t("worker_advance")}`, outAmt: Number(r.amount), inAmt: 0 });
-      });
-      (ws ?? []).forEach((r) => {
-        if (r.payment_mode === "cash" && Number(r.paid_amount ?? 0) > 0) list.push({ date: (r.period_end ?? "") as string, label: `${t("salary")}`, outAmt: Number(r.paid_amount), inAmt: 0 });
-      });
-      (va ?? []).forEach((r) => {
-        if (!r.bank_account_id) list.push({ date: r.advance_date, label: `${t("vendor_advance")}`, outAmt: Number(r.amount), inAmt: 0 });
-      });
+    list.sort((a, b) => b.date.localeCompare(a.date));
+    setTxns(list);
+    setLoading(false);
+  };
 
-      list.sort((a, b) => b.date.localeCompare(a.date));
-      setTxns(list);
-      setLoading(false);
-    })();
-  }, [t]);
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [t]);
+
+  const openEdit = (r: Txn) => {
+    if (r.wizard === "purchase") return navigate({ to: "/purchases/new", search: { id: r.id } });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (r.wizard === "sale") return navigate({ to: "/sales/new", search: { id: r.id, type: (r.saleType ?? "waste") as any } });
+    setEditTxn(r);
+  };
+
+  const removeTxn = async (r: Txn) => {
+    if (!confirm(t("confirm_delete") || "Delete?")) return;
+    if (r.table === "sales") await supabase.from("customer_receipts").delete().eq("sale_id", r.id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from(r.table as any) as any).delete().eq("id", r.id);
+    if (error) return toast.error(error.message);
+    toast.success(t("deleted") || "Deleted");
+    load();
+  };
 
   const range = useMemo(() => {
     const today = new Date();
@@ -161,10 +231,10 @@ function CashBook() {
           ) : (
             <button
               type="button"
-              className="text-left font-bold text-lg underline decoration-dotted"
+              className="flex items-center gap-1 text-left font-bold text-lg underline decoration-dotted"
               onClick={() => { setOpeningInput(String(opening)); setEditOpening(true); }}
             >
-              ₹{opening.toFixed(2)}
+              ₹{opening.toFixed(2)} <Pencil className="h-3.5 w-3.5 opacity-60" />
             </button>
           )}
         </div>
@@ -172,7 +242,6 @@ function CashBook() {
         <Stat label={t("cash_in")} value={totalIn} color="text-emerald-700" />
         <Stat label={t("cash_out")} value={totalOut} color="text-rose-700" />
       </div>
-
 
       <div className="mb-3 grid grid-cols-4 gap-1">
         {(["today", "week", "month", "custom"] as const).map((f) => (
@@ -197,16 +266,35 @@ function CashBook() {
       ) : (
         <div className="space-y-2">
           {filtered.map((r, i) => (
-            <div key={i} className="rounded-xl border bg-card p-3 flex justify-between items-center">
-              <div>
-                <div className="font-medium text-sm">{r.label}</div>
+            <div key={`${r.table}-${r.id}-${i}`} className="rounded-xl border bg-card p-3 flex items-center gap-2">
+              <button type="button" className="min-w-0 flex-1 text-left" onClick={() => openEdit(r)}>
+                <div className="font-medium text-sm truncate">{r.label}</div>
                 <div className="text-xs text-muted-foreground">{r.date}</div>
-              </div>
-              {r.inAmt > 0 && <div className="font-bold text-emerald-700">+ ₹{r.inAmt.toFixed(2)}</div>}
-              {r.outAmt > 0 && <div className="font-bold text-rose-700">- ₹{r.outAmt.toFixed(2)}</div>}
+              </button>
+              {r.inAmt > 0 && <div className="font-bold text-emerald-700 shrink-0">+ ₹{r.inAmt.toFixed(2)}</div>}
+              {r.outAmt > 0 && <div className="font-bold text-rose-700 shrink-0">- ₹{r.outAmt.toFixed(2)}</div>}
+              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0" aria-label={t("edit")} onClick={() => openEdit(r)}>
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 text-red-600" aria-label={t("delete")} onClick={() => removeTxn(r)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           ))}
         </div>
+      )}
+
+      {editTxn && (
+        <EditRecordDialog
+          open={!!editTxn}
+          onClose={() => setEditTxn(null)}
+          onSaved={load}
+          table={editTxn.table}
+          id={editTxn.id}
+          row={editTxn.row}
+          fields={(FIELDS[editTxn.table] ?? (() => []))(t)}
+          title={editTxn.label}
+        />
       )}
     </AppShell>
   );
