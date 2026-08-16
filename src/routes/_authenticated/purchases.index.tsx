@@ -69,7 +69,7 @@ function PurchasesList() {
     <AppShell
       title={t("purchases")}
       action={
-        <Button size="lg" className="h-11" onClick={() => navigate({ to: "/purchases/new" })}>
+        <Button size="lg" className="h-11" onClick={() => navigate({ to: "/purchases/new", search: { id: undefined } })}>
           <Plus className="mr-1 h-5 w-5" /> {t("add")}
         </Button>
       }
@@ -117,7 +117,7 @@ function PurchasesList() {
           <div className="grid grid-cols-1 gap-3 pt-2">
             <button
               type="button"
-              onClick={() => { setChooser(false); navigate({ to: "/purchases/new" }); }}
+              onClick={() => { setChooser(false); navigate({ to: "/purchases/new", search: { id: undefined } }); }}
               className="flex items-center gap-3 rounded-xl border-2 border-primary bg-primary/10 p-5 text-left active:scale-[0.98] transition-transform"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground">
