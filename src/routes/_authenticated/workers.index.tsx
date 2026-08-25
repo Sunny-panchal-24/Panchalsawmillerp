@@ -227,10 +227,13 @@ function SalaryRow({ r, onEdit, onDelete }: { r: SalRow; onEdit: () => void; onD
             <div className="text-sm text-rose-600 font-medium">Outstanding: ₹{Number(r.outstanding).toFixed(2)}</div>
           )}
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
           <Link to="/workers/$workerId/ledger" params={{ workerId: r.worker_id }}>
             <Button size="icon" variant="outline" aria-label="Ledger"><BookOpen className="h-4 w-4" /></Button>
           </Link>
+          <Button size="icon" variant="outline" onClick={onEdit} aria-label="Edit">
+            <Pencil className="h-4 w-4" />
+          </Button>
           <Button size="icon" variant="destructive" onClick={onDelete} aria-label="Delete">
             <Trash2 className="h-4 w-4" />
           </Button>
