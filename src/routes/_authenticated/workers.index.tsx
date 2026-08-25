@@ -165,13 +165,54 @@ function WorkersIndex() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {editAdv && (
+        <EditRecordDialog
+          open={!!editAdv}
+          onClose={() => setEditAdv(null)}
+          onSaved={load}
+          table="worker_advances"
+          id={editAdv.id}
+          row={editAdv as unknown as Record<string, unknown>}
+          title="Edit Advance"
+          fields={[
+            { key: "advance_date", label: "Date", type: "date" },
+            { key: "amount", label: "Amount", type: "number" },
+            { key: "notes", label: "Notes" },
+          ]}
+        />
+      )}
+      {editSal && (
+        <EditRecordDialog
+          open={!!editSal}
+          onClose={() => setEditSal(null)}
+          onSaved={load}
+          table="worker_salaries"
+          id={editSal.id}
+          row={editSal as unknown as Record<string, unknown>}
+          title="Edit Salary"
+          fields={[
+            { key: "present_days", label: "Present Days", type: "number" },
+            { key: "daily_wage", label: "Daily Wage", type: "number" },
+            { key: "advance_deducted", label: "Advance Deducted", type: "number" },
+            { key: "paid_amount", label: "Paid Amount", type: "number" },
+            { key: "outstanding", label: "Outstanding", type: "number" },
+          ]}
+        />
+      )}
     </AppShell>
   );
 }
 
-function SalaryRow({ r, onDelete }: { r: SalRow; onDelete: () => void }) {
+function SalaryRow({ r, onEdit, onDelete }: { r: SalRow; onEdit: () => void; onDelete: () => void }) {
   return (
-    <div className="rounded-lg border bg-card p-3">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onEdit}
+      onKeyDown={(e) => { if (e.key === "Enter") onEdit(); }}
+      className="rounded-lg border bg-card p-3 cursor-pointer active:scale-[0.99] transition-transform"
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="text-sm text-muted-foreground">{r.period_label}</div>
