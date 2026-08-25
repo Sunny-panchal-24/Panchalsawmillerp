@@ -80,7 +80,7 @@ function WorkersIndex() {
           {salaries.length === 0 ? (
             <div className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">{t("no_records") || "No records"}</div>
           ) : salaries.map((r) => (
-            <SalaryRow key={r.id} r={r} onDelete={() => delSal(r.id)} />
+            <SalaryRow key={r.id} r={r} onEdit={() => setEditSal(r)} onDelete={() => delSal(r.id)} />
           ))}
         </div>
       ) : (
