@@ -88,16 +88,28 @@ function WorkersIndex() {
           {advances.length === 0 ? (
             <div className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">{t("no_records") || "No records"}</div>
           ) : advances.map((r) => (
-            <div key={r.id} className="rounded-lg border bg-card p-3">
+            <div
+              key={r.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setEditAdv(r)}
+              onKeyDown={(e) => { if (e.key === "Enter") setEditAdv(r); }}
+              className="rounded-lg border bg-card p-3 cursor-pointer active:scale-[0.99] transition-transform"
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="text-sm text-muted-foreground">{r.advance_date} · {r.payment_mode}</div>
                   <div className="text-base font-semibold">{r.workers?.name ?? "—"}</div>
                   <div className="text-sm">Amount: <strong>₹{Number(r.amount).toFixed(2)}</strong></div>
                 </div>
-                <Button size="icon" variant="destructive" onClick={() => delAdv(r.id)} aria-label={t("delete")}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex flex-col gap-1">
+                  <Button size="icon" variant="outline" onClick={(e) => { e.stopPropagation(); setEditAdv(r); }} aria-label="Edit">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="destructive" onClick={(e) => { e.stopPropagation(); delAdv(r.id); }} aria-label={t("delete")}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
