@@ -42,10 +42,12 @@ function WorkersIndex() {
   const [tab, setTab] = useState<"advances" | "salaries">("salaries");
   const [advances, setAdvances] = useState<AdvRow[]>([]);
   const [salaries, setSalaries] = useState<SalRow[]>([]);
+  const [editAdv, setEditAdv] = useState<AdvRow | null>(null);
+  const [editSal, setEditSal] = useState<SalRow | null>(null);
 
   const load = async () => {
     const [a, s] = await Promise.all([
-      supabase.from("worker_advances").select("id,advance_date,amount,payment_mode,workers(name)").order("advance_date", { ascending: false }).limit(100),
+      supabase.from("worker_advances").select("id,advance_date,amount,payment_mode,notes,workers(name)").order("advance_date", { ascending: false }).limit(100),
       supabase.from("worker_salaries").select("id,worker_id,period_label,present_days,daily_wage,gross_salary,advance_deducted,net_payable,paid_amount,outstanding,workers(name)").order("created_at", { ascending: false }).limit(100),
     ]);
     setAdvances((a.data ?? []) as unknown as AdvRow[]);
