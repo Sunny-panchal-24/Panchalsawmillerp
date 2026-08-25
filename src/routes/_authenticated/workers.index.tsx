@@ -5,9 +5,10 @@ import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Wallet, Calculator, Eye, Trash2, CalendarCheck, BookOpen } from "lucide-react";
+import { Wallet, Calculator, Eye, Trash2, CalendarCheck, BookOpen, Pencil } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
 
 export const Route = createFileRoute("/_authenticated/workers/")({
   component: WorkersIndex,
