@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { EditRecordDialog, type EditField } from "@/components/EditRecordDialog";
+import { AdjustmentDialog } from "@/components/AdjustmentDialog";
 
 export const Route = createFileRoute("/_authenticated/bank-book")({
   component: BankBook,
@@ -56,6 +57,11 @@ const FIELDS: Record<string, (t: (k: string) => string) => EditField[]> = {
     { key: "advance_date", label: t("date"), type: "date" },
     { key: "amount", label: t("amount"), type: "number" },
   ],
+  manual_adjustments: (t) => [
+    { key: "adjust_date", label: t("date"), type: "date" },
+    { key: "amount", label: t("amount"), type: "number" },
+    { key: "reason", label: t("remarks") },
+  ],
 };
 
 function BankBook() {
@@ -70,7 +76,7 @@ function BankBook() {
   const load = async () => {
     const [
       { data: bk }, { data: pu }, { data: sa }, { data: vp },
-      { data: cr }, { data: ex }, { data: wa }, { data: ws }, { data: va },
+      { data: cr }, { data: ex }, { data: wa }, { data: ws }, { data: va }, { data: ma },
     ] = await Promise.all([
       supabase.from("bank_accounts").select("id,name,opening_balance").eq("is_active", true).order("name"),
       supabase.from("purchases").select("id,entry_date,entry_no,paid_amount,paid_mode,bank_account_id,tractor_paid_amount,tractor_paid_mode,tractor_bank_account_id"),
@@ -81,6 +87,7 @@ function BankBook() {
       supabase.from("worker_advances").select("id,advance_date,amount,bank_account_id"),
       supabase.from("worker_salaries").select("id,period_end,paid_amount,bank_account_id,outstanding"),
       supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id"),
+      supabase.from("manual_adjustments").select("id,adjust_date,amount,reason,bank_account_id").not("bank_account_id", "is", null),
     ]);
 
     setBanks((bk ?? []) as Bank[]);
@@ -112,6 +119,12 @@ function BankBook() {
     (ws ?? []).forEach((r: any) => r.bank_account_id && Number(r.paid_amount ?? 0) > 0 && push(r.bank_account_id, { date: (r.period_end ?? "") as string, label: t("salary"), outAmt: Number(r.paid_amount), inAmt: 0, table: "worker_salaries", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (va ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: r.advance_date, label: t("vendor_advance"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_advances", id: r.id, row: r }));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ma ?? []).forEach((r: any) => {
+      const amt = Number(r.amount ?? 0);
+      push(r.bank_account_id, { date: r.adjust_date, label: `${t("manual_adjustment")}${r.reason ? " – " + r.reason : ""}`, inAmt: amt > 0 ? amt : 0, outAmt: amt < 0 ? -amt : 0, table: "manual_adjustments", id: r.id, row: r });
+    });
 
     Object.keys(map).forEach((k) => map[k].sort((a, b) => b.date.localeCompare(a.date)));
     setByBank(map);
@@ -189,6 +202,7 @@ function BankPanel({
   onOpeningSaved: () => void;
 }) {
   const { t } = useI18n();
+  const [adjOpen, setAdjOpen] = useState(false);
   const [editOpening, setEditOpening] = useState(false);
   const [openingInput, setOpeningInput] = useState("");
 
@@ -248,7 +262,9 @@ function BankPanel({
       <div className="flex gap-2">
         <Input className="flex-1" placeholder={t("search")} value={search} onChange={(e) => setSearch(e.target.value)} />
         <Button size="sm" variant="outline" onClick={exportCSV}>{t("export_excel")}</Button>
+        <Button size="sm" onClick={() => setAdjOpen(true)}>+ {t("adjustment")}</Button>
       </div>
+      <AdjustmentDialog open={adjOpen} onClose={() => setAdjOpen(false)} onSaved={onOpeningSaved} bankAccountId={bank.id} title={`${t("manual_adjustment")} – ${bank.name}`} />
       {filtered.length === 0 ? (
         <p className="text-center text-muted-foreground">{t("no_records")}</p>
       ) : (
