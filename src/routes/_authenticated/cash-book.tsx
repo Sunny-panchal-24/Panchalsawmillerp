@@ -64,7 +64,13 @@ const FIELDS: Record<string, (t: (k: string) => string) => EditField[]> = {
     { key: "advance_date", label: t("date"), type: "date" },
     { key: "amount", label: t("amount"), type: "number" },
   ],
+  manual_adjustments: (t) => [
+    { key: "adjust_date", label: t("date"), type: "date" },
+    { key: "amount", label: t("amount"), type: "number" },
+    { key: "reason", label: t("remarks") },
+  ],
 };
+
 
 function CashBook() {
   const { t } = useI18n();
