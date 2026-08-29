@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
 import { EditRecordDialog, type EditField } from "@/components/EditRecordDialog";
+import { AdjustmentDialog } from "@/components/AdjustmentDialog";
 
 export const Route = createFileRoute("/_authenticated/cash-book")({
   component: CashBook,
@@ -86,12 +87,13 @@ function CashBook() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [editTxn, setEditTxn] = useState<Txn | null>(null);
+  const [adjOpen, setAdjOpen] = useState(false);
 
   const load = async () => {
     const [
       { data: cs }, { data: pu }, { data: sa }, { data: vp },
       { data: cr }, { data: ex }, { data: wa }, { data: ws },
-      { data: va },
+      { data: va }, { data: ma },
     ] = await Promise.all([
       supabase.from("company_settings").select("id,opening_cash").limit(1).maybeSingle(),
       supabase.from("purchases").select("id,entry_date,entry_no,paid_amount,paid_mode,tractor_paid_amount,tractor_paid_mode"),
@@ -102,6 +104,7 @@ function CashBook() {
       supabase.from("worker_advances").select("id,advance_date,amount,payment_mode,worker_id"),
       supabase.from("worker_salaries").select("id,period_end,paid_amount,payment_mode,worker_id,outstanding"),
       supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id,vendor_id"),
+      supabase.from("manual_adjustments").select("id,adjust_date,amount,reason,bank_account_id").is("bank_account_id", null),
     ]);
 
     setOpening(Number(cs?.opening_cash ?? 0));
@@ -146,6 +149,12 @@ function CashBook() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (va ?? []).forEach((r: any) => {
       if (!r.bank_account_id) list.push({ date: r.advance_date, label: t("vendor_advance"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_advances", id: r.id, row: r });
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ma ?? []).forEach((r: any) => {
+      const amt = Number(r.amount ?? 0);
+      list.push({ date: r.adjust_date, label: `${t("manual_adjustment")}${r.reason ? " – " + r.reason : ""}`, inAmt: amt > 0 ? amt : 0, outAmt: amt < 0 ? -amt : 0, table: "manual_adjustments", id: r.id, row: r });
     });
 
     list.sort((a, b) => b.date.localeCompare(a.date));
@@ -263,6 +272,7 @@ function CashBook() {
       <div className="mb-3 flex gap-2">
         <Input className="flex-1" placeholder={t("search")} value={search} onChange={(e) => setSearch(e.target.value)} />
         <Button size="sm" variant="outline" onClick={exportCSV}>{t("export_excel")}</Button>
+        <Button size="sm" onClick={() => setAdjOpen(true)}>+ {t("adjustment")}</Button>
       </div>
 
       {loading ? (
@@ -289,6 +299,8 @@ function CashBook() {
           ))}
         </div>
       )}
+
+      <AdjustmentDialog open={adjOpen} onClose={() => setAdjOpen(false)} onSaved={load} bankAccountId={null} />
 
       {editTxn && (
         <EditRecordDialog
