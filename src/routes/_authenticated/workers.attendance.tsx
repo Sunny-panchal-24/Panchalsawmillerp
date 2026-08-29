@@ -75,7 +75,17 @@ function AttendancePage() {
 
   return (
     <AppShell title="Attendance" backTo="/workers">
+      <Tabs defaultValue="day">
+        <TabsList className="w-full mb-3">
+          <TabsTrigger value="day" className="flex-1">{tt("daily_entry")}</TabsTrigger>
+          <TabsTrigger value="cal" className="flex-1">{tt("calendar")}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="cal">
+          <AttendanceCalendar workers={workers} />
+        </TabsContent>
+        <TabsContent value="day">
       <div className="space-y-4">
+
         <div>
           <Label>Date</Label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12" />
