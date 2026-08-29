@@ -75,7 +75,17 @@ function AttendancePage() {
 
   return (
     <AppShell title="Attendance" backTo="/workers">
+      <Tabs defaultValue="day">
+        <TabsList className="w-full mb-3">
+          <TabsTrigger value="day" className="flex-1">{tt("daily_entry")}</TabsTrigger>
+          <TabsTrigger value="cal" className="flex-1">{tt("calendar")}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="cal">
+          <AttendanceCalendar workers={workers} />
+        </TabsContent>
+        <TabsContent value="day">
       <div className="space-y-4">
+
         <div>
           <Label>Date</Label>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12" />
@@ -128,6 +138,125 @@ function AttendancePage() {
           {saving ? "Saving..." : "Save Attendance"}
         </Button>
       </div>
+        </TabsContent>
+      </Tabs>
     </AppShell>
   );
 }
+
+function AttendanceCalendar({ workers }: { workers: Worker[] }) {
+  const { t: tt } = useI18n();
+  const [workerId, setWorkerId] = useState("");
+  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [map, setMap] = useState<Record<string, Status>>({});
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!workers.length) return;
+    if (!workerId) setWorkerId(workers[0].id);
+  }, [workers, workerId]);
+
+  const [y, m] = month.split("-").map(Number);
+  const first = new Date(y, m - 1, 1);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const startPad = first.getDay();
+
+  const load = async () => {
+    if (!workerId) return;
+    setBusy(true);
+    const from = `${month}-01`;
+    const to = `${month}-${String(daysInMonth).padStart(2, "0")}`;
+    const { data } = await supabase
+      .from("worker_attendance")
+      .select("attendance_date,status")
+      .eq("worker_id", workerId)
+      .gte("attendance_date", from)
+      .lte("attendance_date", to);
+    const next: Record<string, Status> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data ?? []).forEach((r: any) => (next[r.attendance_date] = r.status));
+    setMap(next);
+    setBusy(false);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [workerId, month]);
+
+  const cycle = async (dateStr: string) => {
+    if (!workerId) return;
+    const order: Status[] = ["present", "half", "absent", "weekly_off"];
+    const cur = map[dateStr];
+    const next = cur === undefined ? "present" : order[(order.indexOf(cur) + 1) % order.length];
+    setMap((p) => ({ ...p, [dateStr]: next }));
+    const { error } = await supabase
+      .from("worker_attendance")
+      .upsert({ worker_id: workerId, attendance_date: dateStr, status: next }, { onConflict: "worker_id,attendance_date" });
+    if (error) { toast.error(error.message); load(); }
+  };
+
+  const counts = Object.values(map).reduce(
+    (acc, s) => { acc[s] = (acc[s] ?? 0) + 1; return acc; },
+    {} as Record<Status, number>,
+  );
+
+  const cellCls = (s?: Status) => STATUSES.find((x) => x.key === s)?.cls ?? "bg-background text-muted-foreground border-border";
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label>{tt("select_worker")}</Label>
+        <select
+          className="h-12 w-full rounded-md border bg-background px-3"
+          value={workerId}
+          onChange={(e) => setWorkerId(e.target.value)}
+        >
+          {workers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+        </select>
+      </div>
+      <div>
+        <Label>{tt("month")}</Label>
+        <Input type="month" className="h-12" value={month} onChange={(e) => setMonth(e.target.value)} />
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground">
+        {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => <div key={i}>{d}</div>)}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: startPad }).map((_, i) => <div key={`p${i}`} />)}
+        {Array.from({ length: daysInMonth }).map((_, i) => {
+          const day = i + 1;
+          const ds = `${month}-${String(day).padStart(2, "0")}`;
+          const s = map[ds];
+          return (
+            <button
+              key={ds}
+              type="button"
+              disabled={busy}
+              onClick={() => cycle(ds)}
+              className={`aspect-square rounded-lg border-2 text-sm font-semibold ${cellCls(s)}`}
+            >
+              <div>{day}</div>
+              <div className="text-[10px]">{STATUSES.find((x) => x.key === s)?.label ?? ""}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 pt-2">
+        <Sum label={tt("present_days")} v={counts.present ?? 0} />
+        <Sum label={tt("half_days")} v={counts.half ?? 0} />
+        <Sum label={tt("absent_days")} v={counts.absent ?? 0} />
+        <Sum label={tt("off_days")} v={counts.weekly_off ?? 0} />
+      </div>
+    </div>
+  );
+}
+
+function Sum({ label, v }: { label: string; v: number }) {
+  return (
+    <div className="rounded-lg border bg-card p-2 text-center">
+      <div className="text-[10px] text-muted-foreground leading-tight">{label}</div>
+      <div className="text-lg font-bold">{v}</div>
+    </div>
+  );
+}
+
