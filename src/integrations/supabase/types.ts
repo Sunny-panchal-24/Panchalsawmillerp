@@ -269,6 +269,47 @@ export type Database = {
           },
         ]
       }
+      manual_adjustments: {
+        Row: {
+          adjust_date: string
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          adjust_date?: string
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adjust_date?: string
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_adjustments_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monthly_closings: {
         Row: {
           bank_closing: Json
