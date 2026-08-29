@@ -739,6 +739,29 @@ const phase9: Record<Lang, Dict> = {
 };
 (Object.keys(phase9) as Lang[]).forEach((l) => Object.assign(translations[l], phase9[l]));
 
+const phase10: Record<Lang, Dict> = {
+  en: {
+    manual_adjustment: "Manual Adjustment", add_adjustment: "Add Adjustment", adjustment: "Adjustment",
+    calendar: "Calendar", daily_entry: "Daily Entry", attendance_calendar: "Attendance Calendar",
+    select_worker: "Select Worker", present_days: "Present Days", half_days: "Half Days",
+    absent_days: "Absent Days", off_days: "Weekly Off",
+  },
+  hi: {
+    manual_adjustment: "मैनुअल समायोजन", add_adjustment: "समायोजन जोड़ें", adjustment: "समायोजन",
+    calendar: "कैलेंडर", daily_entry: "दैनिक एंट्री", attendance_calendar: "हाज़िरी कैलेंडर",
+    select_worker: "मज़दूर चुनें", present_days: "उपस्थित दिन", half_days: "आधे दिन",
+    absent_days: "अनुपस्थित दिन", off_days: "साप्ताहिक छुट्टी",
+  },
+  gu: {
+    manual_adjustment: "મેન્યુઅલ સુધારો", add_adjustment: "સુધારો ઉમેરો", adjustment: "સુધારો",
+    calendar: "કૅલેન્ડર", daily_entry: "દૈનિક એન્ટ્રી", attendance_calendar: "હાજરી કૅલેન્ડર",
+    select_worker: "કામદાર પસંદ કરો", present_days: "હાજર દિવસ", half_days: "અડધા દિવસ",
+    absent_days: "ગેરહાજર દિવસ", off_days: "સાપ્તાહિક રજા",
+  },
+};
+(Object.keys(phase10) as Lang[]).forEach((l) => Object.assign(translations[l], phase10[l]));
+
+
 interface I18nContextValue {
   lang: Lang;
   setLang: (l: Lang) => void;
