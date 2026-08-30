@@ -5,6 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/workers/attendance")({
@@ -23,6 +25,7 @@ const STATUSES: { key: Status; label: string; cls: string }[] = [
 ];
 
 function AttendancePage() {
+  const { t: tt } = useI18n();
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [rows, setRows] = useState<Record<string, Row>>({});
