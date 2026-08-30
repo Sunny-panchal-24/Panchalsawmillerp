@@ -800,6 +800,14 @@ export function useI18n() {
   return ctx;
 }
 
+// Phase 11 additions
+const phase11: Record<Lang, Dict> = {
+  en: { customer_ledger: "Customer Ledger", receipts: "Receipts", receipt: "Receipt", admin_only: "Admin only" },
+  hi: { customer_ledger: "ग्राहक खाता", receipts: "रसीदें", receipt: "रसीद", admin_only: "केवल एडमिन" },
+  gu: { customer_ledger: "ગ્રાહક ખાતાવહી", receipts: "રસીદો", receipt: "રસીદ", admin_only: "ફક્ત એડમિન" },
+};
+(Object.keys(phase11) as Lang[]).forEach((l) => Object.assign(translations[l], phase11[l]));
+
 export const LANGUAGES: { code: Lang; label: string }[] = [
   { code: "en", label: "English" },
   { code: "hi", label: "हिंदी" },

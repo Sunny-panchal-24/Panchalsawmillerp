@@ -37,6 +37,7 @@ import { Route as AuthenticatedExpensesNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedCustomerReceiptsNewRouteImport } from './routes/_authenticated/customer-receipts.new'
 import { Route as AuthenticatedWorkersWorkerIdLedgerRouteImport } from './routes/_authenticated/workers.$workerId.ledger'
 import { Route as AuthenticatedVendorsVendorIdLedgerRouteImport } from './routes/_authenticated/vendors.$vendorId.ledger'
+import { Route as AuthenticatedCustomersCustomerIdLedgerRouteImport } from './routes/_authenticated/customers.$customerId.ledger'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -193,6 +194,12 @@ const AuthenticatedVendorsVendorIdLedgerRoute =
     path: '/vendors/$vendorId/ledger',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCustomersCustomerIdLedgerRoute =
+  AuthenticatedCustomersCustomerIdLedgerRouteImport.update({
+    id: '/customers/$customerId/ledger',
+    path: '/customers/$customerId/ledger',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/sales/': typeof AuthenticatedSalesIndexRoute
   '/vendor-payments/': typeof AuthenticatedVendorPaymentsIndexRoute
   '/workers/': typeof AuthenticatedWorkersIndexRoute
+  '/customers/$customerId/ledger': typeof AuthenticatedCustomersCustomerIdLedgerRoute
   '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
   '/workers/$workerId/ledger': typeof AuthenticatedWorkersWorkerIdLedgerRoute
 }
@@ -249,6 +257,7 @@ export interface FileRoutesByTo {
   '/sales': typeof AuthenticatedSalesIndexRoute
   '/vendor-payments': typeof AuthenticatedVendorPaymentsIndexRoute
   '/workers': typeof AuthenticatedWorkersIndexRoute
+  '/customers/$customerId/ledger': typeof AuthenticatedCustomersCustomerIdLedgerRoute
   '/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
   '/workers/$workerId/ledger': typeof AuthenticatedWorkersWorkerIdLedgerRoute
 }
@@ -280,6 +289,7 @@ export interface FileRoutesById {
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
   '/_authenticated/vendor-payments/': typeof AuthenticatedVendorPaymentsIndexRoute
   '/_authenticated/workers/': typeof AuthenticatedWorkersIndexRoute
+  '/_authenticated/customers/$customerId/ledger': typeof AuthenticatedCustomersCustomerIdLedgerRoute
   '/_authenticated/vendors/$vendorId/ledger': typeof AuthenticatedVendorsVendorIdLedgerRoute
   '/_authenticated/workers/$workerId/ledger': typeof AuthenticatedWorkersWorkerIdLedgerRoute
 }
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/sales/'
     | '/vendor-payments/'
     | '/workers/'
+    | '/customers/$customerId/ledger'
     | '/vendors/$vendorId/ledger'
     | '/workers/$workerId/ledger'
   fileRoutesByTo: FileRoutesByTo
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/sales'
     | '/vendor-payments'
     | '/workers'
+    | '/customers/$customerId/ledger'
     | '/vendors/$vendorId/ledger'
     | '/workers/$workerId/ledger'
   id:
@@ -370,6 +382,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sales/'
     | '/_authenticated/vendor-payments/'
     | '/_authenticated/workers/'
+    | '/_authenticated/customers/$customerId/ledger'
     | '/_authenticated/vendors/$vendorId/ledger'
     | '/_authenticated/workers/$workerId/ledger'
   fileRoutesById: FileRoutesById
@@ -577,6 +590,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVendorsVendorIdLedgerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/customers/$customerId/ledger': {
+      id: '/_authenticated/customers/$customerId/ledger'
+      path: '/customers/$customerId/ledger'
+      fullPath: '/customers/$customerId/ledger'
+      preLoaderRoute: typeof AuthenticatedCustomersCustomerIdLedgerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -605,6 +625,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
   AuthenticatedVendorPaymentsIndexRoute: typeof AuthenticatedVendorPaymentsIndexRoute
   AuthenticatedWorkersIndexRoute: typeof AuthenticatedWorkersIndexRoute
+  AuthenticatedCustomersCustomerIdLedgerRoute: typeof AuthenticatedCustomersCustomerIdLedgerRoute
   AuthenticatedVendorsVendorIdLedgerRoute: typeof AuthenticatedVendorsVendorIdLedgerRoute
   AuthenticatedWorkersWorkerIdLedgerRoute: typeof AuthenticatedWorkersWorkerIdLedgerRoute
 }
@@ -636,6 +657,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
   AuthenticatedVendorPaymentsIndexRoute: AuthenticatedVendorPaymentsIndexRoute,
   AuthenticatedWorkersIndexRoute: AuthenticatedWorkersIndexRoute,
+  AuthenticatedCustomersCustomerIdLedgerRoute:
+    AuthenticatedCustomersCustomerIdLedgerRoute,
   AuthenticatedVendorsVendorIdLedgerRoute:
     AuthenticatedVendorsVendorIdLedgerRoute,
   AuthenticatedWorkersWorkerIdLedgerRoute:

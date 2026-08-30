@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useIsAdmin } from "@/hooks/use-admin";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/workers/salary")({
@@ -68,6 +69,7 @@ function WorkerSalaryWizard() {
   const [mode, setMode] = useState<string>("cash");
   const [bankId, setBankId] = useState<string>("");
   const [overrideDay, setOverrideDay] = useState(false);
+  const { isAdmin } = useIsAdmin();
   const [lastPaidOn, setLastPaidOn] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -137,7 +139,7 @@ function WorkerSalaryWizard() {
   const outstanding = Math.max(0, netPayable - paid);
 
   const dayAllowed = useMemo(() => isPaymentDayAllowed(new Date(), lastPaidOn), [lastPaidOn]);
-  const payBlocked = payChoice === "now" && !dayAllowed && !overrideDay;
+  const payBlocked = payChoice === "now" && !dayAllowed && !(overrideDay && isAdmin);
 
   const save = async () => {
     if (!workerId) return toast.error("Select worker");
@@ -269,10 +271,14 @@ function WorkerSalaryWizard() {
                 <div className="text-sm font-medium text-amber-800 dark:text-amber-200">
                   ⚠ Salary already paid this cycle (last: {lastPaidOn?.toISOString().slice(0, 10)}). Next cycle starts on Wednesday.
                 </div>
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={overrideDay} onCheckedChange={(v) => setOverrideDay(!!v)} />
-                  Override day rule (admin)
-                </label>
+                {isAdmin ? (
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox checked={overrideDay} onCheckedChange={(v) => setOverrideDay(!!v)} />
+                    Override day rule (admin)
+                  </label>
+                ) : (
+                  <div className="text-xs text-muted-foreground">Override available to admin only.</div>
+                )}
               </div>
             )}
             {payChoice === "now" && (
