@@ -193,8 +193,8 @@ function NewPurchaseWizard() {
     const gross = Number(grossWeight) || 0;
     const empty = Number(emptyWeight) || 0;
     const netWeight = Math.max(0, gross - empty);
-    const netMan = netWeight / MAN_KG; // original man
-    const nilCut = applyNilCut ? (netMan / 100) * 5 : 0;
+    const netMan = Math.floor(netWeight / MAN_KG); // original man (round down)
+    const nilCut = applyNilCut ? Math.ceil((netMan / 100) * 5) : 0; // nil cut rounds up
     const finalMan = Math.max(0, netMan - nilCut);
 
     const rate = Number(ratePerMan) || 0;
