@@ -360,9 +360,9 @@ function NewPurchaseWizard() {
           </Field>
           <SummaryBox rows={[
             [t("net_weight"), `${calc.netWeight.toFixed(2)} kg`],
-            [t("net_man"), calc.netMan.toFixed(2)],
-            [t("nil_cut"), applyNilCut ? `- ${calc.nilCut.toFixed(2)}` : "—"],
-            [t("final_man"), <strong key="fm" className="text-lg">{calc.finalMan.toFixed(2)}</strong>],
+            [t("net_man"), String(calc.netMan)],
+            [t("nil_cut"), applyNilCut ? `- ${calc.nilCut}` : "—"],
+            [t("final_man"), <strong key="fm" className="text-lg">{String(calc.finalMan)}</strong>],
           ]} />
 
         </div>
@@ -378,7 +378,7 @@ function NewPurchaseWizard() {
             <Input type="number" inputMode="decimal" value={ratePerMan} onChange={(e) => setRatePerMan(e.target.value)} className="h-14 text-2xl" />
           </Field>
           <SummaryBox highlight rows={[
-            [t("final_man"), calc.finalMan.toFixed(2)],
+            [t("final_man"), String(calc.finalMan)],
             [t("rate_per_man"), `₹${calc.rate.toFixed(2)}`],
             [t("material_value"), <strong key="mv" className="text-xl">₹{calc.materialValue.toFixed(2)}</strong>],
           ]} />
