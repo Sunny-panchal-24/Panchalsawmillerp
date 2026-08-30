@@ -199,6 +199,7 @@ function VendorsTab() {
 /* ------------------ CUSTOMERS ------------------ */
 function CustomersTab() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<Customer[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Customer | null>(null);
