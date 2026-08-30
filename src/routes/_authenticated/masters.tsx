@@ -304,6 +304,7 @@ function CustomersTab() {
               {c.address && <div className="text-sm">{c.address}</div>}
             </div>
             <div className="flex gap-1 shrink-0">
+              <Button size="icon" variant="outline" onClick={() => navigate({ to: "/customers/$customerId/ledger", params: { customerId: c.id } })} aria-label={t("customer_ledger")}><BookOpen className="h-4 w-4" /></Button>
               <Button size="icon" variant="outline" onClick={() => openEdit(c)} aria-label={t("edit")}><Pencil className="h-4 w-4" /></Button>
               <Button size="icon" variant="destructive" onClick={() => remove(c.id)} aria-label={t("delete")}><Trash2 className="h-4 w-4" /></Button>
             </div>
