@@ -274,6 +274,12 @@ function WorkerSalaryWizard() {
             <div className="rounded-lg bg-muted p-3 text-sm">
               Gross: ₹{gross.toFixed(2)} − Advance: ₹{advDeduct.toFixed(2)} = <strong>Net ₹{netPayable.toFixed(2)}</strong>
             </div>
+            {carryAdvance > 0 && (
+              <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm">
+                Advance exceeds salary — ₹{carryAdvance.toFixed(2)} stays pending as advance.
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1 h-12" onClick={() => setStep(2)}>Back</Button>
               <Button className="flex-1 h-12" onClick={() => setStep(4)}>Next</Button>
