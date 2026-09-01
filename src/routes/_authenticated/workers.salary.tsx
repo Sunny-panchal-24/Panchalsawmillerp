@@ -93,7 +93,7 @@ function WorkerSalaryWizard() {
     if (!workerId) return;
     (async () => {
       const [advRes, salRes, wRes, attRes, lastRes] = await Promise.all([
-        supabase.from("worker_advances").select("amount").eq("worker_id", workerId),
+        supabase.from("worker_advances").select("amount,advance_date").eq("worker_id", workerId),
         supabase.from("worker_salaries").select("advance_deducted").eq("worker_id", workerId),
         supabase.from("workers").select("opening_advance,daily_wage").eq("id", workerId).maybeSingle(),
         supabase.from("worker_attendance").select("status").eq("worker_id", workerId)
@@ -105,10 +105,16 @@ function WorkerSalaryWizard() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const given = (advRes.data ?? []).reduce((s, a: any) => s + Number(a.amount ?? 0), 0);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const inPeriod = (advRes.data ?? []).filter((a: any) => a.advance_date >= periodStart && a.advance_date <= periodEnd)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .reduce((s: number, a: any) => s + Number(a.amount ?? 0), 0);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const adjusted = (salRes.data ?? []).reduce((s, a: any) => s + Number(a.advance_deducted ?? 0), 0);
       const remaining = Math.max(0, opening + given - adjusted);
       setPendingAdvance(remaining);
-      setAdvanceToDeduct(remaining.toFixed(2));
+      setPeriodAdvance(inPeriod);
+      setAdvanceToDeduct(Math.min(inPeriod || remaining, remaining).toFixed(2));
+
       setWage(String(wRes.data?.daily_wage ?? worker?.daily_wage ?? ""));
 
       let p = 0, h = 0, a = 0, wo = 0;
