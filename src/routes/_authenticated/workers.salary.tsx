@@ -250,9 +250,11 @@ function WorkerSalaryWizard() {
         {step === 3 && (
           <div className="space-y-3">
             <Label className="text-base">Advance Adjustment</Label>
-            <div className="rounded-lg bg-muted p-3 text-sm">
-              Pending Advance: <strong>₹{pendingAdvance.toFixed(2)}</strong>
+            <div className="rounded-lg bg-muted p-3 text-sm space-y-1">
+              <div>Advance taken in this period: <strong>₹{periodAdvance.toFixed(2)}</strong></div>
+              <div>Total pending advance: <strong>₹{pendingAdvance.toFixed(2)}</strong></div>
             </div>
+
             <div className="grid grid-cols-2 gap-2">
               <button type="button" onClick={() => setAdvanceAction("deduct")}
                 className={`rounded-lg border-2 p-4 ${advanceAction === "deduct" ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
