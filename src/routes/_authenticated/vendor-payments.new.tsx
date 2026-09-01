@@ -174,11 +174,17 @@ function NewVendorPaymentWizard() {
 
       {step === 4 && (
         <div className="space-y-3">
+          <div className="rounded-2xl border-2 border-primary bg-primary/10 p-4 text-center">
+            <div className="text-sm text-muted-foreground">{t("payable_amount")}</div>
+            <div className="text-3xl font-bold">₹{outstanding.toFixed(2)}</div>
+            <div className="text-xs text-muted-foreground mt-1">{selected?.name}</div>
+          </div>
           <Label className="text-base font-semibold">{t("payment_amount")}</Label>
           <Input type="number" inputMode="decimal" className="h-14 text-2xl" value={amount} onChange={(e) => setAmount(e.target.value)} />
           <div className="rounded-lg bg-muted p-3 text-sm">
             {t("outstanding")}: <strong>₹{outstanding.toFixed(2)}</strong>
           </div>
+
           {exceeds && (
             <div className="rounded-lg border-2 border-amber-300 bg-amber-50 p-3 text-sm">
               <div className="text-amber-800 font-medium">{t("exceeds_outstanding_msg")}</div>
