@@ -761,6 +761,14 @@ const phase10: Record<Lang, Dict> = {
 };
 (Object.keys(phase10) as Lang[]).forEach((l) => Object.assign(translations[l], phase10[l]));
 
+const phase11: Record<Lang, Dict> = {
+  en: { transport_expense: "Transportation Expense", payable_amount: "Payable Amount" },
+  hi: { transport_expense: "परिवहन खर्च", payable_amount: "देय राशि" },
+  gu: { transport_expense: "પરિવહન ખર્ચ", payable_amount: "ચૂકવવાની રકમ" },
+};
+(Object.keys(phase11) as Lang[]).forEach((l) => Object.assign(translations[l], phase11[l]));
+
+
 
 interface I18nContextValue {
   lang: Lang;
