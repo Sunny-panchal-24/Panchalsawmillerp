@@ -99,7 +99,17 @@ function ReportsPage() {
     return { income, received, purchaseCost, expTotal, salaryTotal, vpTotal, profit };
   }, [sales, receipts, purchases, expenses, workerSalaries, vendorPayments, from, to]);
 
-  // Daily profit
+  // Transportation (tractor) expense — kept separate from vendor payments
+  const transport = useMemo(() => {
+    const total = purchases.reduce((a, x) => a + Number(x.tractor_payable || 0), 0);
+    const paid = purchases.reduce((a, x) => a + Number(x.tractor_paid_amount || 0), 0);
+    const material = purchases.reduce((a, x) => a + Number(x.material_cost || 0), 0);
+    const man = purchases.reduce((a, x) => a + Number(x.net_man || 0), 0);
+    const rawMaterial = material + total;
+    return { total, paid, rawMaterial, costPerMan: man > 0 ? rawMaterial / man : 0 };
+  }, [purchases]);
+
+
   const dailyProfit = useMemo(() => {
     const map = new Map<string, { income: number; cost: number; expense: number }>();
     const bump = (d: string, key: "income" | "cost" | "expense", v: number) => {
