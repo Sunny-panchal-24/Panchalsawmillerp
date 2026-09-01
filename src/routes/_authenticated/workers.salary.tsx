@@ -317,8 +317,18 @@ function WorkerSalaryWizard() {
             )}
             {payChoice === "now" && (
               <>
+                <div className="rounded-2xl border-2 border-primary bg-primary/10 p-4 text-center">
+                  <div className="text-sm text-muted-foreground">Payable Amount</div>
+                  <div className="text-3xl font-bold">₹{netPayable.toFixed(2)}</div>
+                </div>
                 <Label>Amount Paid</Label>
                 <Input type="number" inputMode="decimal" value={paidAmount} onChange={(e) => setPaidAmount(e.target.value)} className="h-12" />
+                {excessPaid > 0 && (
+                  <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm">
+                    ₹{excessPaid.toFixed(2)} above payable — will be recorded as a new advance.
+                  </div>
+                )}
+
                 <Label>Payment Mode</Label>
                 <div className="grid grid-cols-1 gap-2">
                   <button type="button" onClick={() => { setMode("cash"); setBankId(""); }}
