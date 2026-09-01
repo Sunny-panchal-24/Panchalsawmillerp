@@ -145,6 +145,8 @@ function WorkerSalaryWizard() {
   const netPayable = useMemo(() => Math.max(0, gross - advDeduct), [gross, advDeduct]);
   const paid = payChoice === "now" ? Number(paidAmount || 0) : 0;
   const outstanding = Math.max(0, netPayable - paid);
+  const carryAdvance = Math.max(0, (advanceAction === "deduct" ? Math.min(Number(advanceToDeduct || 0), pendingAdvance) : 0) - advDeduct);
+  const excessPaid = Math.max(0, paid - netPayable);
 
   const dayAllowed = useMemo(() => isPaymentDayAllowed(new Date(), lastPaidOn), [lastPaidOn]);
   const payBlocked = payChoice === "now" && !dayAllowed && !(overrideDay && isAdmin);
@@ -164,16 +166,32 @@ function WorkerSalaryWizard() {
       extra_work: Number(extraWork || 0),
       advance_deducted: advDeduct,
       net_payable: netPayable,
-      paid_amount: paid,
+      paid_amount: Math.min(paid, netPayable),
       payment_mode: payChoice === "now" ? mode : null,
       bank_account_id: payChoice === "now" && mode === "bank" ? bankId || null : null,
       outstanding,
     });
+    if (!error && excessPaid > 0) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Amount paid beyond payable salary is recorded as a fresh advance.
+        await supabase.from("worker_advances").insert({
+          worker_id: workerId,
+          advance_date: periodEnd,
+          amount: excessPaid,
+          payment_mode: mode,
+          bank_account_id: mode === "bank" ? bankId || null : null,
+          notes: `Excess salary payment (${periodLabel})`,
+          created_by: user.id,
+        });
+      }
+    }
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Salary saved");
     navigate({ to: "/workers" });
   };
+
 
   return (
     <AppShell title="Salary" backTo="/workers">
