@@ -536,6 +536,18 @@ function ReportsPage() {
             <Table headers={["Bank", "Inflow", "Outflow", "Net"]}
               rows={bankFlow.map((b) => [b.name, fmt(b.inflow), fmt(b.outflow), fmt(b.net)])} />
 
+            <SectionTitle icon={Wallet} title="Transportation Expense (Tractor)" />
+            <div className="grid grid-cols-3 gap-2">
+              <Stat label="Total" value={fmt(transport.total)} color="text-rose-600" />
+              <Stat label="Paid" value={fmt(transport.paid)} />
+              <Stat label="Pending" value={fmt(transport.total - transport.paid)} color="text-amber-600" />
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Stat label="Raw Material Cost" value={fmt(transport.rawMaterial)} />
+              <Stat label="Cost / Man" value={fmt(transport.costPerMan)} />
+            </div>
+
+
             <SectionTitle icon={Wallet} title="Expense Transactions (tap to edit)" />
             <TxnLedger
               items={expenseLedger}
