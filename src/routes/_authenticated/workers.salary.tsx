@@ -61,8 +61,10 @@ function WorkerSalaryWizard() {
   const [extraWork, setExtraWork] = useState("0");
 
   const [pendingAdvance, setPendingAdvance] = useState(0);
+  const [periodAdvance, setPeriodAdvance] = useState(0);
   const [advanceAction, setAdvanceAction] = useState<"deduct" | "pending">("deduct");
   const [advanceToDeduct, setAdvanceToDeduct] = useState("");
+
 
   const [payChoice, setPayChoice] = useState<"now" | "later">("now");
   const [paidAmount, setPaidAmount] = useState("");
