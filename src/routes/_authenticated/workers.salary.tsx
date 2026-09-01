@@ -61,8 +61,10 @@ function WorkerSalaryWizard() {
   const [extraWork, setExtraWork] = useState("0");
 
   const [pendingAdvance, setPendingAdvance] = useState(0);
+  const [periodAdvance, setPeriodAdvance] = useState(0);
   const [advanceAction, setAdvanceAction] = useState<"deduct" | "pending">("deduct");
   const [advanceToDeduct, setAdvanceToDeduct] = useState("");
+
 
   const [payChoice, setPayChoice] = useState<"now" | "later">("now");
   const [paidAmount, setPaidAmount] = useState("");
@@ -91,7 +93,7 @@ function WorkerSalaryWizard() {
     if (!workerId) return;
     (async () => {
       const [advRes, salRes, wRes, attRes, lastRes] = await Promise.all([
-        supabase.from("worker_advances").select("amount").eq("worker_id", workerId),
+        supabase.from("worker_advances").select("amount,advance_date").eq("worker_id", workerId),
         supabase.from("worker_salaries").select("advance_deducted").eq("worker_id", workerId),
         supabase.from("workers").select("opening_advance,daily_wage").eq("id", workerId).maybeSingle(),
         supabase.from("worker_attendance").select("status").eq("worker_id", workerId)
@@ -103,10 +105,16 @@ function WorkerSalaryWizard() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const given = (advRes.data ?? []).reduce((s, a: any) => s + Number(a.amount ?? 0), 0);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const inPeriod = (advRes.data ?? []).filter((a: any) => a.advance_date >= periodStart && a.advance_date <= periodEnd)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .reduce((s: number, a: any) => s + Number(a.amount ?? 0), 0);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const adjusted = (salRes.data ?? []).reduce((s, a: any) => s + Number(a.advance_deducted ?? 0), 0);
       const remaining = Math.max(0, opening + given - adjusted);
       setPendingAdvance(remaining);
-      setAdvanceToDeduct(remaining.toFixed(2));
+      setPeriodAdvance(inPeriod);
+      setAdvanceToDeduct(Math.min(inPeriod || remaining, remaining).toFixed(2));
+
       setWage(String(wRes.data?.daily_wage ?? worker?.daily_wage ?? ""));
 
       let p = 0, h = 0, a = 0, wo = 0;
@@ -137,6 +145,8 @@ function WorkerSalaryWizard() {
   const netPayable = useMemo(() => Math.max(0, gross - advDeduct), [gross, advDeduct]);
   const paid = payChoice === "now" ? Number(paidAmount || 0) : 0;
   const outstanding = Math.max(0, netPayable - paid);
+  const carryAdvance = Math.max(0, (advanceAction === "deduct" ? Math.min(Number(advanceToDeduct || 0), pendingAdvance) : 0) - advDeduct);
+  const excessPaid = Math.max(0, paid - netPayable);
 
   const dayAllowed = useMemo(() => isPaymentDayAllowed(new Date(), lastPaidOn), [lastPaidOn]);
   const payBlocked = payChoice === "now" && !dayAllowed && !(overrideDay && isAdmin);
@@ -156,16 +166,32 @@ function WorkerSalaryWizard() {
       extra_work: Number(extraWork || 0),
       advance_deducted: advDeduct,
       net_payable: netPayable,
-      paid_amount: paid,
+      paid_amount: Math.min(paid, netPayable),
       payment_mode: payChoice === "now" ? mode : null,
       bank_account_id: payChoice === "now" && mode === "bank" ? bankId || null : null,
       outstanding,
     });
+    if (!error && excessPaid > 0) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Amount paid beyond payable salary is recorded as a fresh advance.
+        await supabase.from("worker_advances").insert({
+          worker_id: workerId,
+          advance_date: periodEnd,
+          amount: excessPaid,
+          payment_mode: mode,
+          bank_account_id: mode === "bank" ? bankId || null : null,
+          notes: `Excess salary payment (${periodLabel})`,
+          created_by: user.id,
+        });
+      }
+    }
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Salary saved");
     navigate({ to: "/workers" });
   };
+
 
   return (
     <AppShell title="Salary" backTo="/workers">
@@ -224,9 +250,11 @@ function WorkerSalaryWizard() {
         {step === 3 && (
           <div className="space-y-3">
             <Label className="text-base">Advance Adjustment</Label>
-            <div className="rounded-lg bg-muted p-3 text-sm">
-              Pending Advance: <strong>₹{pendingAdvance.toFixed(2)}</strong>
+            <div className="rounded-lg bg-muted p-3 text-sm space-y-1">
+              <div>Advance taken in this period: <strong>₹{periodAdvance.toFixed(2)}</strong></div>
+              <div>Total pending advance: <strong>₹{pendingAdvance.toFixed(2)}</strong></div>
             </div>
+
             <div className="grid grid-cols-2 gap-2">
               <button type="button" onClick={() => setAdvanceAction("deduct")}
                 className={`rounded-lg border-2 p-4 ${advanceAction === "deduct" ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
@@ -246,6 +274,12 @@ function WorkerSalaryWizard() {
             <div className="rounded-lg bg-muted p-3 text-sm">
               Gross: ₹{gross.toFixed(2)} − Advance: ₹{advDeduct.toFixed(2)} = <strong>Net ₹{netPayable.toFixed(2)}</strong>
             </div>
+            {carryAdvance > 0 && (
+              <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm">
+                Advance exceeds salary — ₹{carryAdvance.toFixed(2)} stays pending as advance.
+              </div>
+            )}
+
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1 h-12" onClick={() => setStep(2)}>Back</Button>
               <Button className="flex-1 h-12" onClick={() => setStep(4)}>Next</Button>
@@ -283,8 +317,18 @@ function WorkerSalaryWizard() {
             )}
             {payChoice === "now" && (
               <>
+                <div className="rounded-2xl border-2 border-primary bg-primary/10 p-4 text-center">
+                  <div className="text-sm text-muted-foreground">Payable Amount</div>
+                  <div className="text-3xl font-bold">₹{netPayable.toFixed(2)}</div>
+                </div>
                 <Label>Amount Paid</Label>
                 <Input type="number" inputMode="decimal" value={paidAmount} onChange={(e) => setPaidAmount(e.target.value)} className="h-12" />
+                {excessPaid > 0 && (
+                  <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm">
+                    ₹{excessPaid.toFixed(2)} above payable — will be recorded as a new advance.
+                  </div>
+                )}
+
                 <Label>Payment Mode</Label>
                 <div className="grid grid-cols-1 gap-2">
                   <button type="button" onClick={() => { setMode("cash"); setBankId(""); }}

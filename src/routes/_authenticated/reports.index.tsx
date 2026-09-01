@@ -99,7 +99,17 @@ function ReportsPage() {
     return { income, received, purchaseCost, expTotal, salaryTotal, vpTotal, profit };
   }, [sales, receipts, purchases, expenses, workerSalaries, vendorPayments, from, to]);
 
-  // Daily profit
+  // Transportation (tractor) expense — kept separate from vendor payments
+  const transport = useMemo(() => {
+    const total = purchases.reduce((a, x) => a + Number(x.tractor_payable || 0), 0);
+    const paid = purchases.reduce((a, x) => a + Number(x.tractor_paid_amount || 0), 0);
+    const material = purchases.reduce((a, x) => a + Number(x.material_cost || 0), 0);
+    const man = purchases.reduce((a, x) => a + Number(x.net_man || 0), 0);
+    const rawMaterial = material + total;
+    return { total, paid, rawMaterial, costPerMan: man > 0 ? rawMaterial / man : 0 };
+  }, [purchases]);
+
+
   const dailyProfit = useMemo(() => {
     const map = new Map<string, { income: number; cost: number; expense: number }>();
     const bump = (d: string, key: "income" | "cost" | "expense", v: number) => {
@@ -535,6 +545,18 @@ function ReportsPage() {
             <SectionTitle icon={Landmark} title="Bank Flow" />
             <Table headers={["Bank", "Inflow", "Outflow", "Net"]}
               rows={bankFlow.map((b) => [b.name, fmt(b.inflow), fmt(b.outflow), fmt(b.net)])} />
+
+            <SectionTitle icon={Wallet} title="Transportation Expense (Tractor)" />
+            <div className="grid grid-cols-3 gap-2">
+              <Stat label="Total" value={fmt(transport.total)} color="text-rose-600" />
+              <Stat label="Paid" value={fmt(transport.paid)} />
+              <Stat label="Pending" value={fmt(transport.total - transport.paid)} color="text-amber-600" />
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Stat label="Raw Material Cost" value={fmt(transport.rawMaterial)} />
+              <Stat label="Cost / Man" value={fmt(transport.costPerMan)} />
+            </div>
+
 
             <SectionTitle icon={Wallet} title="Expense Transactions (tap to edit)" />
             <TxnLedger
