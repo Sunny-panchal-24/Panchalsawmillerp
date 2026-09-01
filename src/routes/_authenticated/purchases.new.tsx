@@ -509,9 +509,14 @@ function NewPurchaseWizard() {
           ]} />
           {tractorPayMode === "now" && (
             <>
+              <div className="rounded-2xl border-2 border-primary bg-primary/10 p-4 text-center">
+                <div className="text-sm text-muted-foreground">{t("tractor_payable")} ({t("transport_expense")})</div>
+                <div className="text-3xl font-bold">₹{calc.tractorPayable.toFixed(2)}</div>
+              </div>
               <Field label={t("payment_amount")}>
                 <Input type="number" inputMode="decimal" value={tractorPayAmt} onChange={(e) => setTractorPayAmt(e.target.value)} className="h-14 text-2xl" />
               </Field>
+
               <Field label={t("payment_mode")}>
                 <Select value={tractorPayTarget} onValueChange={setTractorPayTarget}>
                   <SelectTrigger className="h-12 text-base"><SelectValue /></SelectTrigger>
