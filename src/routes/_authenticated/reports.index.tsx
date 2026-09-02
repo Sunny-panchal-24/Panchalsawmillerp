@@ -274,31 +274,33 @@ function ReportsPage() {
   useEffect(() => {
     (async () => {
       const [ap, avp, ava, as, ar, aws, awa] = await Promise.all([
-        supabase.from("purchases").select("vendor_id, vendor_payable, paid_amount"),
+        supabase.from("purchases").select("vendor_id, vendor_payable, advance_deducted, paid_amount"),
         supabase.from("vendor_payments").select("vendor_id, amount"),
         supabase.from("vendor_advances").select("vendor_id, amount"),
-        supabase.from("sales").select("customer_id, outstanding"),
-        supabase.from("customer_receipts").select("customer_id, amount, sale_id"),
-        supabase.from("worker_salaries").select("worker_id, outstanding"),
+        supabase.from("sales").select("customer_id, total_amount, paid_amount"),
+        supabase.from("customer_receipts").select("customer_id, amount"),
+        supabase.from("worker_salaries").select("worker_id, gross_salary, extra_work, paid_amount"),
         supabase.from("worker_advances").select("worker_id, amount"),
       ]);
+      // Single net balance per party: advance / credit = negative outstanding.
+      const bump = (m: Map<string, number>, k: string, v: number) => m.set(k, (m.get(k) || 0) + v);
       const vMap = new Map<string, number>();
-      (ap.data ?? []).forEach((p: Row) => {
-        vMap.set(p.vendor_id, (vMap.get(p.vendor_id) || 0) + Number(p.vendor_payable || 0) - Number(p.paid_amount || 0));
-      });
-      (avp.data ?? []).forEach((p: Row) => vMap.set(p.vendor_id, (vMap.get(p.vendor_id) || 0) - Number(p.amount || 0)));
-      vendors.forEach((v) => vMap.set(v.id, (vMap.get(v.id) || 0) + Number(v.opening_balance || 0)));
+      vendors.forEach((v) => bump(vMap, v.id, Number(v.opening_balance || 0) - Number(v.opening_advance || 0)));
+      (ap.data ?? []).forEach((p: Row) => bump(vMap, p.vendor_id, Number(p.vendor_payable || 0) + Number(p.advance_deducted || 0) - Number(p.paid_amount || 0)));
+      (avp.data ?? []).forEach((p: Row) => bump(vMap, p.vendor_id, -Number(p.amount || 0)));
+      (ava.data ?? []).forEach((p: Row) => bump(vMap, p.vendor_id, -Number(p.amount || 0)));
       setOutVendors(vendors.map((v) => ({ name: v.name, balance: vMap.get(v.id) || 0 })).filter((x) => Math.abs(x.balance) > 0.01));
 
       const cMap = new Map<string, number>();
-      (as.data ?? []).forEach((s: Row) => cMap.set(s.customer_id, (cMap.get(s.customer_id) || 0) + Number(s.outstanding || 0)));
-      customers.forEach((c) => cMap.set(c.id, (cMap.get(c.id) || 0) + Number(c.opening_balance || 0)));
+      customers.forEach((c) => bump(cMap, c.id, Number(c.opening_balance || 0)));
+      (as.data ?? []).forEach((x: Row) => bump(cMap, x.customer_id, Number(x.total_amount || 0) - Number(x.paid_amount || 0)));
+      (ar.data ?? []).forEach((x: Row) => bump(cMap, x.customer_id, -Number(x.amount || 0)));
       setOutCustomers(customers.map((c) => ({ name: c.name, balance: cMap.get(c.id) || 0 })).filter((x) => Math.abs(x.balance) > 0.01));
 
       const wMap = new Map<string, number>();
-      (aws.data ?? []).forEach((s: Row) => wMap.set(s.worker_id, (wMap.get(s.worker_id) || 0) + Number(s.outstanding || 0)));
-      (awa.data ?? []).forEach((a: Row) => wMap.set(a.worker_id, (wMap.get(a.worker_id) || 0) - Number(a.amount || 0)));
-      workers.forEach((w) => wMap.set(w.id, (wMap.get(w.id) || 0) - Number(w.opening_advance || 0)));
+      workers.forEach((w) => bump(wMap, w.id, -Number(w.opening_advance || 0)));
+      (aws.data ?? []).forEach((x: Row) => bump(wMap, x.worker_id, Number(x.gross_salary || 0) + Number(x.extra_work || 0) - Number(x.paid_amount || 0)));
+      (awa.data ?? []).forEach((x: Row) => bump(wMap, x.worker_id, -Number(x.amount || 0)));
       setOutWorkers(workers.map((w) => ({ name: w.name, balance: wMap.get(w.id) || 0 })).filter((x) => Math.abs(x.balance) > 0.01));
     })();
   }, [vendors, customers, workers]);
