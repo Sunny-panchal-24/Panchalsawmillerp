@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { vendorBalance } from "@/lib/balances";
 
 export const Route = createFileRoute("/_authenticated/vendors/$vendorId/ledger")({
   component: VendorLedger,
@@ -44,7 +45,7 @@ function VendorLedger() {
       setLoading(true);
       const [v, p, pay, adv, bk] = await Promise.all([
         supabase.from("vendors").select("*").eq("id", vendorId).single(),
-        supabase.from("purchases").select("id,entry_date,entry_no,total_cost").eq("vendor_id", vendorId).order("entry_date"),
+        supabase.from("purchases").select("id,entry_date,entry_no,total_cost,vendor_payable,advance_deducted,paid_amount,tractor_payable").eq("vendor_id", vendorId).order("entry_date"),
         supabase.from("vendor_payments").select("id,payment_date,amount,mode,remarks,bank_account_id,purchase_id").eq("vendor_id", vendorId).order("payment_date"),
         supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id,remarks").eq("vendor_id", vendorId).order("advance_date"),
         supabase.from("bank_accounts").select("id,name"),
@@ -62,16 +63,26 @@ function VendorLedger() {
   const bankName = (id: string | null) => id ? (banks.find((b) => b.id === id)?.name ?? "—") : t("cash");
 
   const opening = (Number(vendor?.opening_balance) || 0) - (Number(vendor?.opening_advance) || 0);
-  const totalPurchases = purchases.reduce((s, x) => s + Number(x.total_cost), 0);
+  // Vendor is charged only for material (tractor/transport is a sawmill expense).
+  const charge = (p: Purchase) => Number(p.vendor_payable || 0) + Number(p.advance_deducted || 0);
+  const totalPurchases = purchases.reduce((s, x) => s + charge(x), 0);
+  const totalPurchasePaid = purchases.reduce((s, x) => s + Number(x.paid_amount || 0), 0);
   const totalPayments = payments.reduce((s, x) => s + Number(x.amount), 0);
   const totalAdvances = advances.reduce((s, x) => s + Number(x.amount), 0);
-  // outstanding = opening + purchases - (payments + advances)
-  const outstanding = opening + totalPurchases - totalPayments - totalAdvances;
+  // Single balance: advance is just negative outstanding.
+  const outstanding = vendorBalance({
+    opening_balance: vendor?.opening_balance,
+    opening_advance: vendor?.opening_advance,
+    purchases, payments, advances,
+  });
 
   // Outstanding history (running)
   type Hist = { date: string; particulars: string; change: number; balance: number };
   const events: { date: string; particulars: string; change: number }[] = [];
-  purchases.forEach((x) => events.push({ date: x.entry_date, particulars: `${t("purchase")} #${x.entry_no}`, change: Number(x.total_cost) }));
+  purchases.forEach((x) => {
+    events.push({ date: x.entry_date, particulars: `${t("purchase")} #${x.entry_no}`, change: charge(x) });
+    if (Number(x.paid_amount || 0) > 0) events.push({ date: x.entry_date, particulars: `${t("purchase")} #${x.entry_no} · ${t("paid")}`, change: -Number(x.paid_amount) });
+  });
   payments.forEach((x) => events.push({ date: x.payment_date, particulars: `${t("payment")} · ${bankName(x.bank_account_id)}${x.remarks ? ` · ${x.remarks}` : ""}`, change: -Number(x.amount) }));
   advances.forEach((x) => events.push({ date: x.advance_date, particulars: `${t("advance")} · ${bankName(x.bank_account_id)}${x.remarks ? ` · ${x.remarks}` : ""}`, change: -Number(x.amount) }));
   events.sort((a, b) => a.date.localeCompare(b.date));
@@ -112,7 +123,7 @@ function VendorLedger() {
                     <tr key={x.id} className="border-t">
                       <td className="p-2">{x.entry_date}</td>
                       <td className="p-2">#{x.entry_no}</td>
-                      <td className="p-2 text-right">₹{Number(x.total_cost).toFixed(2)}</td>
+                      <td className="p-2 text-right">₹{charge(x).toFixed(2)}</td>
                     </tr>
                   ))}
                   <tr className="border-t bg-muted font-medium">

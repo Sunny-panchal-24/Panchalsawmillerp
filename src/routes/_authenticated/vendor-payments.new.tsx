@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { vendorBalance } from "@/lib/balances";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -58,14 +59,16 @@ function NewVendorPaymentWizard() {
     if (!vendorId) { setOutstanding(0); return; }
     (async () => {
       const [{ data: v }, { data: pu }, { data: pa }] = await Promise.all([
-        supabase.from("vendors").select("opening_balance").eq("id", vendorId).single(),
-        supabase.from("purchases").select("vendor_payable").eq("vendor_id", vendorId),
+        supabase.from("vendors").select("opening_balance,opening_advance").eq("id", vendorId).single(),
+        supabase.from("purchases").select("vendor_payable,advance_deducted,paid_amount").eq("vendor_id", vendorId),
         supabase.from("vendor_payments").select("amount").eq("vendor_id", vendorId),
       ]);
-      const opening = Number(v?.opening_balance ?? 0);
-      const purchTotal = (pu ?? []).reduce((s, r) => s + Number(r.vendor_payable ?? 0), 0);
-      const paid = (pa ?? []).reduce((s, r) => s + Number(r.amount), 0);
-      setOutstanding(opening + purchTotal - paid);
+      const { data: adv } = await supabase.from("vendor_advances").select("amount").eq("vendor_id", vendorId);
+      setOutstanding(vendorBalance({
+        opening_balance: v?.opening_balance,
+        opening_advance: v?.opening_advance,
+        purchases: pu ?? [], payments: pa ?? [], advances: adv ?? [],
+      }));
     })();
   }, [vendorId]);
 
