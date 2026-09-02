@@ -14,7 +14,10 @@ type Vendor = {
   id: string; name: string; village: string | null; mobile: string | null;
   opening_balance: number; opening_advance: number;
 };
-type Purchase = { id: string; entry_date: string; entry_no: string; total_cost: number };
+type Purchase = {
+  id: string; entry_date: string; entry_no: string; total_cost: number;
+  vendor_payable: number; advance_deducted: number; paid_amount: number; tractor_payable: number;
+};
 type Payment = {
   id: string; payment_date: string; amount: number;
   mode: string; remarks: string | null; bank_account_id: string | null;
