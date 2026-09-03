@@ -232,18 +232,10 @@ function NewSaleWizard() {
         saleId = sale!.id;
       }
 
-      if (computedPaid > 0) {
-        await supabase.from("customer_receipts").insert({
-          customer_id: customerId,
-          sale_id: saleId,
-          receipt_date: saleDate,
-          amount: computedPaid,
-          mode: payMode === CASH ? "cash" : "bank",
-          bank_account_id: bankId,
-          remarks: t("sale") + " " + finalSaleNo,
-          created_by: user.id,
-        });
-      }
+      // NOTE: inline sale payment is stored on the sale row itself (paid_amount).
+      // We deliberately do NOT create a linked customer_receipts row — that used to
+      // double-count the same money in cash/bank books and customer balances.
+
 
       toast.success(t("saved"));
       navigate({ to: "/sales" });

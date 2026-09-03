@@ -627,14 +627,10 @@ function NewPurchaseWizard() {
         purchaseId = data.id;
       }
 
-      if (vendorPayMode === "now" && vAmt > 0) {
-        const { error: pErr } = await supabase.from("vendor_payments").insert({
-          vendor_id: vendorId, payment_date: entryDate, amount: vAmt,
-          mode: "cash", bank_account_id: vendorBankId, purchase_id: purchaseId,
-          remarks: `Purchase #${finalEntryNo}`,
-        });
-        if (pErr) toast.error(pErr.message);
-      }
+      // NOTE: inline vendor payment is stored on the purchase row itself (paid_amount).
+      // No linked vendor_payments row is created — that used to double-count the
+      // same cash in cash/bank books, vendor balance and reports.
+
 
       toast.success(t("saved"));
       navigate({ to: "/purchases" });

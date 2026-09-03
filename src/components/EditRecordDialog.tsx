@@ -12,12 +12,13 @@ import { toast } from "sonner";
 export type EditField = {
   key: string;
   label: string;
-  type?: "text" | "number" | "date";
+  type?: "text" | "number" | "date" | "select";
+  options?: { value: string; label: string }[];
 };
 
 // Generic edit dialog: loads current values from the row, saves changes back.
 export function EditRecordDialog({
-  open, onClose, onSaved, table, id, row, fields, title,
+  open, onClose, onSaved, table, id, row, fields, title, derive,
 }: {
   open: boolean;
   onClose: () => void;
@@ -27,6 +28,7 @@ export function EditRecordDialog({
   row: Record<string, unknown>;
   fields: EditField[];
   title?: string;
+  derive?: (patch: Record<string, unknown>) => Record<string, unknown>;
 }) {
   const { t } = useI18n();
   const [values, setValues] = useState<Record<string, string>>({});
@@ -45,12 +47,13 @@ export function EditRecordDialog({
 
   const save = async () => {
     setSaving(true);
-    const patch: Record<string, unknown> = {};
+    let patch: Record<string, unknown> = {};
     fields.forEach((f) => {
       const raw = values[f.key] ?? "";
       if (f.type === "number") patch[f.key] = Number(raw) || 0;
       else patch[f.key] = raw.trim() === "" ? null : raw;
     });
+    if (derive) patch = derive(patch);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from(table as any) as any).update(patch).eq("id", id);
     setSaving(false);
@@ -60,24 +63,38 @@ export function EditRecordDialog({
     onClose();
   };
 
+
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{title ?? t("edit_entry")}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           {fields.map((f) => (
             <div key={f.key} className="space-y-1.5">
               <Label className="text-base">{f.label}</Label>
-              <Input
-                type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
-                inputMode={f.type === "number" ? "decimal" : undefined}
-                className="h-12 text-base"
-                value={values[f.key] ?? ""}
-                onChange={(e) => setValues((p) => ({ ...p, [f.key]: e.target.value }))}
-              />
+              {f.type === "select" ? (
+                <select
+                  className="h-12 w-full rounded-md border border-input bg-background px-3 text-base"
+                  value={values[f.key] ?? ""}
+                  onChange={(e) => setValues((p) => ({ ...p, [f.key]: e.target.value }))}
+                >
+                  {(f.options ?? []).map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                  inputMode={f.type === "number" ? "decimal" : undefined}
+                  className="h-12 text-base"
+                  value={values[f.key] ?? ""}
+                  onChange={(e) => setValues((p) => ({ ...p, [f.key]: e.target.value }))}
+                />
+              )}
             </div>
           ))}
         </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t("cancel")}</Button>
           <Button onClick={save} disabled={saving}>{t("save")}</Button>
