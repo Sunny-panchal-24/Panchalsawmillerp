@@ -6,13 +6,16 @@ import { useI18n } from "@/lib/i18n";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Pencil, Trash2 } from "lucide-react";
-import { EditRecordDialog, type EditField } from "@/components/EditRecordDialog";
+import { Pencil } from "lucide-react";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
+import { RowActions } from "@/components/RowActions";
+import { editFieldsFor, type Lists } from "@/lib/edit-fields";
 import { AdjustmentDialog } from "@/components/AdjustmentDialog";
 
 export const Route = createFileRoute("/_authenticated/cash-book")({
   component: CashBook,
 });
+
 
 type Txn = {
   date: string;
