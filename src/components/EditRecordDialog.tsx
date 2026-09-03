@@ -12,12 +12,13 @@ import { toast } from "sonner";
 export type EditField = {
   key: string;
   label: string;
-  type?: "text" | "number" | "date";
+  type?: "text" | "number" | "date" | "select";
+  options?: { value: string; label: string }[];
 };
 
 // Generic edit dialog: loads current values from the row, saves changes back.
 export function EditRecordDialog({
-  open, onClose, onSaved, table, id, row, fields, title,
+  open, onClose, onSaved, table, id, row, fields, title, derive,
 }: {
   open: boolean;
   onClose: () => void;
@@ -27,6 +28,7 @@ export function EditRecordDialog({
   row: Record<string, unknown>;
   fields: EditField[];
   title?: string;
+  derive?: (patch: Record<string, unknown>) => Record<string, unknown>;
 }) {
   const { t } = useI18n();
   const [values, setValues] = useState<Record<string, string>>({});
@@ -45,12 +47,13 @@ export function EditRecordDialog({
 
   const save = async () => {
     setSaving(true);
-    const patch: Record<string, unknown> = {};
+    let patch: Record<string, unknown> = {};
     fields.forEach((f) => {
       const raw = values[f.key] ?? "";
       if (f.type === "number") patch[f.key] = Number(raw) || 0;
       else patch[f.key] = raw.trim() === "" ? null : raw;
     });
+    if (derive) patch = derive(patch);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from(table as any) as any).update(patch).eq("id", id);
     setSaving(false);
@@ -59,6 +62,7 @@ export function EditRecordDialog({
     onSaved();
     onClose();
   };
+
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
