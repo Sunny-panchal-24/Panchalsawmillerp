@@ -1,6 +1,5 @@
-import { Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { RowActions } from "@/components/RowActions";
 
 export type TxnItem = {
   id: string;
@@ -11,7 +10,7 @@ export type TxnItem = {
   tone?: "in" | "out" | "neutral";
 };
 
-// Clickable ledger list: tap a row (or the pencil) to edit, trash to delete.
+// Clickable ledger list: tap a row to open the safe Edit / Delete popup.
 export function TxnLedger({
   items,
   onEdit,
@@ -29,14 +28,7 @@ export function TxnLedger({
   return (
     <div className="space-y-2">
       {items.map((it) => (
-        <Card
-          key={it.id}
-          role="button"
-          tabIndex={0}
-          onClick={() => onEdit(it.id)}
-          onKeyDown={(e) => { if (e.key === "Enter") onEdit(it.id); }}
-          className="flex items-center gap-2 p-3 active:scale-[0.99] transition-transform cursor-pointer"
-        >
+        <Card key={it.id} className="flex items-center gap-2 p-3">
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold">{it.title}</div>
             <div className="truncate text-xs text-muted-foreground">
@@ -50,26 +42,14 @@ export function TxnLedger({
           >
             ₹{Number(it.amount || 0).toFixed(2)}
           </div>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-9 w-9 shrink-0"
-            aria-label="Edit"
-            onClick={(e) => { e.stopPropagation(); onEdit(it.id); }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-9 w-9 shrink-0 text-red-600"
-            aria-label="Delete"
-            onClick={(e) => { e.stopPropagation(); onDelete(it.id); }}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <RowActions
+            title={it.title}
+            onEdit={() => onEdit(it.id)}
+            onDelete={() => onDelete(it.id)}
+          />
         </Card>
       ))}
     </div>
   );
 }
+
