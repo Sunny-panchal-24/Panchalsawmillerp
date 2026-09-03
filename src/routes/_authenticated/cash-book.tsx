@@ -32,48 +32,8 @@ type Txn = {
 
 type Filter = "today" | "week" | "month" | "custom" | "all";
 
-const FIELDS: Record<string, (t: (k: string) => string) => EditField[]> = {
-  purchases: (t) => [
-    { key: "entry_date", label: t("date"), type: "date" },
-    { key: "paid_amount", label: t("amount"), type: "number" },
-  ],
-  sales: (t) => [
-    { key: "sale_date", label: t("date"), type: "date" },
-    { key: "paid_amount", label: t("amount"), type: "number" },
-  ],
-  vendor_payments: (t) => [
-    { key: "payment_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-    { key: "remarks", label: t("remarks") },
-  ],
-  customer_receipts: (t) => [
-    { key: "receipt_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-    { key: "remarks", label: t("remarks") },
-  ],
-  expenses: (t) => [
-    { key: "expense_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-    { key: "description", label: t("description") },
-  ],
-  worker_advances: (t) => [
-    { key: "advance_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-  ],
-  worker_salaries: (t) => [
-    { key: "paid_amount", label: t("amount"), type: "number" },
-    { key: "outstanding", label: t("outstanding"), type: "number" },
-  ],
-  vendor_advances: (t) => [
-    { key: "advance_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-  ],
-  manual_adjustments: (t) => [
-    { key: "adjust_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-    { key: "reason", label: t("remarks") },
-  ],
-};
+
+
 
 
 function CashBook() {
