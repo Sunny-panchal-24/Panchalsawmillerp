@@ -66,22 +66,35 @@ export function EditRecordDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{title ?? t("edit_entry")}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           {fields.map((f) => (
             <div key={f.key} className="space-y-1.5">
               <Label className="text-base">{f.label}</Label>
-              <Input
-                type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
-                inputMode={f.type === "number" ? "decimal" : undefined}
-                className="h-12 text-base"
-                value={values[f.key] ?? ""}
-                onChange={(e) => setValues((p) => ({ ...p, [f.key]: e.target.value }))}
-              />
+              {f.type === "select" ? (
+                <select
+                  className="h-12 w-full rounded-md border border-input bg-background px-3 text-base"
+                  value={values[f.key] ?? ""}
+                  onChange={(e) => setValues((p) => ({ ...p, [f.key]: e.target.value }))}
+                >
+                  {(f.options ?? []).map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                  inputMode={f.type === "number" ? "decimal" : undefined}
+                  className="h-12 text-base"
+                  value={values[f.key] ?? ""}
+                  onChange={(e) => setValues((p) => ({ ...p, [f.key]: e.target.value }))}
+                />
+              )}
             </div>
           ))}
         </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>{t("cancel")}</Button>
           <Button onClick={save} disabled={saving}>{t("save")}</Button>
