@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useI18n } from "@/lib/i18n";
@@ -29,6 +29,15 @@ export function AppShell({ title, children, action, backTo = "/" }: AppShellProp
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-11 w-11 shrink-0"
+              onClick={() => navigate({ to: "/" })}
+              aria-label={t("home")}
+            >
+              <Home className="h-5 w-5" />
+            </Button>
             <h1 className="truncate text-lg font-bold">{title}</h1>
           </div>
           <div className="flex items-center gap-2">
@@ -37,6 +46,7 @@ export function AppShell({ title, children, action, backTo = "/" }: AppShellProp
           </div>
         </div>
       </header>
+
       <main className="mx-auto max-w-3xl px-3 py-4">{children}</main>
     </div>
   );
