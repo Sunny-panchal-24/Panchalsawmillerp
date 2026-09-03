@@ -51,63 +51,71 @@ function CashBook() {
   const [loading, setLoading] = useState(true);
   const [editTxn, setEditTxn] = useState<Txn | null>(null);
   const [adjOpen, setAdjOpen] = useState(false);
+  const [lists, setLists] = useState<Lists>({});
 
   const load = async () => {
     const [
       { data: cs }, { data: pu }, { data: sa }, { data: vp },
       { data: cr }, { data: ex }, { data: wa }, { data: ws },
       { data: va }, { data: ma },
+      { data: vn }, { data: cu }, { data: wk }, { data: bk },
     ] = await Promise.all([
       supabase.from("company_settings").select("id,opening_cash").limit(1).maybeSingle(),
-      supabase.from("purchases").select("id,entry_date,entry_no,paid_amount,paid_mode,tractor_paid_amount,tractor_paid_mode"),
-      supabase.from("sales").select("id,sale_date,sale_no,sale_type,paid_amount,payment_mode,payment_status"),
-      supabase.from("vendor_payments").select("id,payment_date,amount,mode,vendor_id,remarks"),
-      supabase.from("customer_receipts").select("id,receipt_date,amount,mode,customer_id,remarks"),
-      supabase.from("expenses").select("id,expense_date,amount,payment_mode,description,expense_type"),
-      supabase.from("worker_advances").select("id,advance_date,amount,payment_mode,worker_id"),
-      supabase.from("worker_salaries").select("id,period_end,paid_amount,payment_mode,worker_id,outstanding"),
-      supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id,vendor_id"),
+      supabase.from("purchases").select("id,entry_date,entry_no,paid_amount,paid_mode,bank_account_id,tractor_paid_amount,tractor_paid_mode,tractor_bank_account_id"),
+      supabase.from("sales").select("id,sale_date,sale_no,sale_type,paid_amount,payment_mode,payment_status,bank_account_id"),
+      supabase.from("vendor_payments").select("id,payment_date,amount,mode,vendor_id,remarks,bank_account_id,purchase_id"),
+      supabase.from("customer_receipts").select("id,receipt_date,amount,mode,customer_id,remarks,bank_account_id,sale_id"),
+      supabase.from("expenses").select("id,expense_date,amount,payment_mode,description,expense_type,bank_account_id"),
+      supabase.from("worker_advances").select("id,advance_date,amount,payment_mode,worker_id,bank_account_id,notes"),
+      supabase.from("worker_salaries").select("*"),
+      supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id,vendor_id,remarks"),
       supabase.from("manual_adjustments").select("id,adjust_date,amount,reason,bank_account_id").is("bank_account_id", null),
+      supabase.from("vendors").select("id,name").order("name"),
+      supabase.from("customers").select("id,name").order("name"),
+      supabase.from("workers").select("id,name").order("name"),
+      supabase.from("bank_accounts").select("id,name").eq("is_active", true).order("name"),
     ]);
 
     setOpening(Number(cs?.opening_cash ?? 0));
     setSettingsId(cs?.id ?? null);
+    setLists({ vendors: vn ?? [], customers: cu ?? [], workers: wk ?? [], banks: bk ?? [] });
 
     const list: Txn[] = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (pu ?? []).forEach((r: any) => {
-      if (Number(r.paid_amount ?? 0) > 0 && r.paid_mode === "cash") {
+      if (Number(r.paid_amount ?? 0) > 0 && !r.bank_account_id) {
         list.push({ date: r.entry_date, label: `${t("purchase")} ${r.entry_no}`, outAmt: Number(r.paid_amount), inAmt: 0, table: "purchases", id: r.id, row: r, wizard: "purchase" });
       }
-      if (Number(r.tractor_paid_amount ?? 0) > 0 && r.tractor_paid_mode === "cash") {
+      if (Number(r.tractor_paid_amount ?? 0) > 0 && !r.tractor_bank_account_id) {
         list.push({ date: r.entry_date, label: `${t("tractor_payment")} ${r.entry_no}`, outAmt: Number(r.tractor_paid_amount), inAmt: 0, table: "purchases", id: r.id, row: r, wizard: "purchase" });
       }
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (sa ?? []).forEach((r: any) => {
-      if (Number(r.paid_amount ?? 0) > 0 && r.payment_mode === "cash") {
+      if (Number(r.paid_amount ?? 0) > 0 && !r.bank_account_id) {
         list.push({ date: r.sale_date, label: `${t("sale")} ${r.sale_no}`, inAmt: Number(r.paid_amount), outAmt: 0, table: "sales", id: r.id, row: r, wizard: "sale", saleType: r.sale_type });
       }
     });
+    // NOTE: rows linked to a purchase/sale are legacy duplicates — skip them.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (vp ?? []).forEach((r: any) => {
-      if (r.mode === "cash") list.push({ date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_payments", id: r.id, row: r });
+      if (!r.bank_account_id && !r.purchase_id) list.push({ date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_payments", id: r.id, row: r });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (cr ?? []).forEach((r: any) => {
-      if (r.mode === "cash") list.push({ date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0, table: "customer_receipts", id: r.id, row: r });
+      if (!r.bank_account_id && !r.sale_id) list.push({ date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0, table: "customer_receipts", id: r.id, row: r });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ex ?? []).forEach((r: any) => {
-      if (r.payment_mode === "cash") list.push({ date: (r.expense_date ?? "") as string, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense"), outAmt: Number(r.amount), inAmt: 0, table: "expenses", id: r.id, row: r });
+      if (!r.bank_account_id) list.push({ date: (r.expense_date ?? "") as string, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense"), outAmt: Number(r.amount), inAmt: 0, table: "expenses", id: r.id, row: r });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (wa ?? []).forEach((r: any) => {
-      if (r.payment_mode === "cash") list.push({ date: r.advance_date, label: t("worker_advance"), outAmt: Number(r.amount), inAmt: 0, table: "worker_advances", id: r.id, row: r });
+      if (!r.bank_account_id) list.push({ date: r.advance_date, label: t("worker_advance"), outAmt: Number(r.amount), inAmt: 0, table: "worker_advances", id: r.id, row: r });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ws ?? []).forEach((r: any) => {
-      if (r.payment_mode === "cash" && Number(r.paid_amount ?? 0) > 0) list.push({ date: (r.period_end ?? "") as string, label: t("salary"), outAmt: Number(r.paid_amount), inAmt: 0, table: "worker_salaries", id: r.id, row: r });
+      if (!r.bank_account_id && Number(r.paid_amount ?? 0) > 0) list.push({ date: (r.period_end ?? "") as string, label: t("salary"), outAmt: Number(r.paid_amount), inAmt: 0, table: "worker_salaries", id: r.id, row: r });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (va ?? []).forEach((r: any) => {
@@ -119,6 +127,7 @@ function CashBook() {
       const amt = Number(r.amount ?? 0);
       list.push({ date: r.adjust_date, label: `${t("manual_adjustment")}${r.reason ? " – " + r.reason : ""}`, inAmt: amt > 0 ? amt : 0, outAmt: amt < 0 ? -amt : 0, table: "manual_adjustments", id: r.id, row: r });
     });
+
 
     list.sort((a, b) => b.date.localeCompare(a.date));
     setTxns(list);
