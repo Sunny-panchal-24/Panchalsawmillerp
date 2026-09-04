@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
@@ -25,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
+import { Plus, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/masters")({
   component: MastersPage,
@@ -126,7 +127,6 @@ function VendorsTab() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm(t("confirm_delete"))) return;
     const { error } = await supabase.from("vendors").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted"));
@@ -186,8 +186,7 @@ function VendorsTab() {
             </div>
             <div className="flex gap-1 shrink-0">
               <Button size="icon" variant="outline" onClick={() => navigate({ to: "/vendors/$vendorId/ledger", params: { vendorId: v.id } })} aria-label={t("view_ledger")}><BookOpen className="h-4 w-4" /></Button>
-              <Button size="icon" variant="outline" onClick={() => openEdit(v)} aria-label={t("edit")}><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="destructive" onClick={() => remove(v.id)} aria-label={t("delete")}><Trash2 className="h-4 w-4" /></Button>
+              <RowActions onEdit={() => openEdit(v)} onDelete={() => remove(v.id)} />
             </div>
           </div>
         </div>
@@ -251,7 +250,6 @@ function CustomersTab() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm(t("confirm_delete"))) return;
     const { error } = await supabase.from("customers").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted"));
@@ -306,8 +304,7 @@ function CustomersTab() {
             </div>
             <div className="flex gap-1 shrink-0">
               <Button size="icon" variant="outline" onClick={() => navigate({ to: "/customers/$customerId/ledger", params: { customerId: c.id } })} aria-label={t("customer_ledger")}><BookOpen className="h-4 w-4" /></Button>
-              <Button size="icon" variant="outline" onClick={() => openEdit(c)} aria-label={t("edit")}><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="destructive" onClick={() => remove(c.id)} aria-label={t("delete")}><Trash2 className="h-4 w-4" /></Button>
+              <RowActions onEdit={() => openEdit(c)} onDelete={() => remove(c.id)} />
             </div>
           </div>
         </div>
@@ -364,7 +361,6 @@ function TractorsTab() {
     toast.success(t("saved")); setOpen(false); load();
   };
   const remove = async (id: string) => {
-    if (!confirm(t("confirm_delete"))) return;
     const { error } = await supabase.from("tractors").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted")); load();
@@ -403,8 +399,7 @@ function TractorsTab() {
               <div className="text-sm">{t("default_empty_weight")}: {Number(x.default_empty_weight)}</div>
             </div>
             <div className="flex gap-1 shrink-0">
-              <Button size="icon" variant="outline" onClick={() => openEdit(x)} aria-label={t("edit")}><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="destructive" onClick={() => remove(x.id)} aria-label={t("delete")}><Trash2 className="h-4 w-4" /></Button>
+              <RowActions onEdit={() => openEdit(x)} onDelete={() => remove(x.id)} />
             </div>
           </div>
         </div>
@@ -464,7 +459,6 @@ function WorkersTab() {
     toast.success(t("saved")); setOpen(false); load();
   };
   const remove = async (id: string) => {
-    if (!confirm(t("confirm_delete"))) return;
     const { error } = await supabase.from("workers").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted")); load();
@@ -515,8 +509,7 @@ function WorkersTab() {
               <div className="text-sm">{t("daily_wage")}: ₹{Number(x.daily_wage)} · {t(x.salary_type)}</div>
             </div>
             <div className="flex gap-1 shrink-0">
-              <Button size="icon" variant="outline" onClick={() => openEdit(x)} aria-label={t("edit")}><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="destructive" onClick={() => remove(x.id)} aria-label={t("delete")}><Trash2 className="h-4 w-4" /></Button>
+              <RowActions onEdit={() => openEdit(x)} onDelete={() => remove(x.id)} />
             </div>
           </div>
         </div>
@@ -569,7 +562,6 @@ function BanksTab() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm(t("confirm_delete"))) return;
     const { error } = await supabase.from("bank_accounts").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted")); load();
@@ -612,8 +604,7 @@ function BanksTab() {
               <div className="text-sm">{t("opening_balance")}: ₹{Number(b.opening_balance).toFixed(2)}</div>
             </div>
             <div className="flex gap-1 shrink-0">
-              <Button size="icon" variant="outline" onClick={() => openEdit(b)} aria-label={t("edit")}><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="destructive" onClick={() => remove(b.id)} aria-label={t("delete")}><Trash2 className="h-4 w-4" /></Button>
+              <RowActions onEdit={() => openEdit(b)} onDelete={() => remove(b.id)} />
             </div>
           </div>
         </div>

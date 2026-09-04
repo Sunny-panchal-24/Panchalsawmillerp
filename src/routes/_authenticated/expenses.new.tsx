@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   ArrowLeft,
+  Home,
   ArrowRight,
   CalendarDays,
   Wrench,
@@ -346,6 +347,9 @@ function ExpenseNew() {
               }}
             >
               <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Button variant="secondary" size="icon" className="h-10 w-10" aria-label={t("home")} onClick={() => navigate({ to: "/" })}>
+              <Home className="h-5 w-5" />
             </Button>
             <div>
               <h1 className="text-lg font-bold leading-tight">{t("new_expense")}</h1>

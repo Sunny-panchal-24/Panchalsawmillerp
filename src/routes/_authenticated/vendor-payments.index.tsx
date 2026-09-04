@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, BookOpen, Trash2, Pencil } from "lucide-react";
+import { Plus, Search, BookOpen } from "lucide-react";
 import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 
@@ -57,7 +58,6 @@ function VendorPaymentsIndex() {
   useEffect(() => { load(); }, []);
 
   const removePayment = async (id: string) => {
-    if (!confirm(t("confirm_delete") || "Delete this payment?")) return;
     const { error } = await supabase.from("vendor_payments").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted") || "Deleted");
@@ -132,12 +132,7 @@ function VendorPaymentsIndex() {
                     <div className="text-right ml-2">
                       <div className="font-bold text-rose-700">₹{Number(p.amount).toFixed(2)}</div>
                     </div>
-                    <Button size="icon" variant="ghost" className="ml-1 h-8 w-8" onClick={() => setEditRow(p)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600" onClick={() => removePayment(p.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <RowActions onEdit={() => setEditRow(p)} onDelete={() => removePayment(p.id)} />
                   </div>
                 ))}
               </div>

@@ -101,11 +101,14 @@ function VendorLedger() {
             {vendor?.village && <div className="text-sm text-muted-foreground">{vendor.village}</div>}
             {vendor?.mobile && <div className="text-sm text-muted-foreground">{vendor.mobile}</div>}
             <div className="mt-3 flex items-center justify-between border-t pt-3">
-              <span className="text-sm text-muted-foreground">{t("outstanding")}</span>
+              <span className="text-sm text-muted-foreground">
+                {outstanding < 0 ? t("advance") : t("outstanding")}
+              </span>
               <span className={`text-xl font-bold ${outstanding > 0 ? "text-rose-600" : "text-emerald-600"}`}>
-                ₹{outstanding.toFixed(2)}
+                ₹{Math.abs(outstanding).toFixed(2)}
               </span>
             </div>
+
           </div>
 
           <Tabs defaultValue="purchases">

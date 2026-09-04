@@ -6,9 +6,11 @@ import { useI18n } from "@/lib/i18n";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { EditRecordDialog, type EditField } from "@/components/EditRecordDialog";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
+import { RowActions } from "@/components/RowActions";
+import { editFieldsFor, type Lists } from "@/lib/edit-fields";
 import { AdjustmentDialog } from "@/components/AdjustmentDialog";
 
 export const Route = createFileRoute("/_authenticated/bank-book")({
@@ -29,40 +31,6 @@ type Txn = {
   saleType?: string;
 };
 
-const FIELDS: Record<string, (t: (k: string) => string) => EditField[]> = {
-  vendor_payments: (t) => [
-    { key: "payment_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-    { key: "remarks", label: t("remarks") },
-  ],
-  customer_receipts: (t) => [
-    { key: "receipt_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-    { key: "remarks", label: t("remarks") },
-  ],
-  expenses: (t) => [
-    { key: "expense_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-    { key: "description", label: t("description") },
-  ],
-  worker_advances: (t) => [
-    { key: "advance_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-  ],
-  worker_salaries: (t) => [
-    { key: "paid_amount", label: t("amount"), type: "number" },
-    { key: "outstanding", label: t("outstanding"), type: "number" },
-  ],
-  vendor_advances: (t) => [
-    { key: "advance_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-  ],
-  manual_adjustments: (t) => [
-    { key: "adjust_date", label: t("date"), type: "date" },
-    { key: "amount", label: t("amount"), type: "number" },
-    { key: "reason", label: t("remarks") },
-  ],
-};
 
 function BankBook() {
   const { t } = useI18n();
@@ -72,23 +40,30 @@ function BankBook() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [editTxn, setEditTxn] = useState<Txn | null>(null);
+  const [lists, setLists] = useState<Lists>({});
 
   const load = async () => {
     const [
       { data: bk }, { data: pu }, { data: sa }, { data: vp },
       { data: cr }, { data: ex }, { data: wa }, { data: ws }, { data: va }, { data: ma },
+      { data: vn }, { data: cu }, { data: wk },
     ] = await Promise.all([
       supabase.from("bank_accounts").select("id,name,opening_balance").eq("is_active", true).order("name"),
       supabase.from("purchases").select("id,entry_date,entry_no,paid_amount,paid_mode,bank_account_id,tractor_paid_amount,tractor_paid_mode,tractor_bank_account_id"),
       supabase.from("sales").select("id,sale_date,sale_no,sale_type,paid_amount,payment_mode,bank_account_id"),
-      supabase.from("vendor_payments").select("id,payment_date,amount,mode,bank_account_id,remarks"),
-      supabase.from("customer_receipts").select("id,receipt_date,amount,mode,bank_account_id,remarks"),
+      supabase.from("vendor_payments").select("id,payment_date,amount,mode,bank_account_id,remarks,vendor_id,purchase_id"),
+      supabase.from("customer_receipts").select("id,receipt_date,amount,mode,bank_account_id,remarks,customer_id,sale_id"),
       supabase.from("expenses").select("id,expense_date,amount,bank_account_id,description,expense_type"),
-      supabase.from("worker_advances").select("id,advance_date,amount,bank_account_id"),
-      supabase.from("worker_salaries").select("id,period_end,paid_amount,bank_account_id,outstanding"),
-      supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id"),
+      supabase.from("worker_advances").select("id,advance_date,amount,bank_account_id,worker_id,notes"),
+      supabase.from("worker_salaries").select("*"),
+      supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id,vendor_id,remarks"),
       supabase.from("manual_adjustments").select("id,adjust_date,amount,reason,bank_account_id").not("bank_account_id", "is", null),
+      supabase.from("vendors").select("id,name").order("name"),
+      supabase.from("customers").select("id,name").order("name"),
+      supabase.from("workers").select("id,name").order("name"),
     ]);
+    setLists({ vendors: vn ?? [], customers: cu ?? [], workers: wk ?? [], banks: (bk ?? []) as { id: string; name: string }[] });
+
 
     setBanks((bk ?? []) as Bank[]);
     const map: Record<string, Txn[]> = {};
@@ -108,9 +83,9 @@ function BankBook() {
       if (Number(r.paid_amount ?? 0) > 0 && r.bank_account_id) push(r.bank_account_id, { date: r.sale_date, label: `${t("sale")} ${r.sale_no}`, inAmt: Number(r.paid_amount), outAmt: 0, table: "sales", id: r.id, row: r, wizard: "sale", saleType: r.sale_type });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (vp ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_payments", id: r.id, row: r }));
+    (vp ?? []).forEach((r: any) => r.bank_account_id && !r.purchase_id && push(r.bank_account_id, { date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_payments", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (cr ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0, table: "customer_receipts", id: r.id, row: r }));
+    (cr ?? []).forEach((r: any) => r.bank_account_id && !r.sale_id && push(r.bank_account_id, { date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0, table: "customer_receipts", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ex ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: (r.expense_date ?? "") as string, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense"), outAmt: Number(r.amount), inAmt: 0, table: "expenses", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,7 +116,6 @@ function BankBook() {
   };
 
   const removeTxn = async (r: Txn) => {
-    if (!confirm(t("confirm_delete") || "Delete?")) return;
     if (r.table === "sales") await supabase.from("customer_receipts").delete().eq("sale_id", r.id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from(r.table as any) as any).delete().eq("id", r.id);
@@ -182,7 +156,8 @@ function BankBook() {
           table={editTxn.table}
           id={editTxn.id}
           row={editTxn.row}
-          fields={(FIELDS[editTxn.table] ?? (() => []))(t)}
+          fields={editFieldsFor(editTxn.table, t, lists).fields}
+          derive={editFieldsFor(editTxn.table, t, lists).derive}
           title={editTxn.label}
         />
       )}
@@ -277,12 +252,7 @@ function BankPanel({
               </button>
               {r.inAmt > 0 && <div className="font-bold text-emerald-700 shrink-0">+ ₹{r.inAmt.toFixed(2)}</div>}
               {r.outAmt > 0 && <div className="font-bold text-rose-700 shrink-0">- ₹{r.outAmt.toFixed(2)}</div>}
-              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0" aria-label={t("edit")} onClick={() => onEdit(r)}>
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 text-red-600" aria-label={t("delete")} onClick={() => onDelete(r)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <RowActions title={r.label} onEdit={() => onEdit(r)} onDelete={() => onDelete(r)} />
             </div>
           ))}
         </div>

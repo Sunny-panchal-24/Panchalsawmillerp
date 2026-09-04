@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Search, Pencil } from "lucide-react";
+import { Search } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/sales/")({
@@ -42,7 +43,6 @@ function SalesIndex() {
   useEffect(() => { load(); }, []);
 
   const remove = async (id: string) => {
-    if (!confirm(t("confirm_delete"))) return;
     await supabase.from("customer_receipts").delete().eq("sale_id", id);
     const { error } = await supabase.from("sales").delete().eq("id", id);
     if (error) return toast.error(error.message);
@@ -86,12 +86,7 @@ function SalesIndex() {
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <Button size="icon" variant="outline" onClick={() => navigate({ to: "/sales/new", search: { type: r.sale_type, id: r.id } })} aria-label={t("edit")}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="destructive" onClick={() => remove(r.id)} aria-label={t("delete")}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <RowActions onEdit={() => navigate({ to: "/sales/new", search: { type: r.sale_type, id: r.id } })} onDelete={() => remove(r.id)} />
               </div>
             </div>
           </div>

@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Search, Trash2, Wrench, FileText , Pencil } from "lucide-react";
+import { Home, ArrowLeft, Plus, Search, Wrench, FileText } from "lucide-react";
 import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 
@@ -62,7 +63,6 @@ function ExpensesIndex() {
   }, [list, search]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t("confirm_delete"))) return;
     const { error } = await supabase.from("expenses").delete().eq("id", id);
     if (error) {
       toast.error(t("error"));
@@ -89,6 +89,9 @@ function ExpensesIndex() {
               }}
             >
               <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Button variant="secondary" size="icon" className="h-10 w-10" aria-label={t("home")} onClick={() => navigate({ to: "/" })}>
+              <Home className="h-5 w-5" />
             </Button>
             <div>
               <h1 className="text-lg font-bold leading-tight">{t("expenses")}</h1>
@@ -183,12 +186,7 @@ function ExpensesIndex() {
                         <div className="text-right">
                           <p className="font-bold">₹{Number(e.amount).toFixed(2)}</p>
                           <div className="mt-1 flex justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditRow(e)}>
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleDelete(e.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <RowActions onEdit={() => setEditRow(e)} onDelete={() => handleDelete(e.id)} />
                           </div>
                         </div>
                       </div>
