@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Search, Wrench, FileText } from "lucide-react";
+import { Home, ArrowLeft, Plus, Search, Wrench, FileText } from "lucide-react";
 import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 
@@ -89,6 +89,9 @@ function ExpensesIndex() {
               }}
             >
               <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Button variant="secondary" size="icon" className="h-10 w-10" aria-label={t("home")} onClick={() => navigate({ to: "/" })}>
+              <Home className="h-5 w-5" />
             </Button>
             <div>
               <h1 className="text-lg font-bold leading-tight">{t("expenses")}</h1>
