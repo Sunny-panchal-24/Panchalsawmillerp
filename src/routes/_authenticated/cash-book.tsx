@@ -261,12 +261,7 @@ function CashBook() {
               </button>
               {r.inAmt > 0 && <div className="font-bold text-emerald-700 shrink-0">+ ₹{r.inAmt.toFixed(2)}</div>}
               {r.outAmt > 0 && <div className="font-bold text-rose-700 shrink-0">- ₹{r.outAmt.toFixed(2)}</div>}
-              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0" aria-label={t("edit")} onClick={() => openEdit(r)}>
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 text-red-600" aria-label={t("delete")} onClick={() => removeTxn(r)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <RowActions title={r.label} onEdit={() => openEdit(r)} onDelete={() => removeTxn(r)} />
             </div>
           ))}
         </div>
@@ -282,10 +277,12 @@ function CashBook() {
           table={editTxn.table}
           id={editTxn.id}
           row={editTxn.row}
-          fields={(FIELDS[editTxn.table] ?? (() => []))(t)}
+          fields={editFieldsFor(editTxn.table, t, lists).fields}
+          derive={editFieldsFor(editTxn.table, t, lists).derive}
           title={editTxn.label}
         />
       )}
+
     </AppShell>
   );
 }
