@@ -6,9 +6,11 @@ import { useI18n } from "@/lib/i18n";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { EditRecordDialog, type EditField } from "@/components/EditRecordDialog";
+import { EditRecordDialog } from "@/components/EditRecordDialog";
+import { RowActions } from "@/components/RowActions";
+import { editFieldsFor, type Lists } from "@/lib/edit-fields";
 import { AdjustmentDialog } from "@/components/AdjustmentDialog";
 
 export const Route = createFileRoute("/_authenticated/bank-book")({
