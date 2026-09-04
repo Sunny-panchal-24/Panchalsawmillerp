@@ -40,23 +40,30 @@ function BankBook() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [editTxn, setEditTxn] = useState<Txn | null>(null);
+  const [lists, setLists] = useState<Lists>({});
 
   const load = async () => {
     const [
       { data: bk }, { data: pu }, { data: sa }, { data: vp },
       { data: cr }, { data: ex }, { data: wa }, { data: ws }, { data: va }, { data: ma },
+      { data: vn }, { data: cu }, { data: wk },
     ] = await Promise.all([
       supabase.from("bank_accounts").select("id,name,opening_balance").eq("is_active", true).order("name"),
       supabase.from("purchases").select("id,entry_date,entry_no,paid_amount,paid_mode,bank_account_id,tractor_paid_amount,tractor_paid_mode,tractor_bank_account_id"),
       supabase.from("sales").select("id,sale_date,sale_no,sale_type,paid_amount,payment_mode,bank_account_id"),
-      supabase.from("vendor_payments").select("id,payment_date,amount,mode,bank_account_id,remarks"),
-      supabase.from("customer_receipts").select("id,receipt_date,amount,mode,bank_account_id,remarks"),
+      supabase.from("vendor_payments").select("id,payment_date,amount,mode,bank_account_id,remarks,vendor_id,purchase_id"),
+      supabase.from("customer_receipts").select("id,receipt_date,amount,mode,bank_account_id,remarks,customer_id,sale_id"),
       supabase.from("expenses").select("id,expense_date,amount,bank_account_id,description,expense_type"),
-      supabase.from("worker_advances").select("id,advance_date,amount,bank_account_id"),
-      supabase.from("worker_salaries").select("id,period_end,paid_amount,bank_account_id,outstanding"),
-      supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id"),
+      supabase.from("worker_advances").select("id,advance_date,amount,bank_account_id,worker_id,notes"),
+      supabase.from("worker_salaries").select("*"),
+      supabase.from("vendor_advances").select("id,advance_date,amount,bank_account_id,vendor_id,remarks"),
       supabase.from("manual_adjustments").select("id,adjust_date,amount,reason,bank_account_id").not("bank_account_id", "is", null),
+      supabase.from("vendors").select("id,name").order("name"),
+      supabase.from("customers").select("id,name").order("name"),
+      supabase.from("workers").select("id,name").order("name"),
     ]);
+    setLists({ vendors: vn ?? [], customers: cu ?? [], workers: wk ?? [], banks: (bk ?? []) as { id: string; name: string }[] });
+
 
     setBanks((bk ?? []) as Bank[]);
     const map: Record<string, Txn[]> = {};
