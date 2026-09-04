@@ -83,9 +83,9 @@ function BankBook() {
       if (Number(r.paid_amount ?? 0) > 0 && r.bank_account_id) push(r.bank_account_id, { date: r.sale_date, label: `${t("sale")} ${r.sale_no}`, inAmt: Number(r.paid_amount), outAmt: 0, table: "sales", id: r.id, row: r, wizard: "sale", saleType: r.sale_type });
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (vp ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_payments", id: r.id, row: r }));
+    (vp ?? []).forEach((r: any) => r.bank_account_id && !r.purchase_id && push(r.bank_account_id, { date: r.payment_date, label: t("vendor_payment"), outAmt: Number(r.amount), inAmt: 0, table: "vendor_payments", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (cr ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0, table: "customer_receipts", id: r.id, row: r }));
+    (cr ?? []).forEach((r: any) => r.bank_account_id && !r.sale_id && push(r.bank_account_id, { date: r.receipt_date, label: t("customer_receipt"), inAmt: Number(r.amount), outAmt: 0, table: "customer_receipts", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ex ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: (r.expense_date ?? "") as string, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense"), outAmt: Number(r.amount), inAmt: 0, table: "expenses", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,7 +116,6 @@ function BankBook() {
   };
 
   const removeTxn = async (r: Txn) => {
-    if (!confirm(t("confirm_delete") || "Delete?")) return;
     if (r.table === "sales") await supabase.from("customer_receipts").delete().eq("sale_id", r.id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from(r.table as any) as any).delete().eq("id", r.id);
@@ -157,7 +156,8 @@ function BankBook() {
           table={editTxn.table}
           id={editTxn.id}
           row={editTxn.row}
-          fields={(FIELDS[editTxn.table] ?? (() => []))(t)}
+          fields={editFieldsFor(editTxn.table, t, lists).fields}
+          derive={editFieldsFor(editTxn.table, t, lists).derive}
           title={editTxn.label}
         />
       )}
@@ -252,12 +252,7 @@ function BankPanel({
               </button>
               {r.inAmt > 0 && <div className="font-bold text-emerald-700 shrink-0">+ ₹{r.inAmt.toFixed(2)}</div>}
               {r.outAmt > 0 && <div className="font-bold text-rose-700 shrink-0">- ₹{r.outAmt.toFixed(2)}</div>}
-              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0" aria-label={t("edit")} onClick={() => onEdit(r)}>
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 text-red-600" aria-label={t("delete")} onClick={() => onDelete(r)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <RowActions title={r.label} onEdit={() => onEdit(r)} onDelete={() => onDelete(r)} />
             </div>
           ))}
         </div>

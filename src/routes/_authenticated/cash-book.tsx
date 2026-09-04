@@ -144,7 +144,6 @@ function CashBook() {
   };
 
   const removeTxn = async (r: Txn) => {
-    if (!confirm(t("confirm_delete") || "Delete?")) return;
     if (r.table === "sales") await supabase.from("customer_receipts").delete().eq("sale_id", r.id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from(r.table as any) as any).delete().eq("id", r.id);
