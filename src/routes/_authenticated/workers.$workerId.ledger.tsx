@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -88,7 +89,6 @@ function WorkerLedger() {
 
   const del = async (e: Entry) => {
     if (e.source === "opening") return;
-    if (!confirm("Delete this entry?")) return;
     const table = e.source === "salary" ? "worker_salaries" : "worker_advances";
     const { error } = await supabase.from(table).delete().eq("id", e.id);
     if (error) return toast.error(error.message);
@@ -133,12 +133,7 @@ function WorkerLedger() {
                   <td className="p-2">
                     {e.source !== "opening" && (
                       <div className="flex gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => setEditRow(e)} aria-label="Edit">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" onClick={() => del(e)} aria-label="Delete">
-                          <Trash2 className="h-4 w-4 text-rose-600" />
-                        </Button>
+                        <RowActions onEdit={() => setEditRow(e)} onDelete={() => del(e)} />
                       </div>
                     )}
                   </td>

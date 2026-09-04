@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
@@ -56,13 +57,11 @@ function WorkersIndex() {
   useEffect(() => { load(); }, []);
 
   const delAdv = async (id: string) => {
-    if (!confirm(t("confirm_delete") || "Delete?")) return;
     const { error } = await supabase.from("worker_advances").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted") || "Deleted"); load();
   };
   const delSal = async (id: string) => {
-    if (!confirm(t("confirm_delete") || "Delete?")) return;
     const { error } = await supabase.from("worker_salaries").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted") || "Deleted"); load();
@@ -103,12 +102,7 @@ function WorkersIndex() {
                   <div className="text-sm">Amount: <strong>₹{Number(r.amount).toFixed(2)}</strong></div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Button size="icon" variant="outline" onClick={(e) => { e.stopPropagation(); setEditAdv(r); }} aria-label="Edit">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="destructive" onClick={(e) => { e.stopPropagation(); delAdv(r.id); }} aria-label={t("delete")}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <RowActions onEdit={() => setEditAdv(r)} onDelete={() => delAdv(r.id)} />
                 </div>
               </div>
             </div>
@@ -231,12 +225,7 @@ function SalaryRow({ r, onEdit, onDelete }: { r: SalRow; onEdit: () => void; onD
           <Link to="/workers/$workerId/ledger" params={{ workerId: r.worker_id }}>
             <Button size="icon" variant="outline" aria-label="Ledger"><BookOpen className="h-4 w-4" /></Button>
           </Link>
-          <Button size="icon" variant="outline" onClick={onEdit} aria-label="Edit">
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="destructive" onClick={onDelete} aria-label="Delete">
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <RowActions onEdit={onEdit} onDelete={onDelete} />
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
@@ -49,7 +50,6 @@ function CustomerReceiptsIndex() {
   useEffect(() => { load(); }, []);
 
   const remove = async (id: string) => {
-    if (!confirm(t("confirm_delete") || "Delete this receipt?")) return;
     const { error } = await supabase.from("customer_receipts").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(t("deleted") || "Deleted"); load();
@@ -114,12 +114,7 @@ function CustomerReceiptsIndex() {
                     <div className="text-right ml-2">
                       <div className="font-bold text-emerald-700">₹{Number(p.amount).toFixed(2)}</div>
                     </div>
-                    <Button size="icon" variant="ghost" className="ml-1 h-8 w-8" onClick={() => setEditRow(p)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600" onClick={() => remove(p.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <RowActions onEdit={() => setEditRow(p)} onDelete={() => remove(p.id)} />
                   </div>
                 ))}
               </div>

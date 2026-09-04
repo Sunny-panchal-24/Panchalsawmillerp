@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
@@ -48,7 +49,6 @@ function PurchasesList() {
   useEffect(() => { load(); }, []);
 
   const remove = async (id: string) => {
-    if (!confirm(t("confirm_delete"))) return;
     await supabase.from("vendor_payments").delete().eq("purchase_id", id);
     const { error } = await supabase.from("purchases").delete().eq("id", id);
     if (error) return toast.error(error.message);
@@ -96,12 +96,7 @@ function PurchasesList() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Button size="icon" variant="outline" onClick={() => navigate({ to: "/purchases/new", search: { id: r.id } })} aria-label={t("edit")}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="destructive" onClick={() => remove(r.id)} aria-label={t("delete")}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <RowActions onEdit={() => navigate({ to: "/purchases/new", search: { id: r.id } })} onDelete={() => remove(r.id)} />
                 </div>
               </div>
             </div>
