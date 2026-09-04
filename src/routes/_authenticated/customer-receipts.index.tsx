@@ -6,7 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Trash2 , Pencil } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 

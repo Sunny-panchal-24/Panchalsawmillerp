@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Search, Trash2, Wrench, FileText , Pencil } from "lucide-react";
+import { ArrowLeft, Plus, Search, Wrench, FileText } from "lucide-react";
 import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 

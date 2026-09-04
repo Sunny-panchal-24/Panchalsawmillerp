@@ -4,7 +4,7 @@ import { RowActions } from "@/components/RowActions";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { Trash2, Pencil } from "lucide-react";
+import {  } from "lucide-react";
 import { EditRecordDialog } from "@/components/EditRecordDialog";
 import { toast } from "sonner";
 

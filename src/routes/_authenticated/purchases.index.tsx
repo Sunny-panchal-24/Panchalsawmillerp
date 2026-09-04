@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Trash2, Search, ShoppingCart, Eye, Pencil } from "lucide-react";
+import { Plus, Search, ShoppingCart, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/purchases/")({

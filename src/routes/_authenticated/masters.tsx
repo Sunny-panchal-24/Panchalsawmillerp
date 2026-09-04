@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
+import { Plus, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/masters")({
   component: MastersPage,
