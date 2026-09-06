@@ -836,3 +836,53 @@ export const LANGUAGES: { code: Lang; label: string }[] = [
   { code: "hi", label: "हिंदी" },
   { code: "gu", label: "ગુજરાતી" },
 ];
+
+// Phase 12 additions — dashboard summary + central Ledger File
+const phase12: Record<Lang, Dict> = {
+  en: {
+    ledger_file: "Ledger File", entry_details: "Entry Details", quantity: "Quantity",
+    material_summary: "Material Summary", material_purchased: "Material Purchased",
+    waste_material_sold: "Waste Material Sold", finished_material_sold: "Finished Material Sold",
+    money_position: "Money Position", total_in_hand: "Total In Hand",
+    vendor_payable: "Vendor Payable", customer_outstanding: "Customer Outstanding",
+    worker_payable: "Worker Payable", worker_paid: "Worker Paid",
+    period: "Period", yesterday: "Yesterday", prev_month: "Previous Month",
+    financial_year: "Financial Year", all_time: "All", categories: "Categories",
+    worker_payments: "Worker Payments", advance_given: "Advance Given",
+    advance_adjusted: "Advance Adjusted", purchase_value: "Purchase Value",
+    sales_value: "Sales Value", received: "Received", paid: "Paid",
+    period_activity: "Period activity", current_balance_note: "Current balance",
+    all_entries: "All Entries", search_ledger: "Search name, entry no, amount, remarks",
+  },
+  hi: {
+    ledger_file: "लेजर फाइल", entry_details: "एंट्री विवरण", quantity: "मात्रा",
+    material_summary: "माल सारांश", material_purchased: "खरीदा गया माल",
+    waste_material_sold: "वेस्ट माल बिका", finished_material_sold: "तैयार माल बिका",
+    money_position: "पैसे की स्थिति", total_in_hand: "कुल पैसा",
+    vendor_payable: "विक्रेता को देना", customer_outstanding: "ग्राहक से लेना",
+    worker_payable: "कामदार को देना", worker_paid: "कामदार को दिया",
+    period: "अवधि", yesterday: "कल", prev_month: "पिछला महीना",
+    financial_year: "वित्तीय वर्ष", all_time: "सब", categories: "श्रेणियाँ",
+    worker_payments: "कामदार भुगतान", advance_given: "एडवांस दिया",
+    advance_adjusted: "एडवांस समायोजित", purchase_value: "खरीद मूल्य",
+    sales_value: "बिक्री मूल्य", received: "प्राप्त", paid: "भुगतान",
+    period_activity: "अवधि गतिविधि", current_balance_note: "वर्तमान बैलेंस",
+    all_entries: "सभी एंट्री", search_ledger: "नाम, एंट्री नं., राशि, टिप्पणी खोजें",
+  },
+  gu: {
+    ledger_file: "લેજર ફાઇલ", entry_details: "એન્ટ્રી વિગત", quantity: "જથ્થો",
+    material_summary: "માલ સારાંશ", material_purchased: "ખરીદેલો માલ",
+    waste_material_sold: "વેસ્ટ માલ વેચાયો", finished_material_sold: "તૈયાર માલ વેચાયો",
+    money_position: "પૈસાની સ્થિતિ", total_in_hand: "કુલ પૈસા",
+    vendor_payable: "વેન્ડરને આપવાના", customer_outstanding: "ગ્રાહક પાસેથી લેવાના",
+    worker_payable: "કામદારને આપવાના", worker_paid: "કામદારને આપ્યા",
+    period: "સમયગાળો", yesterday: "ગઈકાલ", prev_month: "ગયો મહિનો",
+    financial_year: "નાણાકીય વર્ષ", all_time: "બધું", categories: "શ્રેણીઓ",
+    worker_payments: "કામદાર ચુકવણી", advance_given: "એડવાન્સ આપ્યું",
+    advance_adjusted: "એડવાન્સ સરભર", purchase_value: "ખરીદ મૂલ્ય",
+    sales_value: "વેચાણ મૂલ્ય", received: "મળ્યા", paid: "ચૂકવ્યા",
+    period_activity: "સમયગાળાની પ્રવૃત્તિ", current_balance_note: "વર્તમાન બેલેન્સ",
+    all_entries: "બધી એન્ટ્રી", search_ledger: "નામ, એન્ટ્રી નં., રકમ, નોંધ શોધો",
+  },
+};
+(Object.keys(phase12) as Lang[]).forEach((l) => Object.assign(translations[l], phase12[l]));
