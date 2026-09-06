@@ -15,6 +15,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedRecoveryRouteImport } from './routes/_authenticated/recovery'
 import { Route as AuthenticatedMastersRouteImport } from './routes/_authenticated/masters'
+import { Route as AuthenticatedLedgerFileRouteImport } from './routes/_authenticated/ledger-file'
 import { Route as AuthenticatedCashBookRouteImport } from './routes/_authenticated/cash-book'
 import { Route as AuthenticatedBankBookRouteImport } from './routes/_authenticated/bank-book'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -66,6 +67,11 @@ const AuthenticatedRecoveryRoute = AuthenticatedRecoveryRouteImport.update({
 const AuthenticatedMastersRoute = AuthenticatedMastersRouteImport.update({
   id: '/masters',
   path: '/masters',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLedgerFileRoute = AuthenticatedLedgerFileRouteImport.update({
+  id: '/ledger-file',
+  path: '/ledger-file',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCashBookRoute = AuthenticatedCashBookRouteImport.update({
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/bank-book': typeof AuthenticatedBankBookRoute
   '/cash-book': typeof AuthenticatedCashBookRoute
+  '/ledger-file': typeof AuthenticatedLedgerFileRoute
   '/masters': typeof AuthenticatedMastersRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
   '/setup': typeof AuthenticatedSetupRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/bank-book': typeof AuthenticatedBankBookRoute
   '/cash-book': typeof AuthenticatedCashBookRoute
+  '/ledger-file': typeof AuthenticatedLedgerFileRoute
   '/masters': typeof AuthenticatedMastersRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
   '/setup': typeof AuthenticatedSetupRoute
@@ -269,6 +277,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/bank-book': typeof AuthenticatedBankBookRoute
   '/_authenticated/cash-book': typeof AuthenticatedCashBookRoute
+  '/_authenticated/ledger-file': typeof AuthenticatedLedgerFileRoute
   '/_authenticated/masters': typeof AuthenticatedMastersRoute
   '/_authenticated/recovery': typeof AuthenticatedRecoveryRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
@@ -302,6 +311,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bank-book'
     | '/cash-book'
+    | '/ledger-file'
     | '/masters'
     | '/recovery'
     | '/setup'
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bank-book'
     | '/cash-book'
+    | '/ledger-file'
     | '/masters'
     | '/recovery'
     | '/setup'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/bank-book'
     | '/_authenticated/cash-book'
+    | '/_authenticated/ledger-file'
     | '/_authenticated/masters'
     | '/_authenticated/recovery'
     | '/_authenticated/setup'
@@ -434,6 +446,13 @@ declare module '@tanstack/react-router' {
       path: '/masters'
       fullPath: '/masters'
       preLoaderRoute: typeof AuthenticatedMastersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ledger-file': {
+      id: '/_authenticated/ledger-file'
+      path: '/ledger-file'
+      fullPath: '/ledger-file'
+      preLoaderRoute: typeof AuthenticatedLedgerFileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cash-book': {
@@ -605,6 +624,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBankBookRoute: typeof AuthenticatedBankBookRoute
   AuthenticatedCashBookRoute: typeof AuthenticatedCashBookRoute
+  AuthenticatedLedgerFileRoute: typeof AuthenticatedLedgerFileRoute
   AuthenticatedMastersRoute: typeof AuthenticatedMastersRoute
   AuthenticatedRecoveryRoute: typeof AuthenticatedRecoveryRoute
   AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
@@ -635,6 +655,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedBankBookRoute: AuthenticatedBankBookRoute,
   AuthenticatedCashBookRoute: AuthenticatedCashBookRoute,
+  AuthenticatedLedgerFileRoute: AuthenticatedLedgerFileRoute,
   AuthenticatedMastersRoute: AuthenticatedMastersRoute,
   AuthenticatedRecoveryRoute: AuthenticatedRecoveryRoute,
   AuthenticatedSetupRoute: AuthenticatedSetupRoute,
