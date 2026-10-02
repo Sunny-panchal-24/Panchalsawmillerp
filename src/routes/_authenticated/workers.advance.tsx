@@ -23,6 +23,7 @@ function WorkerAdvanceWizard() {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [workerId, setWorkerId] = useState<string>("");
   const [amount, setAmount] = useState("");
+  const [dir, setDir] = useState<"give" | "return">("give");
   const [mode, setMode] = useState<string>("cash");
   const [bankId, setBankId] = useState<string>("");
   const [saving, setSaving] = useState(false);
@@ -30,7 +31,7 @@ function WorkerAdvanceWizard() {
   useEffect(() => {
     (async () => {
       const [w, b] = await Promise.all([
-        supabase.from("workers").select("id,name,daily_wage").eq("is_active", true).order("name"),
+        supabase.from("workers").select("id,name,daily_wage").order("name"),
         supabase.from("bank_accounts").select("id,name").eq("is_active", true).order("name"),
       ]);
       setWorkers((w.data ?? []) as Worker[]);
@@ -45,13 +46,14 @@ function WorkerAdvanceWizard() {
     setSaving(true);
     const { error } = await supabase.from("worker_advances").insert({
       worker_id: workerId,
-      amount: Number(amount),
+      amount: dir === "return" ? -Number(amount) : Number(amount),
+      notes: dir === "return" ? "Advance returned" : null,
       payment_mode: mode,
       bank_account_id: mode === "cash" ? null : bankId || null,
     });
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Advance saved");
+    toast.success(t("saved"));
     navigate({ to: "/workers" });
   };
 
@@ -82,7 +84,11 @@ function WorkerAdvanceWizard() {
 
         {step === 2 && (
           <div className="space-y-3">
-            <Label className="text-base">Advance Amount</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant={dir === "give" ? "default" : "outline"} className="h-12" onClick={() => setDir("give")}>{t("give_advance")}</Button>
+              <Button variant={dir === "return" ? "default" : "outline"} className="h-12" onClick={() => setDir("return")}>{t("worker_returns_money")}</Button>
+            </div>
+            <Label className="text-base">{t("amount")}</Label>
             <Input type="number" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-14 text-xl" placeholder="0.00" autoFocus />
             <div className="text-sm text-muted-foreground">Worker: <strong>{worker?.name}</strong></div>
             <div className="flex gap-2 pt-2">
