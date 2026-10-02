@@ -74,6 +74,7 @@ function NewPurchaseWizard() {
   const [grossWeight, setGrossWeight] = useState("");
   const [emptyWeight, setEmptyWeight] = useState("");
   const [ratePerMan, setRatePerMan] = useState("");
+  const [finalMaterial, setFinalMaterial] = useState("");
   const [applyNilCut, setApplyNilCut] = useState(true);
 
 
@@ -140,6 +141,10 @@ function NewPurchaseWizard() {
       setGrossWeight(String(data.weight_with_material ?? ""));
       setEmptyWeight(String(data.empty_weight ?? ""));
       setRatePerMan(String(data.rate_per_man ?? ""));
+      {
+        const mc = Number(data.material_calculated ?? 0);
+        if (mc > 0 && Math.abs(mc - Number(data.material_cost)) > 0.001) setFinalMaterial(String(data.material_cost));
+      }
       setApplyNilCut(data.ptype !== "B");
       if (Number(data.advance_deducted ?? 0) > 0) {
         setAdvanceMode("deduct");
@@ -198,7 +203,9 @@ function NewPurchaseWizard() {
     const finalMan = Math.max(0, netMan - nilCut);
 
     const rate = Number(ratePerMan) || 0;
-    const materialValue = finalMan * rate;
+    const materialCalculated = finalMan * rate;
+    const materialValue = finalMaterial.trim() !== "" ? Math.max(0, Number(finalMaterial) || 0) : materialCalculated;
+    const effectiveRate = finalMan > 0 ? materialValue / finalMan : 0;
     const advDed = advanceMode === "deduct" ? Math.min(Number(advanceDeduct) || 0, availableAdvance) : 0;
     const fcp = Number(forestChaiPani) || 0;
     const extra = Number(extraDeduction) || 0;
@@ -216,10 +223,10 @@ function NewPurchaseWizard() {
     const costPerKg = netWeight > 0 ? rawMaterialCost / netWeight : 0;
 
     return {
-      netWeight, netMan, nilCut, finalMan, rate, materialValue, advDed, fcp, extra, vendorPayable,
+      netWeight, netMan, nilCut, finalMan, rate, materialValue, materialCalculated, effectiveRate, advDed, fcp, extra, vendorPayable,
       trRate, tractorLabour, tCp, tDsl, tExt, tractorPayable, rawMaterialCost, costPerMan, costPerKg,
     };
-  }, [grossWeight, emptyWeight, ratePerMan, applyNilCut, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
+  }, [grossWeight, emptyWeight, ratePerMan, finalMaterial, applyNilCut, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
 
   const onTractorPick = (id: string) => {
     setTractorId(id);
@@ -377,10 +384,16 @@ function NewPurchaseWizard() {
           <Field label={t("rate_per_man")}>
             <Input type="number" inputMode="decimal" value={ratePerMan} onChange={(e) => setRatePerMan(e.target.value)} className="h-14 text-2xl" />
           </Field>
-          <SummaryBox highlight rows={[
+          <SummaryBox rows={[
             [t("final_man"), String(calc.finalMan)],
-            [t("rate_per_man"), `₹${calc.rate.toFixed(2)}`],
+            [t("calculated_amount"), `₹${calc.materialCalculated.toFixed(2)}`],
+          ]} />
+          <Field label={t("final_amount_settled")}>
+            <Input type="number" inputMode="decimal" placeholder={calc.materialCalculated.toFixed(2)} value={finalMaterial} onChange={(e) => setFinalMaterial(e.target.value)} className="h-12 text-lg" />
+          </Field>
+          <SummaryBox highlight rows={[
             [t("material_value"), <strong key="mv" className="text-xl">₹{calc.materialValue.toFixed(2)}</strong>],
+            [t("effective_rate"), `₹${calc.effectiveRate.toFixed(3)} / MAN`],
           ]} />
         </div>
       ),
@@ -595,6 +608,7 @@ function NewPurchaseWizard() {
         actual_man: calc.finalMan,
         rate_per_man: calc.rate,
         material_cost: calc.materialValue,
+        material_calculated: calc.materialCalculated,
         forest_expense: calc.fcp,
         chai_pani_expense: calc.tCp,
         tractor_labour: calc.tractorLabour,

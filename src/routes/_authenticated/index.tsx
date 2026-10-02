@@ -40,6 +40,7 @@ const TILES: { key: string; Icon: typeof ShoppingCart; color: string; to: string
   { key: "vendor_payments", Icon: Wallet, color: "bg-rose-600", to: "/vendor-payments" },
   { key: "customer_receipts", Icon: Receipt, color: "bg-violet-600", to: "/customer-receipts" },
   { key: "workers", Icon: Users, color: "bg-cyan-600", to: "/workers" },
+  { key: "trading_account", Icon: Package, color: "bg-lime-700", to: "/trading" },
   { key: "expenses", Icon: Receipt, color: "bg-orange-700", to: "/expenses" },
   { key: "ledger_file", Icon: FileText, color: "bg-fuchsia-700", to: "/ledger-file" },
   { key: "cash_book", Icon: BookOpen, color: "bg-orange-500", to: "/cash-book" },

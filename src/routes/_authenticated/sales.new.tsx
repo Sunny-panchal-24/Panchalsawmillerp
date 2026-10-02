@@ -60,6 +60,7 @@ function NewSaleWizard() {
   const [cft, setCft] = useState("");
 
   const [rate, setRate] = useState("");
+  const [finalAmt, setFinalAmt] = useState("");
 
   // payment
   const [payStatus, setPayStatus] = useState<"full" | "partial" | "credit">("full");
@@ -108,6 +109,10 @@ function NewSaleWizard() {
       setEmptyWeight(String(data.empty_weight ?? ""));
       setCft(String(data.cft ?? ""));
       setRate(String(data.rate ?? ""));
+      {
+        const calc = Number(data.calculated_amount ?? 0);
+        if (calc > 0 && Math.abs(calc - Number(data.total_amount)) > 0.001) setFinalAmt(String(data.total_amount));
+      }
       setPayStatus((data.payment_status as "full" | "partial" | "credit") ?? "full");
       setPaidAmount(String(data.paid_amount ?? ""));
       setPayMode(data.bank_account_id ?? CASH);
@@ -122,11 +127,14 @@ function NewSaleWizard() {
     return n > 0 ? n : 0;
   }, [grossWeight, emptyWeight, isWaste]);
 
-  const totalAmount = useMemo(() => {
+  const calcAmount = useMemo(() => {
     const r = parseFloat(rate) || 0;
     if (isWaste) return +(netWeight * r).toFixed(2);
     return +((parseFloat(cft) || 0) * r).toFixed(2);
   }, [isWaste, netWeight, cft, rate]);
+  const qtyUnits = isWaste ? netWeight : (parseFloat(cft) || 0);
+  const totalAmount = finalAmt.trim() !== "" ? Math.max(0, parseFloat(finalAmt) || 0) : calcAmount;
+  const effectiveRate = qtyUnits > 0 ? totalAmount / qtyUnits : 0;
 
   const computedPaid = useMemo(() => {
     if (payStatus === "full") return totalAmount;
@@ -212,6 +220,7 @@ function NewSaleWizard() {
           cft: isWaste ? 0 : parseFloat(cft) || 0,
           rate: parseFloat(rate) || 0,
           total_amount: totalAmount,
+          calculated_amount: calcAmount,
           paid_amount: computedPaid,
           outstanding,
           payment_status: payStatus,
@@ -368,7 +377,17 @@ function NewSaleWizard() {
               value={rate} onChange={(e) => setRate(e.target.value)} />
           </div>
           <div className="rounded-lg bg-muted p-3 text-base">
+            <div>{t("calculated_amount")}: <strong>₹{calcAmount.toFixed(2)}</strong></div>
+          </div>
+          <div>
+            <Label>{t("final_amount_settled")}</Label>
+            <Input type="number" inputMode="decimal" className="h-12 text-base"
+              placeholder={calcAmount.toFixed(2)}
+              value={finalAmt} onChange={(e) => setFinalAmt(e.target.value)} />
+          </div>
+          <div className="rounded-lg bg-primary/10 p-3 text-base space-y-1">
             <div>{t("total")}: <strong>₹{totalAmount.toFixed(2)}</strong></div>
+            <div>{t("effective_rate")}: <strong>₹{effectiveRate.toFixed(3)}</strong> / {isWaste ? "KG" : "CFT"}</div>
           </div>
         </div>
       )}

@@ -424,6 +424,7 @@ export type Database = {
           entry_no: string
           forest_expense: number
           id: string
+          material_calculated: number
           material_cost: number
           net_man: number
           net_weight: number
@@ -460,6 +461,7 @@ export type Database = {
           entry_no: string
           forest_expense?: number
           id?: string
+          material_calculated?: number
           material_cost?: number
           net_man?: number
           net_weight?: number
@@ -496,6 +498,7 @@ export type Database = {
           entry_no?: string
           forest_expense?: number
           id?: string
+          material_calculated?: number
           material_cost?: number
           net_man?: number
           net_weight?: number
@@ -552,6 +555,7 @@ export type Database = {
       sales: {
         Row: {
           bank_account_id: string | null
+          calculated_amount: number
           cft: number
           created_at: string
           created_by: string
@@ -574,6 +578,7 @@ export type Database = {
         }
         Insert: {
           bank_account_id?: string | null
+          calculated_amount?: number
           cft?: number
           created_at?: string
           created_by?: string
@@ -596,6 +601,7 @@ export type Database = {
         }
         Update: {
           bank_account_id?: string | null
+          calculated_amount?: number
           cft?: number
           created_at?: string
           created_by?: string
@@ -668,6 +674,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      trading_entries: {
+        Row: {
+          bank_account_id: string | null
+          calculated_amount: number
+          created_at: string
+          created_by: string
+          entry_date: string
+          final_amount: number
+          id: string
+          kind: string
+          paid_amount: number
+          party: string
+          qty: number
+          rate: number
+          remarks: string | null
+          updated_at: string
+        }
+        Insert: {
+          bank_account_id?: string | null
+          calculated_amount?: number
+          created_at?: string
+          created_by?: string
+          entry_date?: string
+          final_amount?: number
+          id?: string
+          kind: string
+          paid_amount?: number
+          party: string
+          qty?: number
+          rate?: number
+          remarks?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bank_account_id?: string | null
+          calculated_amount?: number
+          created_at?: string
+          created_by?: string
+          entry_date?: string
+          final_amount?: number
+          id?: string
+          kind?: string
+          paid_amount?: number
+          party?: string
+          qty?: number
+          rate?: number
+          remarks?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_entries_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
