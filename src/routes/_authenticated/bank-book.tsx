@@ -89,7 +89,8 @@ function BankBook() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ex ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: (r.expense_date ?? "") as string, label: t(r.expense_type === "maintenance" ? "maintenance" : "other_expense"), outAmt: Number(r.amount), inAmt: 0, table: "expenses", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (wa ?? []).forEach((r: any) => r.bank_account_id && push(r.bank_account_id, { date: r.advance_date, label: t("worker_advance"), outAmt: Number(r.amount), inAmt: 0, table: "worker_advances", id: r.id, row: r }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (wa ?? []).forEach((r: any) => { const a = Number(r.amount); if (r.bank_account_id) push(r.bank_account_id, { date: r.advance_date, label: t(a < 0 ? "advance_returned" : "worker_advance"), outAmt: a > 0 ? a : 0, inAmt: a < 0 ? -a : 0, table: "worker_advances", id: r.id, row: r }); });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ws ?? []).forEach((r: any) => r.bank_account_id && Number(r.paid_amount ?? 0) > 0 && push(r.bank_account_id, { date: (r.period_end ?? "") as string, label: t("salary"), outAmt: Number(r.paid_amount), inAmt: 0, table: "worker_salaries", id: r.id, row: r }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

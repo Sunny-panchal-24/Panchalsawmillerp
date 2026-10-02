@@ -111,7 +111,7 @@ function CashBook() {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (wa ?? []).forEach((r: any) => {
-      if (!r.bank_account_id) list.push({ date: r.advance_date, label: t("worker_advance"), outAmt: Number(r.amount), inAmt: 0, table: "worker_advances", id: r.id, row: r });
+      if (!r.bank_account_id) { const a = Number(r.amount); list.push({ date: r.advance_date, label: t(a < 0 ? "advance_returned" : "worker_advance"), outAmt: a > 0 ? a : 0, inAmt: a < 0 ? -a : 0, table: "worker_advances", id: r.id, row: r }); }
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ws ?? []).forEach((r: any) => {
