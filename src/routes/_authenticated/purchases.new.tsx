@@ -223,10 +223,10 @@ function NewPurchaseWizard() {
     const costPerKg = netWeight > 0 ? rawMaterialCost / netWeight : 0;
 
     return {
-      netWeight, netMan, nilCut, finalMan, rate, materialValue, advDed, fcp, extra, vendorPayable,
+      netWeight, netMan, nilCut, finalMan, rate, materialValue, materialCalculated, effectiveRate, advDed, fcp, extra, vendorPayable,
       trRate, tractorLabour, tCp, tDsl, tExt, tractorPayable, rawMaterialCost, costPerMan, costPerKg,
     };
-  }, [grossWeight, emptyWeight, ratePerMan, applyNilCut, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
+  }, [grossWeight, emptyWeight, ratePerMan, finalMaterial, applyNilCut, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
 
   const onTractorPick = (id: string) => {
     setTractorId(id);
