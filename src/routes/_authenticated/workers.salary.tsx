@@ -62,6 +62,7 @@ function WorkerSalaryWizard() {
 
   const [pendingAdvance, setPendingAdvance] = useState(0);
   const [periodAdvance, setPeriodAdvance] = useState(0);
+  const [openingAdv, setOpeningAdv] = useState(0);
   const [advanceAction, setAdvanceAction] = useState<"deduct" | "pending">("deduct");
   const [advanceToDeduct, setAdvanceToDeduct] = useState("");
 
@@ -113,7 +114,8 @@ function WorkerSalaryWizard() {
       const remaining = Math.max(0, opening + given - adjusted);
       setPendingAdvance(remaining);
       setPeriodAdvance(inPeriod);
-      setAdvanceToDeduct(Math.min(inPeriod || remaining, remaining).toFixed(2));
+      setOpeningAdv(Math.max(0, remaining - inPeriod));
+      setAdvanceToDeduct(remaining.toFixed(2));
 
       setWage(String(wRes.data?.daily_wage ?? worker?.daily_wage ?? ""));
 
@@ -145,7 +147,6 @@ function WorkerSalaryWizard() {
   const netPayable = useMemo(() => Math.max(0, gross - advDeduct), [gross, advDeduct]);
   const paid = payChoice === "now" ? Number(paidAmount || 0) : 0;
   const outstanding = Math.max(0, netPayable - paid);
-  const carryAdvance = Math.max(0, (advanceAction === "deduct" ? Math.min(Number(advanceToDeduct || 0), pendingAdvance) : 0) - advDeduct);
   const excessPaid = Math.max(0, paid - netPayable);
 
   const dayAllowed = useMemo(() => isPaymentDayAllowed(new Date(), lastPaidOn), [lastPaidOn]);
@@ -251,8 +252,10 @@ function WorkerSalaryWizard() {
           <div className="space-y-3">
             <Label className="text-base">Advance Adjustment</Label>
             <div className="rounded-lg bg-muted p-3 text-sm space-y-1">
+              <div>Opening advance (previous months): <strong>₹{openingAdv.toFixed(2)}</strong></div>
               <div>Advance taken in this period: <strong>₹{periodAdvance.toFixed(2)}</strong></div>
               <div>Total pending advance: <strong>₹{pendingAdvance.toFixed(2)}</strong></div>
+              <div>Gross salary: <strong>₹{gross.toFixed(2)}</strong></div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -269,16 +272,19 @@ function WorkerSalaryWizard() {
               <>
                 <Label>Amount to Deduct</Label>
                 <Input type="number" inputMode="decimal" value={advanceToDeduct} onChange={(e) => setAdvanceToDeduct(e.target.value)} className="h-12" />
+                <div className="grid grid-cols-3 gap-2">
+                  <Button type="button" variant="outline" onClick={() => setAdvanceToDeduct(Math.min(pendingAdvance, gross).toFixed(2))}>Full</Button>
+                  <Button type="button" variant="outline" onClick={() => setAdvanceToDeduct((Math.min(pendingAdvance, gross) / 2).toFixed(2))}>Half</Button>
+                  <Button type="button" variant="outline" onClick={() => setAdvanceToDeduct(Math.min(periodAdvance, pendingAdvance).toFixed(2))}>This period</Button>
+                </div>
               </>
             )}
             <div className="rounded-lg bg-muted p-3 text-sm">
               Gross: ₹{gross.toFixed(2)} − Advance: ₹{advDeduct.toFixed(2)} = <strong>Net ₹{netPayable.toFixed(2)}</strong>
             </div>
-            {carryAdvance > 0 && (
-              <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm">
-                Advance exceeds salary — ₹{carryAdvance.toFixed(2)} stays pending as advance.
-              </div>
-            )}
+            <div className="rounded-lg border-2 border-primary bg-primary/10 p-3 text-sm">
+              Advance carried to next month: <strong>₹{Math.max(0, pendingAdvance - advDeduct).toFixed(2)}</strong>
+            </div>
 
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1 h-12" onClick={() => setStep(2)}>Back</Button>

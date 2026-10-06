@@ -28,6 +28,8 @@ function TradingPage() {
   const { t } = useI18n();
   const [rows, setRows] = useState<Entry[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
+  const [fin, setFin] = useState<{ sale_date: string; cft: number; total_amount: number }[]>([]);
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [step, setStep] = useState(0);
@@ -36,10 +38,13 @@ function TradingPage() {
   const [f, setF] = useState(blank);
 
   const load = async () => {
-    const [{ data }, { data: b }] = await Promise.all([
+    const [{ data }, { data: b }, { data: fs }] = await Promise.all([
       supabase.from("trading_entries").select("*").order("entry_date", { ascending: false }),
       supabase.from("bank_accounts").select("id,name").eq("is_active", true).order("name"),
+      supabase.from("sales").select("sale_date,cft,total_amount").eq("sale_type", "finished"),
     ]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setFin((fs ?? []) as any);
     setRows((data ?? []) as Entry[]);
     setBanks((b ?? []) as Bank[]);
   };
@@ -61,6 +66,22 @@ function TradingPage() {
     // Profit on what was sold, valued at average buy rate
     return { bq, bv, sq, sv, avgBuy, avgSell, stock: bq - sq, profit: sv - sq * avgBuy };
   }, [rows]);
+
+  // Trading wood bought this month is assumed sold inside your finished wood bills.
+  const mix = useMemo(() => {
+    const inM = (d: string) => (d ?? "").slice(0, 7) === month;
+    const buys = rows.filter((r) => r.kind === "buy" && inM(r.entry_date));
+    const bq = buys.reduce((s, r) => s + n(r.qty), 0);
+    const bv = buys.reduce((s, r) => s + n(r.final_amount), 0);
+    const fm = fin.filter((x) => inM(x.sale_date));
+    const fq = fm.reduce((s, x) => s + n(x.cft), 0);
+    const fv = fm.reduce((s, x) => s + n(x.total_amount), 0);
+    const sellRate = fq > 0 ? fv / fq : 0;
+    const tq = Math.min(bq, fq);
+    const tRevenue = tq * sellRate;
+    const tCost = bq > 0 ? (bv / bq) * tq : 0;
+    return { bq, bv, fq, fv, sellRate, tq, tRevenue, tProfit: tRevenue - tCost, ownQ: fq - tq, ownV: fv - tRevenue, unsold: bq - tq };
+  }, [rows, fin, month]);
 
   const startNew = () => { setF(blank); setEditId(null); setStep(0); setOpen(true); };
   const startEdit = (r: Entry) => {
@@ -133,6 +154,21 @@ function TradingPage() {
         <Stat label={t("avg_sell_rate")} value={`₹${sum.avgSell.toFixed(2)}`} />
         <Stat label={t("stock_cft")} value={String(+sum.stock.toFixed(2))} />
         <Stat label={t("trading_profit")} value={money(sum.profit)} strong />
+      </div>
+      <div className="mb-4 space-y-2 rounded-xl border-2 border-primary p-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="font-bold">Finished wood mix</div>
+          <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className="h-10 w-40" />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Stat label="Finished wood sold (all bills)" value={`${+mix.fq.toFixed(2)} CFT · ${money(mix.fv)}`} />
+          <Stat label="Avg sale rate" value={`₹${mix.sellRate.toFixed(2)}`} />
+          <Stat label="Trading wood in sales" value={`${+mix.tq.toFixed(2)} CFT · ${money(mix.tRevenue)}`} />
+          <Stat label="Trading bought cost" value={money(mix.bv)} />
+          <Stat label="My own finished wood" value={`${+mix.ownQ.toFixed(2)} CFT · ${money(mix.ownV)}`} strong />
+          <Stat label={t("trading_profit")} value={money(mix.tProfit)} strong />
+        </div>
+        {mix.unsold > 0 && <div className="text-xs text-muted-foreground">{+mix.unsold.toFixed(2)} CFT trading wood not yet sold this month.</div>}
       </div>
       <Button className="mb-4 h-14 w-full text-lg" onClick={startNew}>+ {t("new")}</Button>
       <div className="space-y-2">
