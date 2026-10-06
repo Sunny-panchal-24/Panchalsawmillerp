@@ -93,6 +93,7 @@ function NewPurchaseWizard() {
   const [tractorChai, setTractorChai] = useState("");
   const [diesel, setDiesel] = useState("");
   const [tractorExtra, setTractorExtra] = useState("");
+  const [tractorMinMan, setTractorMinMan] = useState("");
 
   const [tractorPayMode, setTractorPayMode] = useState<"now" | "later">("later");
   const [tractorPayAmt, setTractorPayAmt] = useState("");
@@ -156,6 +157,11 @@ function NewPurchaseWizard() {
       setDiesel(String(data.diesel_expense ?? ""));
       setTractorChai(String(data.chai_pani_expense ?? ""));
       {
+        const r = Number(data.tractor_rate_per_man ?? 0);
+        const usedMan = r > 0 ? Math.round(Number(data.tractor_labour ?? 0) / r) : 0;
+        if (usedMan > Number(data.net_man ?? 0)) setTractorMinMan(String(usedMan));
+      }
+      {
         const labour = Number(data.tractor_labour ?? 0);
         const extra = Number(data.tractor_payable ?? 0) - labour - Number(data.chai_pani_expense ?? 0) - Number(data.diesel_expense ?? 0);
         setTractorExtra(extra > 0 ? String(Number(extra.toFixed(2))) : "");
@@ -212,7 +218,9 @@ function NewPurchaseWizard() {
     const vendorPayable = Math.max(0, materialValue - advDed - fcp - extra);
 
     const trRate = Number(tractorRate) || 0;
-    const tractorLabour = finalMan * trRate;
+    // Tractor labour uses actual MAN before Nil Cut, with optional minimum MAN.
+    const tractorMan = Math.max(netMan, Number(tractorMinMan) || 0);
+    const tractorLabour = tractorMan * trRate;
     const tCp = Number(tractorChai) || 0;
     const tDsl = Number(diesel) || 0;
     const tExt = Number(tractorExtra) || 0;
@@ -224,9 +232,9 @@ function NewPurchaseWizard() {
 
     return {
       netWeight, netMan, nilCut, finalMan, rate, materialValue, materialCalculated, effectiveRate, advDed, fcp, extra, vendorPayable,
-      trRate, tractorLabour, tCp, tDsl, tExt, tractorPayable, rawMaterialCost, costPerMan, costPerKg,
+      trRate, tractorMan, tractorLabour, tCp, tDsl, tExt, tractorPayable, rawMaterialCost, costPerMan, costPerKg,
     };
-  }, [grossWeight, emptyWeight, ratePerMan, finalMaterial, applyNilCut, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra]);
+  }, [grossWeight, emptyWeight, ratePerMan, finalMaterial, applyNilCut, advanceMode, advanceDeduct, availableAdvance, forestChaiPani, extraDeduction, tractorRate, tractorChai, diesel, tractorExtra, tractorMinMan]);
 
   const onTractorPick = (id: string) => {
     setTractorId(id);
@@ -491,6 +499,9 @@ function NewPurchaseWizard() {
           <Field label={t("tractor_rate_per_man")}>
             <Input type="number" inputMode="decimal" value={tractorRate} onChange={(e) => setTractorRate(e.target.value)} className="h-14 text-2xl" />
           </Field>
+          <Field label={t("tractor_min_man")}>
+            <Input type="number" inputMode="decimal" value={tractorMinMan} placeholder={String(calc.netMan)} onChange={(e) => setTractorMinMan(e.target.value)} className="h-14 text-2xl" />
+          </Field>
           <Field label={t("tractor_chai_pani")}>
             <Input type="number" inputMode="decimal" value={tractorChai} onChange={(e) => setTractorChai(e.target.value)} className="h-14 text-2xl" />
           </Field>
@@ -501,7 +512,7 @@ function NewPurchaseWizard() {
             <Input type="number" inputMode="decimal" value={tractorExtra} onChange={(e) => setTractorExtra(e.target.value)} className="h-14 text-2xl" />
           </Field>
           <SummaryBox highlight rows={[
-            [t("tractor_labour"), `₹${calc.tractorLabour.toFixed(2)}`],
+            [t("tractor_labour"), `${calc.tractorMan} × ₹${calc.trRate} = ₹${calc.tractorLabour.toFixed(2)}`],
             [t("tractor_chai_pani"), `₹${calc.tCp.toFixed(2)}`],
             [t("diesel_expense"), `₹${calc.tDsl.toFixed(2)}`],
             [t("extra_cost"), `₹${calc.tExt.toFixed(2)}`],
