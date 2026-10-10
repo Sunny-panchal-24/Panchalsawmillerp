@@ -104,7 +104,9 @@ function WorkerSalaryWizard() {
       ]);
       const opening = Number(wRes.data?.opening_advance ?? 0);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const given = (advRes.data ?? []).reduce((s, a: any) => s + Number(a.amount ?? 0), 0);
+      const given = (advRes.data ?? []).filter((a: any) => a.advance_date <= periodEnd)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .reduce((s: number, a: any) => s + Number(a.amount ?? 0), 0);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const inPeriod = (advRes.data ?? []).filter((a: any) => a.advance_date >= periodStart && a.advance_date <= periodEnd)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
