@@ -51,8 +51,10 @@ function WorkerLedger() {
         source: "salary",
         date,
         description: `Salary ${r.period_label} (${r.present_days}d × ₹${Number(r.daily_wage).toFixed(0)}${Number(r.extra_work ?? 0) > 0 ? ` + Extra ₹${Number(r.extra_work).toFixed(0)}` : ""})`,
-        debit: Number(r.gross_salary) + Number(r.extra_work ?? 0),
-        credit: Number(r.advance_deducted) + Number(r.paid_amount),
+        // gross_salary already includes extra work; advance_deducted is not
+        // new money — earned salary itself reduces the advance balance.
+        debit: Number(r.gross_salary),
+        credit: Number(r.paid_amount),
         raw: r,
       });
     });
@@ -68,7 +70,13 @@ function WorkerLedger() {
         raw: r,
       });
     });
-    items.sort((x, y) => (x.date < y.date ? -1 : 1));
+    items.sort((x, y) => {
+      if (x.source === "opening") return -1;
+      if (y.source === "opening") return 1;
+      if (x.date !== y.date) return x.date < y.date ? -1 : 1;
+      // same day: advances before salary
+      return x.source === "salary" ? 1 : y.source === "salary" ? -1 : 0;
+    });
     setEntries(items);
     setLoading(false);
   };

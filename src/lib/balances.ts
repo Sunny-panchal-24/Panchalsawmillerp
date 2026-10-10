@@ -30,7 +30,8 @@ export function workerBalance(i: {
   salaries: { gross_salary?: number | null; extra_work?: number | null; paid_amount?: number | null }[];
   advances: { amount?: number | null }[];
 }) {
-  const earned = i.salaries.reduce((s, x) => s + n(x.gross_salary) + n(x.extra_work), 0);
+  // gross_salary already includes extra work
+  const earned = i.salaries.reduce((s, x) => s + n(x.gross_salary), 0);
   const paid = i.salaries.reduce((s, x) => s + n(x.paid_amount), 0);
   const advances = i.advances.reduce((s, x) => s + n(x.amount), 0);
   return earned - paid - advances - n(i.opening_advance);
